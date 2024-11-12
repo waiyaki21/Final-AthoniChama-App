@@ -1,0 +1,41 @@
+{
+  "name": "electron-laravel",
+  "version": "1.0.0",
+  "description": "Laravel desktop application using Electron JS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": " electron-packager . --win32metadata",
+    "dist": "electron-builder",
+    "electron": "electron main.js",
+    "electron-build": "electron-builder",
+    "electron-pack": "electron-builder -p always"
+  },
+  "author": "Kelvin Waiyaki",
+  "license": "ISC",
+  "build": {
+    "asar": false,
+    "appId": "com.waiyaki21.chama-app",
+    "productName": "ChamaApp",
+    "extends": null,
+    "win": {
+      "icon": "www/icons/chama_icon2.png",
+      "target": "nsis"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^33.0.2",
+    "electron-builder": "^25.1.8",
+    "electron-packager": "^11.0.1"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9",
+    "node-php-server": "^0.1.2"
+  }
+}

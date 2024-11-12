@@ -1,0 +1,6 @@
+.idea
+/node_modules
+/php
+/dist
+/www/node_modules
+/www/vendor
