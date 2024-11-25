@@ -14,7 +14,7 @@
                         <a :href="route('Dashboard')" :active="route().current('Dashboard')" class="flex ml-2 md:mr-24 cursor-pointer font-boldened dark:text-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-600">
                             <span class="self-center text-md font-normal md:text-xl whitespace-nowrap uppercase border-b-2 border-cyan-300 hover:border-cyan-600">
                                 {{ $page.props.setting.shortname }}
-                                <span class="self-center text-sm opacity-90 font-normal sm:text-sm text-rose-600 dark:text-rose-500 whitespace-nowrap uppercase">v1.0</span>
+                                <span class="self-center text-sm opacity-90 font-normal sm:text-sm text-rose-600 dark:text-rose-500 whitespace-nowrap uppercase">v{{ version }}</span>
                             </span>
                         </a>
                     </div>
@@ -114,7 +114,10 @@
 <script setup>
     import  sidenav     from "../Navs/sideNav.vue";
     import  mainplugin  from "../Components/plugins/mainPlugin.vue";
+    import  packageJson from "../../../../package.json";
     import { reactive, defineProps, ref, nextTick, onMounted, onBeforeUnmount } from "vue";
+
+    const version       = packageJson.version;
 
     const props = defineProps({
         urlPrev: {

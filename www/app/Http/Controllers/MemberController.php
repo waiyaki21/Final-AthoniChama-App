@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Cycle;
@@ -48,8 +49,9 @@ class MemberController extends Controller
         $welfareIn  = $before + $addwelfs;
 
         $beforeOwed = $members->sum('welfareowed_before');
+        $afterOwed  = $members->sum('welfare_owing_may');
         $minuswelfs = Welfare::where('type', 0)->sum('payment');
-        $welfareOwed= $minuswelfs + intval($beforeOwed); 
+        $welfareOwed= $minuswelfs + intval($beforeOwed) + intval($afterOwed);
 
         $welfSum    = $welfareIn - $welfareOwed;
 

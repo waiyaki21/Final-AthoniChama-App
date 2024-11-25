@@ -4,3 +4,5 @@
 /dist
 /www/node_modules
 /www/vendor
+/logs
+out/

@@ -5,7 +5,7 @@
         </section>
 
         <section :class="[classInfo.infoSection]" preserve-scroll> 
-            <!-- <section class="w-full m-1 p-1 text-left grid grid-cols-2 md:grid-cols-3 gap-1">
+            <!-- <section class="w-full m-1 p-1 text-left grid grid-cols-2 md:grid-cols-4 gap-1">
                 <infoBlock
                     v-for="(block, index) in infoBlocks"
                     :key="index"
@@ -20,11 +20,9 @@
             </section> -->
             <section :class="[classInfo.sectionBorder, 'grid grid-cols-2 md:grid-cols-4 gap-1']">
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]" v-tooltip="{ content: classInfo.btn1.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]" v-tooltip="$tooltip(classInfo.btn1.toUpperCase(), 'top')">
                         <span>Members No.</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
                     <p class="font-normal text-left text-2xl md:text-3xl text-blue-700 dark:text-blue-600 uppercase">
                         {{ Number(members).toLocaleString() }} Members
@@ -32,36 +30,30 @@
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]" v-tooltip="{ content: classInfo.btn2.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]" v-tooltip="$tooltip(classInfo.btn2.toUpperCase(), 'top')">
                         <span>G.Total Contributed</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
-                    <p class="font-normal text-left text-2xl md:text-3xl text-green-700 dark:text-green-600 uppercase" v-tooltip="{ content: 'KSH ' + Number(grandtotal).toLocaleString()}">
+                    <p class="font-normal text-left text-2xl md:text-3xl text-green-700 dark:text-green-600 uppercase" v-tooltip="$tooltip('KSH ' + Number(grandtotal).toLocaleString(), 'top')">
                         <!-- ksh {{ numFormat(paySum) }} -->
                         ksh {{ numFormat(grandtotal) }}
                     </p>
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]" v-tooltip="{ content: classInfo.btn3.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]" v-tooltip="$tooltip(classInfo.btn3.toUpperCase(), 'top')">
                         <span>Total Welfare</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
-                    <p class="font-normal text-left text-2xl md:text-3xl text-cyan-700 dark:text-cyan-600 uppercase" v-tooltip="{ content: 'KSH ' + Number(welfSum).toLocaleString()}">
+                    <p class="font-normal text-left text-2xl md:text-3xl text-cyan-700 dark:text-cyan-600 uppercase" v-tooltip="$tooltip('KSH ' + Number(welfSum).toLocaleString(), 'top')">
                         ksh {{ numFormat(welfSum) }}
                     </p>
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]"  v-tooltip="{ content: classInfo.btn4.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]"  v-tooltip="$tooltip(classInfo.btn4.toUpperCase(), 'top')">
                         <span>Active Members</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
                     <p class="font-normal text-left text-2xl md:text-3xl text-green-700 dark:text-green-600 uppercase">
                         {{ Number(active).toLocaleString() }} Members
@@ -69,11 +61,9 @@
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]" v-tooltip="{ content: classInfo.btn5.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]" v-tooltip="$tooltip(classInfo.btn5.toUpperCase(), 'top')">
                         <span>Inactive Members</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
                     <p class="font-normal text-left text-2xl md:text-3xl text-red-700 dark:text-red-600 uppercase">
                         {{ Number(inactive).toLocaleString() }} Members
@@ -81,37 +71,31 @@
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]" v-tooltip="{ content: classInfo.btn6.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]" v-tooltip="$tooltip(classInfo.btn6.toUpperCase(), 'top')">
                         <span>T. Amount Before</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
-                    <p class="font-normal text-left text-2xl md:text-3xl text-purple-700 dark:text-purple-600 uppercase" v-tooltip="{ content: 'KSH ' + Number(amntbefore).toLocaleString()}">
+                    <p class="font-normal text-left text-2xl md:text-3xl text-purple-700 dark:text-purple-600 uppercase" v-tooltip="$tooltip('KSH ' + Number(amntbefore).toLocaleString(), 'top')">
                         KSH {{ numFormat(amntbefore) }}
                     </p>
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]"  v-tooltip="{ content: classInfo.btn7.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]"  v-tooltip="$tooltip(classInfo.btn7.toUpperCase(), 'top')">
                         <span>T. Welfares In</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
-                    <p class="font-normal text-left text-2xl md:text-3xl text-emerald-700 dark:text-emerald-600 uppercase" v-tooltip="{ content: 'KSH ' + Number(welfareIn).toLocaleString()}">
+                    <p class="font-normal text-left text-2xl md:text-3xl text-emerald-700 dark:text-emerald-600 uppercase" v-tooltip="$tooltip('KSH ' + Number(welfareIn).toLocaleString(), 'top')">
                         KSH {{ numFormat(welfareIn) }}
                     </p>
                 </a>
 
                 <a class="block max-w-sm p-2 bg-transparent">
-                    <h5 :class="[classInfo.infoHeader]" v-tooltip="{ content: classInfo.btn8.toUpperCase(), placement: 'top', trigger: 'hover', distance: '10', skidding: '0', popperClass: 'v-popper__theme-main animate__animated animate__fadeIn'}">
+                    <h5 :class="[classInfo.infoHeader]" v-tooltip="$tooltip(classInfo.btn8.toUpperCase(), 'top')">
                         <span>T. Welfares Owed</span>
-                        <svg class="flex-shrink-0 inline w-2 h-2 md:w-4 md:h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-                        </svg>
+                        <info-icon class="flex-shrink-0 inline w-3 h-3 ml-0.5"></info-icon> 
                     </h5>
-                    <p class="font-normal text-left text-2xl md:text-3xl text-orange-700 dark:text-orange-600 uppercase" v-tooltip="{ content: 'KSH ' + Number(welfareOwed).toLocaleString()}">
+                    <p class="font-normal text-left text-2xl md:text-3xl text-orange-700 dark:text-orange-600 uppercase" v-tooltip="$tooltip('KSH ' + Number(welfareOwed).toLocaleString(), 'top')">
                         KSH {{ numFormat(welfareOwed) }}
                     </p>
                 </a>
@@ -189,64 +173,64 @@
         infoHeaderZero: 'text-red-300 mb-1 md:text-xl sm:text-md text-left font-normal underline tracking-tight uppercase',
     })
 
-    // const infoBlocks = computed(() => [
-    //     {
-    //         label: 'Members No.',
-    //         value: members,
-    //         tooltipKey: 'btn1',
-    //         valueText: 'Members',
-    //         colorClass: 'text-blue-700 dark:text-blue-600',
-    //     },
-    //     {
-    //         label: 'G.Total Contributed',
-    //         value: grandtotal,
-    //         tooltipKey: 'btn2',
-    //         valueText: 'KSH ',
-    //         colorClass: 'text-green-700 dark:text-green-600',
-    //     },
-    //     {
-    //         label: 'Total Welfare',
-    //         value: welfSum,
-    //         tooltipKey: 'btn3',
-    //         valueText: 'KSH ',
-    //         colorClass: 'text-cyan-700 dark:text-cyan-600',
-    //     },
-    //     {
-    //         label: 'Active Members',
-    //         value: active,
-    //         tooltipKey: 'btn4',
-    //         valueText: 'Members',
-    //         colorClass: 'text-green-700 dark:text-green-600',
-    //     },
-    //     {
-    //         label: 'Inactive Members',
-    //         value: inactive,
-    //         tooltipKey: 'btn5',
-    //         valueText: 'Members',
-    //         colorClass: 'text-red-700 dark:text-red-600',
-    //     },
-    //     {
-    //         label: 'T. Amount Before',
-    //         value: amntbefore,
-    //         tooltipKey: 'btn6',
-    //         valueText: 'KSH ',
-    //         colorClass: 'text-purple-700 dark:text-purple-600',
-    //     },
-    //     {
-    //         label: 'T. Welfares In',
-    //         value: welfareIn,
-    //         tooltipKey: 'btn7',
-    //         valueText: 'KSH ',
-    //         colorClass: 'text-emerald-700 dark:text-emerald-600',
-    //     },
-    //     {
-    //         label: 'T. Welfares Owed',
-    //         value: welfareOwed,
-    //         tooltipKey: 'btn8',
-    //         valueText: 'KSH ',
-    //         colorClass: 'text-emerald-700 dark:text-emerald-600',
-    //     },
-    // ]);
+    const infoBlocks = computed(() => [
+        {
+            label: 'Members No.',
+            value: `${props.members} Members`,
+            tooltipKey: `${classInfo.btn1}`,
+            valueText: 'Members',
+            colorClass: 'text-blue-700 dark:text-blue-600',
+        },
+        {
+            label: 'G.Total Contributed',
+            value: `ksh ${numFormat(props.grandtotal)}`,
+            tooltipKey: `${classInfo.btn2}`,
+            valueText: 'KSH ',
+            colorClass: 'text-green-700 dark:text-green-600',
+        },
+        {
+            label: 'Total Welfare',
+            value: `ksh ${numFormat(props.welfSum)}`,
+            tooltipKey: `${classInfo.btn3}`,
+            valueText: 'KSH ',
+            colorClass: 'text-cyan-700 dark:text-cyan-600',
+        },
+        {
+            label: 'Active Members',
+            value: `${props.active} Members`,
+            tooltipKey: `${classInfo.btn4}`,
+            valueText: 'Members',
+            colorClass: 'text-green-700 dark:text-green-600',
+        },
+        {
+            label: 'Inactive Members',
+            value: `${props.inactive} Members`,
+            tooltipKey: `${classInfo.btn5}`,
+            valueText: 'Members',
+            colorClass: 'text-red-700 dark:text-red-600',
+        },
+        {
+            label: 'T. Amount Before',
+            value: `ksh ${numFormat(props.amntbefore)}`,
+            tooltipKey: `${classInfo.btn6}`,
+            valueText: 'KSH ',
+            colorClass: 'text-purple-700 dark:text-purple-600',
+        },
+        {
+            label: 'T. Welfares In',
+            value: `ksh ${numFormat(props.welfareIn)}`,
+            tooltipKey: `${classInfo.btn7}`,
+            valueText: 'KSH ',
+            colorClass: 'text-emerald-700 dark:text-emerald-600',
+        },
+        {
+            label: 'T. Welfares Owed',
+            value: `ksh ${numFormat(props.welfareOwed)}`,
+            tooltipKey: `${classInfo.btn8}`,
+            valueText: 'KSH ',
+            colorClass: 'text-orange-700 dark:text-orange-600',
+        },
+    ]);
 
     onMounted(() => {
         progressMain()
