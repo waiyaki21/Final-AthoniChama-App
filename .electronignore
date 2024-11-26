@@ -1,0 +1,7 @@
+out/
+logs/
+.gitignore
+README.md
+main-new.js
+package-copy.json
+prev-main.js

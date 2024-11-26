@@ -5,4 +5,7 @@
 /www/node_modules
 /www/vendor
 /logs
-out/
+/out
+main-new.js
+package-copy.json
+prev-main.js

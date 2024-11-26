@@ -3,6 +3,9 @@ const path = require('path');
 const { exec } = require('child_process');
 const log = require('electron-log');
 
+// Requiring the node-php-server
+let phpServer = require('node-php-server');
+
 let phpServerInstance = null; // Global reference for the PHP server
 let phpServerCMD = null; // Global reference for the CMD process
 let mainWindow;
@@ -36,49 +39,40 @@ const port = 8000, host = '127.0.0.1';
 const serverUrl = `http://${host}:${port}`;
 
 // PHP Server Functions
-function startPhpServer_CLI() {
-    return new Promise((resolve, reject) => {
-        const cmd = exec(`php -S ${host}:${port} -t "${path.join(wwwBinaryPath, 'public')}"`, (err, stdout, stderr) => {
-            if (err) {
-                log.error(`CMD Error: ${err.message}`);
-                return reject(err);
-            }
-            log.log(stdout);
-            log.error(stderr);
-            resolve(cmd);
-        });
-    });
-}
-
-async function startPhpServer() {
-    try {
-        phpServerCMD = await startPhpServer_CLI();
+function startPhpServer() {
+    // Start PHP server
+    phpServerCMD = exec('php -S 127.0.0.1:8000 -t www/public', (err, stdout, stderr) => {
+        if (err) {
+            console.error(`Error starting PHP server: ${err}`);
+            log.error('Error starting PHP server with php-cmd', err);
+            showNotification(`CMD Server Error`, `Error starting PHP server with php-exec package: ${err}`);
+        }
+        console.log(stdout);
+        console.error(stderr);
         log.log('PHP server started.');
         loadScreen();
-    } catch {
-        log.error('Error starting PHP server with php-cmd', err);
-
-        showNotification(`CMD Server Error`, `Error starting PHP server with php-exec package: ${err}`);
-    }
+    });
 }
 
 async function startPhpServer_Node() {
     try {
-        const phpServer = (await import('php-server')).default;
-        phpServerInstance = await phpServer({
-            port,
+        phpServer.createServer({
+            port: port,
             hostname: host,
-            base: path.join(wwwBinaryPath, 'public'),
-            bin: phpBinaryPath,
+            base: `${__dirname}/www/public`,
+            keepalive: false,
+            open: false,
+            bin: `${__dirname}/php/php.exe`,
+            router: __dirname + '/www/server.php'
         });
-        log.log(`Node-PHP server started at ${phpServerInstance.url}`);
+        log.log(`Node-PHP server started at ${serverUrl}`);
         loadScreen();
     } catch (err) {
         log.error('Error starting PHP server with php-server package:', err);
 
         showNotification(`Server Error`, `Error starting PHP server with php-server package: ${err}`);
 
-        await startPhpServer();
+        startPhpServer();
     }
 }
 
@@ -95,12 +89,9 @@ function stopPHPServer() {
         phpServerCMD.kill();
         log.log('CLI-based PHP server stopped.');
     }
-    if (phpServerInstance) {
-        // Close the server by killing its internal process
-        if (phpServerInstance.process) {
-            phpServerInstance.process.kill();
-            console.log('Node-based PHP server stopped.');
-        }
+    if (phpServer) {
+        phpServer.close();
+        log.log('Node-based PHP server stopped.');
     }
 }
 // END PHP SERVERS

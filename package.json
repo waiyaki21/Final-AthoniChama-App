@@ -4,11 +4,16 @@
   "description": "This application streamlines the management of member contributions and welfare tracking, organizing all data into monthly cycles for easy access and reporting. Admin can record contributions, track both received and owed welfare amounts, and generate detailed reports. The app includes a built-in option to export monthly summaries to Excel spreadsheets, making it simple to review and share financial records. Ideal for organizations or groups that need to efficiently monitor member contributions and welfare transactions in an organized, user-friendly platform.",
   "main": "main.js",
   "scripts": {
+    "app": "electron .",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "lint": "echo \"No linting configured\"",
-    "publish": "electron-forge publish"
+    "publish": "electron-forge publish",
+    "pack": "electron-packager . AthoniChamaApp --platform=win32 --arch=x64 --out=dist --icon=icons/chama_icon.ico --overwrite --prune",
+    "zip": "node ./utilities/zip.js ../dist/AthoniChamaApp-win32-x64 ../dist/AthoniChamaApp-win32-x64.zip",
+    "minimize": "npm run pack && npm run zip",
+    "release": "npm run package && node ./utilities/release.js"
   },
   "author": "Kelvin Waiyaki",
   "license": "MIT",
@@ -23,15 +28,20 @@
     "@electron-forge/maker-zip": "^7.5.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.5.0",
     "@electron-forge/plugin-fuses": "^7.5.0",
-    "@electron/fuses": "^1.8.0",
-    "electron": "^33.0.2"
-  },
-  "dependencies": {
     "@electron-forge/publisher-github": "^7.5.0",
-    "electron-log": "^5.2.2",
+    "@electron/fuses": "^1.8.0",
+    "electron": "^33.0.2",
+    "electron-packager": "^17.1.2",
     "electron-squirrel-startup": "^1.0.1",
-    "electron-updater": "^6.3.9",
+    "gh-release": "^7.0.2",
     "php-server": "^2.0.0",
     "update-electron-app": "^3.0.0"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "axios": "^1.7.8",
+    "electron-log": "^5.2.2",
+    "electron-updater": "^6.3.9",
+    "node-php-server": "^0.1.2"
   }
 }
