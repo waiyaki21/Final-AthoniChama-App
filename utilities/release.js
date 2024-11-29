@@ -1,22 +1,22 @@
-const release = require('gh-release');
+const { execSync } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
-const options = {
-    owner: 'waiyaki21',
-    repo: 'Final-AthoniChama-App',
-    tag_name: `v${new Date().toISOString().split('T')[0]}`,
-    target_commitish: 'main',
-    name: 'New Release',
-    body: 'Automated release via npm.',
-    draft: false,
-    prerelease: false,
-    assets: fs.readdirSync('./dist').map(file => `./dist/${file}`)
-};
+// Read the version from package.json
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+const version = packageJson.version; // Use the version field from package.json
 
-release(options, (err, result) => {
-    if (err) {
-        console.error('Failed to create release:', err);
-    } else {
-        console.log('Release created successfully:', result.html_url);
-    }
-});
+// Path to the executable file
+const exePath = path.join(__dirname, '../dist', 'AthoniChamaApp-win32-x64', 'AthoniChamaApp.exe');
+
+// Generate the release command
+const releaseCommand = `gh release create ${version} --generate-notes --title "Release ${version}" --notes "Automated release via CLI." "${exePath}"`;
+
+// Execute the command
+try {
+    console.log(`Executing command: ${releaseCommand}`);
+    execSync(releaseCommand, { stdio: 'inherit' });
+    console.log('Release created successfully!');
+} catch (error) {
+    console.error('Error creating release:', error);
+}

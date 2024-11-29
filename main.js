@@ -1,26 +1,46 @@
 const { app, BrowserWindow, Notification, autoUpdater, dialog } = require('electron');
-const path = require('path');
-const { exec } = require('child_process');
-const log = require('electron-log');
-
-// Requiring the node-php-server
-let phpServer = require('node-php-server');
-
-let phpServerInstance = null; // Global reference for the PHP server
-let phpServerCMD = null; // Global reference for the CMD process
-let mainWindow;
-let splashWindow;
+const path      = require('path');
+const { exec }  = require('child_process');
+const http      = require('http');
+const fs        = require('fs');
 
 // Determine if the app is in production or development
 const isDev = !app.isPackaged;
+
+// Adjust module path based on the environment
+// const log = isDev
+//     ? require('electron-log') // Standard require for dev
+//     : require(path.join(process.resourcesPath, 'electron-log')); // Custom path for production
+
+// const utilitiesPath = isDev
+//     ? path.join(__dirname, './utilities/phpUtils') // Development path
+//     : path.join(process.resourcesPath, 'utilities/phpUtils'); // Production path
+
+// const { setupPHPInfo } = require(utilitiesPath);
+
+const { setupPHPInfo } = require('./utilities/phpUtils');
+
+// Adjust module path based on the environment
+// const phpServer = isDev
+//     ? require('node-php-server') // Standard require for dev
+//     : require(path.join(process.resourcesPath, 'node-php-server')); // Custom path for production
+
+let phpServer = require('node-php-server');
+const log = require('electron-log');
+
+let phpServerCMD = null; // Global reference for the CMD process
+let mainWindow;
+let splashWindow;
 
 // Check for more than one instance of the app running
 const singleInstanceLock = app.requestSingleInstanceLock();
 
 // Logging configuration
 log.transports.file.resolvePathFn = () => {
-    const appData = isDev ? path.resolve(__dirname, 'logs/main.log') : path.join(app.getPath('userData'), 'logs/main.log');
-    console.log(appData);
+    const appData = isDev
+        ? path.resolve(__dirname, 'logs/main.log') // Dev mode path
+        : path.join(app.getPath('userData'), 'logs/main.log'); // Production mode path
+
     return appData;
 };
 
@@ -28,67 +48,212 @@ log.transports.file.resolvePathFn = () => {
 log.log("Application Version: " + app.getVersion())
 // END LOGS 
 
-// Get PHP and public folder paths
-const getPhpBinaryPath = () => path.join(__dirname, 'php', 'php.exe');
-const getWwwBinaryPath = () => path.join(__dirname, 'www');
-const phpBinaryPath = getPhpBinaryPath();
-const wwwBinaryPath = getWwwBinaryPath();
-
 // Setting the Server port and the host ip
 const port = 8000, host = '127.0.0.1';
 const serverUrl = `http://${host}:${port}`;
 
-// PHP Server Functions
-function startPhpServer() {
-    // Start PHP server
-    phpServerCMD = exec('php -S 127.0.0.1:8000 -t www/public', (err, stdout, stderr) => {
-        if (err) {
-            console.error(`Error starting PHP server: ${err}`);
-            log.error('Error starting PHP server with php-cmd', err);
-            showNotification(`CMD Server Error`, `Error starting PHP server with php-exec package: ${err}`);
-        }
-        console.log(stdout);
-        console.error(stderr);
-        log.log('PHP server started.');
-        loadScreen();
+let isPhpServerRunning = false; // State variable to track server status
+let phpEnv_Exists      = false;
+let appOpen            = false;
+
+// const phpFolderPath    = isDev
+//     ? path.join(__dirname, 'php', 'php.exe') // Dev mode path
+//     : path.join(process.resourcesPath, 'php', 'php.exe'); // Production mode path
+
+const phpFolderPath = path.join(__dirname, 'php', 'php.exe');
+const wwwFolderPath = path.join(__dirname, 'www', 'public');
+let phpURLPath = phpFolderPath;
+let wwwURLPath = wwwFolderPath;
+
+// Function to check if the 'php' installation exists
+function checkPhpInEnvironment() {
+    return new Promise((resolve, reject) => {
+        const command = process.platform === 'win32' ? 'where php' : 'which php';
+
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.log('PHP is not in the system environment.');
+                phpEnv_Exists = false;
+                reject('PHP is not found in the system environment.');
+                return;
+            }
+
+            if (stderr) {
+                console.error('Error checking PHP:', stderr);
+                phpEnv_Exists = false;
+                reject('Error checking PHP');
+                return;
+            }
+
+            if (stdout.trim()) {
+                console.log('PHP is available at:', stdout.trim());
+                phpEnv_Exists = true;
+                resolve(); // Successfully found PHP, resolve the promise
+            } else {
+                console.log('PHP is not found in the system environment.');
+                phpEnv_Exists = false;
+                reject('PHP not found');
+            }
+
+            // Execute setupPHPInfo only after checking PHP availability
+            let utils = setupPHPInfo();
+
+            phpURLPath          = utils[0];
+            wwwURLPath          = utils[1];
+            // phpServerCMD        = utils[0];
+
+            // Log the final value for debugging
+            log.log('phpEnv_Exists:', phpEnv_Exists);
+        });
     });
 }
 
-async function startPhpServer_Node() {
+async function phpCheck() {
+    log.log('PHP server check.');
+
     try {
+        // Wait for the PHP check to complete
+        await checkPhpInEnvironment();
+
+        // Once checkPhpInEnvironment is done, proceed with checking the server
+        http.get(serverUrl, (res) => {
+            if (res.statusCode === 200 || res.statusCode === 302) {
+                isPhpServerRunning = true;
+                log.log(`PHP server already running at ${serverUrl}`);
+                loadScreen(); // Call loadScreen on success
+            }
+        }).on('error', (err) => {
+            isPhpServerRunning = false;
+            log.error(`Waiting for PHP server to boot: ${err.message}`);
+            if (phpEnv_Exists) {
+                console.log("'php' env exists. Executing Command Server");
+                startPhpServer();
+            } else {
+                console.log("'php' env does not exist. Creating Local Server");
+                startPhpServer_Node();
+            }
+        });
+    } catch (error) {
+        console.error('Error checking PHP environment:', error);
+        // Handle error, possibly fallback to startPHP server
+    }
+}
+
+// PHP Server Functions
+function startPhpServer() {
+    log.log('CMD PHP server activation.');
+
+    if (isPhpServerRunning) {
+        log.log('PHP server is already running. Skipping initialization.');
+        return;
+    }
+
+    // Read the current command info
+    const phpPath = phpURLPath;
+    const wwwPath = wwwURLPath;
+    const command = !isDev
+        ? `"${phpPath}" -S 127.0.0.1:8000 -t "${wwwPath}"` // Path in production
+        : 'php -S 127.0.0.1:8000 -t www/public';        // Path in development
+
+    // Start the PHP server
+    phpServerCMD = exec(command, (err, stdout, stderr) => {
+        if (err) {
+            log.error(`Error starting PHP server: ${err.message}`);
+            failScreen(); // Call failScreen immediately on error
+            return;
+        }
+        log.log(`PHP server started:\n${stdout}`);
+        log.error(`PHP server errors (if any):\n${stderr}`);
+    });
+
+    // Check if the server is booted
+    loadScreen();
+
+    // Return the server process for future control
+    return phpServerCMD;
+}
+
+async function startPhpServer_Node() {
+    log.log('NODE PHP server activation.');
+    if (isPhpServerRunning) {
+        log.log('PHP server is already running. Skipping initialization.');
+        return;
+    }
+
+    try {
+        // Mark the server as running
+        isPhpServerRunning = true;
+
         phpServer.createServer({
             port: port,
             hostname: host,
             base: `${__dirname}/www/public`,
             keepalive: false,
             open: false,
-            bin: `${__dirname}/php/php.exe`,
-            router: __dirname + '/www/server.php'
+            bin: phpFolderPath,
+            router: __dirname + '/www/server.php',
         });
+
         log.log(`Node-PHP server started at ${serverUrl}`);
         loadScreen();
     } catch (err) {
+        log.log('NODE PHP server failure.');
         log.error('Error starting PHP server with php-server package:', err);
 
-        showNotification(`Server Error`, `Error starting PHP server with php-server package: ${err}`);
+        showNotification(
+            `Server Error`,
+            `Error starting PHP server with php-server package: ${err}`
+        );
 
+        // If an error occurs, reset the state variable
+        isPhpServerRunning = false;
+
+        log.log('CMD PHP server calling.');
         startPhpServer();
     }
 }
 
 function loadScreen() {
+    isPhpServerRunning = true;
+    setTimeout(() => {
+        if (!appOpen) {
+            if (splashWindow) {
+                splashWindow.close();
+            }
+            createMainWindow();
+        }
+    }, 1000);
+}
+
+function failScreen() {
+    isPhpServerRunning = false;
+    showNotification(
+        `App Error`,
+        `App Error ,Closing`
+    );
     setTimeout(() => {
         // Close splash screen and open main window after the server starts
-        if (splashWindow) splashWindow.close();
-        createMainWindow();
+        if (mainWindow) mainWindow.close();
+        app.quit();
     }, 3500);
 }
 
 function stopPHPServer() {
+    // Stop CLI-based PHP server
     if (phpServerCMD) {
-        phpServerCMD.kill();
-        log.log('CLI-based PHP server stopped.');
+        try {
+            // Send a custom command to phpServerCMD (if applicable)
+            phpServerCMD.stdin.write('exit\n'); // Not applicable to PHP server by default
+            phpServerCMD.kill('SIGTERM');
+            log.log('CLI-based PHP server stopped.');
+        } catch (error) {
+            console.error('Error stopping CLI-based PHP server:', error.message);
+        }
+        phpServerCMD = null; // Ensure it's reset
+    } else {
+        log.log('No CLI-based PHP server process to stop.');
     }
+
     if (phpServer) {
         phpServer.close();
         log.log('Node-based PHP server stopped.');
@@ -113,22 +278,41 @@ if (!singleInstanceLock) {
         return str.replace(/\b\w/g, char => char.toUpperCase());
     }
 
+    function getAppDetails() {
+        const appName = capitalize(app.getName());
+        const appVersion = app.getVersion();
+        return {
+            title: `${appName} v${appVersion}`,
+            iconPath: path.join(__dirname, 'icons/chama_icon.ico') // Adjust this path
+        };
+    }
+
+    function createWindow(options) {
+        const { title, iconPath } = getAppDetails();
+        const defaultOptions = {
+            title,
+            icon: iconPath,
+            webPreferences: {
+                nodeIntegration: true
+            },
+            autoHideMenuBar: !isDev
+        };
+        return new BrowserWindow({ ...defaultOptions, ...options });
+    }
+
     function createSplashWindow() {
         // Start PHP server
-        startPhpServer_Node();
+        phpCheck();
 
-        // get title 
-        const appName = app.getName();
-        const appVersion = app.getVersion();
-        const title = `${capitalize(appName)} v${appVersion}`; // Combine name and version
-
+        // Show notification
+        const { title } = getAppDetails();
         showNotification(`${title} Loading...`, `${title} loading, Please Wait...`);
 
-        splashWindow = new BrowserWindow({
+        splashWindow = createWindow({
             width: 840,
             height: 600,
             frame: true,
-            transparent: true, // Optional: makes the background of splash page transparent
+            transparent: true,
             alwaysOnTop: true,
             resizable: true
         });
@@ -137,37 +321,22 @@ if (!singleInstanceLock) {
     }
 
     function createMainWindow() {
-        // Define the path to your icon file
-        const iconPath = path.join(__dirname, 'icons/chama_icon.ico'); // Adjust this path
-
-        // get title 
-        const appName = app.getName();
-        const appVersion = app.getVersion();
-        const title = `${capitalize(appName)} v${appVersion}`; // Combine name and version
-
-        // Create the browser window.
-        mainWindow = new BrowserWindow({
+        appOpen = true;
+        mainWindow = createWindow({
             width: 1200,
             height: 720,
-            show: false,
-            autoHideMenuBar: !isDev ? true : false,
-            webPreferences: {
-                nodeIntegration: true,
-            },
-            title: title, // Set the title
-            icon: iconPath
+            show: false
         });
 
-        mainWindow.loadURL(serverUrl)
+        mainWindow.loadURL(serverUrl);
 
-        mainWindow.webContents.once('dom-ready', function () {
-            mainWindow.show()
+        mainWindow.webContents.once('dom-ready', () => {
+            mainWindow.show();
             mainWindow.maximize();
         });
 
-        // Emitted when the window is closed.
-        mainWindow.on('closed', function () {
-            closeAll();
+        mainWindow.on('closed', () => {
+            // closeAll();
             app.quit();
             mainWindow = null;
         });
@@ -176,11 +345,12 @@ if (!singleInstanceLock) {
     // When Electron is ready to create the window
     app.whenReady().then(() => {
         createSplashWindow();
+
         app.on('activate', () => {
             // Configure auto-updater
             autoUpdater.setFeedURL('https://github.com/waiyaki21/Final-AthoniChama-App/releases/latest');
-            if (!isDev) {autoUpdater.checkForUpdates()}
-            if (BrowserWindow.getAllWindows().length === 0) { createSplashWindow()}
+            if (!isDev) { autoUpdater.checkForUpdates() }
+            if (BrowserWindow.getAllWindows().length === 0) { createSplashWindow() }
         });
     });
 
@@ -193,14 +363,9 @@ function showNotification(title, body) {
     new Notification({ title, body }).show();
 }
 
-function closeAll() {
-    stopPHPServer();
-    if (autoUpdater) autoUpdater.removeAllListeners();
-}
-
 // Handle when all windows are closed
 app.on("quit", () => {
-    closeAll();
+    if (autoUpdater) autoUpdater.removeAllListeners();
     app.quit();
 });
 
