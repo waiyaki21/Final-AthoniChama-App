@@ -25,10 +25,10 @@ module.exports = {
         // ],
     },
     makers: [
-        // {
-        //     name: '@electron-forge/maker-zip', // Generic ZIP installer
-        //     platforms: ['win32'],
-        // },
+        {
+            name: '@electron-forge/maker-zip', // Generic ZIP installer
+            platforms: ['win32'],
+        },
         {
             name: '@electron-forge/maker-squirrel',
             config: {
