@@ -35,15 +35,7 @@ log.transports.file.resolvePathFn = () => {
 log.log("Application Version: " + app.getVersion())
 // END LOGS 
 
-// Setting the Server port and the host ip
-const port = 8000, host = '127.0.0.1';
-const serverUrl = `http://${host}:${port}`;
-
 let isPhpServerRunning  = false; // State variable to track server status
-let isPhpServerStarting = false;
-let isPhpEnv_Checked    = false;
-let phpEnv_Exists       = false;
-let phpServerPID        = null; // Initialize with null
 
 const phpFolderPath = isDev
     ? path.join(__dirname, 'php', 'php.exe') // Development
@@ -53,128 +45,25 @@ const wwwFolderPath = isDev
     ? path.join(__dirname, 'www', 'public') // Development
     : path.join(process.resourcesPath, 'app' ,'www', 'public'); // Production
 
+const { phpCheck } = require(isDev
+    ? './utilities/phpInfo' // Development
+    : path.join(process.resourcesPath, 'app', 'utilities', 'phpInfo')); // Production
+
 log.log(phpFolderPath);
 log.log(wwwFolderPath);
 
 // Helper function to show notifications
-function showNotification(title, body) {
+const showNotification = (title, body) => {
     new Notification({ title, body }).show();
 }
 
-// Main server initialization logic
-async function phpCheck() {
-    log.log('PHP server check.');
-
-    try {
-        // Ensure the PHP environment is checked
-        if (!isPhpEnv_Checked) {
-            await checkPhpInEnvironment();
-        }
-
-        // Check the server status
-        http.get(serverUrl, (res) => {
-            if ([200, 302].includes(res.statusCode)) {
-                log.log('running: load screen 1');
-                // Server is running, proceed with loadScreen
-                isPhpServerRunning = true;
-                log.log(`PHP server already running at ${serverUrl}`);
-                loadScreen();  // Call loadScreen here to close the splash screen and show main window
-            } else {
-                log.log('not running: start php server 1');
-                // If the server is not running, try to start it
-                isPhpServerRunning = false;
-                startPhpServer(); // Try starting the PHP server
-            }
-        }).on('error', async (err) => {
-            log.error(`PHP server not running: ${err.message}`);
-            isPhpServerRunning = false;
-
-            // Only start the server if it is not already starting
-            if (!isPhpServerStarting) {
-                isPhpServerStarting = true; // Lock the server start process
-
-                try {
-                    if (phpEnv_Exists) {
-                        log.log("'php' environment exists. Starting PHP server. not running: start cmd-php server 2");
-                        await startPhpServer();  // Try starting PHP server if PHP is available
-                        loadScreen();
-                    } else {
-                        log.log("'php' environment does not exist. Starting Node server. not running: start node-php server 1");
-                        await startPhpServer_Node();  // Otherwise, fallback to Node server
-                        loadScreen();
-                    }
-                } catch (error) {
-                    log.error('Error starting PHP server:', error);
-                    // Handle fallback or failure
-                } finally {
-                    isPhpServerStarting = false; // Unlock after server start
-                }
-            }
-        });
-    } catch (error) {
-        log.error('Error checking PHP environment:', error.message);
-    }
-}
-
-// Check if PHP is available in the environment
-function checkPhpInEnvironment() {
-    return new Promise((resolve, reject) => {
-        const command = process.platform === 'win32' ? 'where php' : 'which php';
-
-        exec(command, (error, stdout) => {
-            phpEnv_Exists = !error && stdout.trim() !== '';
-            phpEnv_Exists ? resolve() : reject('PHP not found in system environment');
-        });
-    });
-}
-
-// Start the PHP server using PHP CLI
-function startPhpServer() {
-    return new Promise((resolve, reject) => {
-        const command = phpEnv_Exists
-            ? `php -S 127.0.0.1:8000 -t "${wwwFolderPath}"`
-            : `"${phpFolderPath}" -S 127.0.0.1:8000 -t "${wwwFolderPath}"`;
-
-        log.log(command);
-
-        const phpServerCMD = exec(command, (err, stdout, stderr) => {
-            if (err) return reject(`Error starting PHP server: ${err.message}`);
-            log.log(`PHP server started: ${stdout}`);
-            isPhpServerRunning = true;
-            log.log(`'server running': ${isPhpServerRunning}`);
-            resolve();
-        });
-
-        phpServerPID = phpServerCMD.pid; // Store process ID
-
-        loadScreen();
-    });
-}
-
-// Start the Node-based PHP server
-function startPhpServer_Node() {
-    return new Promise((resolve, reject) => {
-        try {
-            phpServer.createServer({
-                port: 8000,
-                hostname: '127.0.0.1',
-                base: `${__dirname}/www/public`,
-                keepalive: false,
-                open: false,
-                bin: phpFolderPath,
-                router: `${__dirname}/www/server.php`
-            });
-            log.log(`Node-PHP server started at ${serverUrl}`);
-            isPhpServerRunning = true;
-            resolve();
-        } catch (err) {
-            reject(`Error starting Node-PHP server: ${err}`);
-        }
-    });
-}
+// updates the isPhpServerRunning value 
+const updateStatus = (status) => {
+    isPhpServerRunning = status;
+};
 
 // Load the main application window
-function loadScreen() {
+const loadScreen = () => {
     if (isPhpServerRunning) {
         log.log('Success open main');
         // Proceed to open the main window and close splash screen
@@ -187,9 +76,9 @@ function loadScreen() {
     } else {
         // Retry PHP check if server is still not running
         log.log('Recheck phpCheck');
-        phpCheck();
+        phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification);
     }
-}
+};
 
 function capitalize(str) {
     return str.replace(/\b\w/g, char => char.toUpperCase());
@@ -220,7 +109,7 @@ function createWindow(options) {
 // Load the application splash screen
 function createSplashWindow() {
     // initializeAutoUpdaterListeners(showNotification, log ,phpServer);
-    phpCheck(); // Start server check
+    phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification); // Start server check
 
     // Notification 
     const { title } = getAppDetails();

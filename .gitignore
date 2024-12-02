@@ -9,6 +9,6 @@
 main-new.js
 package-copy.json
 prev-main.js
-/compressed
+# /compressed
 /downloads
 .env

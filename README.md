@@ -1,4 +1,4 @@
-<p align="center"><a href="https://github.com/waiyaki21/chalis-app" target="_blank"><img src="/icons/chama_icon3.png" width="400" alt="Athoni-Chama Logo"></a></p>
+<p align="center"><a href="https://github.com/waiyaki21/chalis-app" target="_blank"><img src="/icons/chama_icon.png" width="400" alt="Athoni-Chama Logo"></a></p>
 
 ## About Athoni Chama App
 

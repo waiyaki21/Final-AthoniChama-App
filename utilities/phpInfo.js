@@ -1,69 +1,73 @@
-const path      = require('path');
-const fs        = require('fs');
-const { exec }  = require('child_process');
-const http      = require('http');
-const { app }   = require('electron');
+const { exec }                  = require('child_process');
+const http                      = require('http');
+const { app }                   = require('electron');
+const path                      = require('path');
+const fs                        = require('fs');
+// const phpServer              = require('php-server');
 
-const isDev = !app.isPackaged; // Determine if running in dev mode
-// Setting the Server port and the host ip
-const port = 8000, host = '127.0.0.1';
-const serverUrl = `http://${host}:${port}`;
+let isPhpEnv_Checked            = false;
+let phpEnv_Exists               = false;
+let isPhpServerRunning          = false;
+let isPhpServerStarting         = false;
+let phpServerPID;
 
-let isPhpServerRunning  = false; // State variable to track server status
-let isPhpServerStarting = false;
-let isPhpEnv_Checked    = false;
-let phpEnv_Exists       = false;
-let phpServerPID        = null; // Initialize with null
-// let server = null;
+const serverUrl = 'http://127.0.0.1:8000';
 
-// Check PHP 
+// Determine if the app is in production or development
+const isDev = !app.isPackaged;
+
+const serverFolderPath = isDev
+    ? path.join(__dirname, '../www', 'server.php') // Development
+    : path.join(process.resourcesPath, 'app', 'www', 'server.php'); // Production
+
+// UNZIP PHP IF IT DOES NOT EXIST 
+const https             = require('https');
+const unzipper          = require('unzipper');
+
+const phpDownloadUrl    = 'https://windows.php.net/downloads/releases/php-8.2.26-nts-Win32-vs16-x64.zip'; // Replace with actual download URL
+
 // Main server initialization logic
-async function phpCheck() {
-    log.log('PHP server check.');
-
+async function phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification) {
+    log.warn('PHP server check.');
     try {
-        // Ensure the PHP environment is checked
         if (!isPhpEnv_Checked) {
-            await checkPhpInEnvironment();
+            await checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification);
         }
 
-        // Check the server status
         http.get(serverUrl, (res) => {
             if ([200, 302].includes(res.statusCode)) {
-                log.log('running: load screen 1');
-                // Server is running, proceed with loadScreen
+                log.info('running: load screen 1');
                 isPhpServerRunning = true;
-                log.log(`PHP server already running at ${serverUrl}`);
-                loadScreen();  // Call loadScreen here to close the splash screen and show main window
+                log.info(`PHP server already running at ${serverUrl}`);
+                updateStatus(isPhpServerRunning);
+                loadScreen();
             } else {
-                log.log('not running: start php server 1');
-                // If the server is not running, try to start it
+                log.warn('not running: start php server 1');
                 isPhpServerRunning = false;
-                startPhpServer(); // Try starting the PHP server
+                startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log);
             }
         }).on('error', async (err) => {
             log.error(`PHP server not running: ${err.message}`);
             isPhpServerRunning = false;
 
-            // Only start the server if it is not already starting
             if (!isPhpServerStarting) {
-                isPhpServerStarting = true; // Lock the server start process
-
+                isPhpServerStarting = true;
                 try {
                     if (phpEnv_Exists) {
-                        log.log("'php' environment exists. Starting PHP server. not running: start cmd-php server 2");
-                        await startPhpServer();  // Try starting PHP server if PHP is available
+                        log.log("'php' environment exists. Starting PHP server.");
+                        await startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log);
+                        updateStatus(isPhpServerRunning);
                         loadScreen();
                     } else {
-                        log.log("'php' environment does not exist. Starting Node server. not running: start node-php server 1");
-                        await startPhpServer_Node();  // Otherwise, fallback to Node server
+                        log.log("'php' environment does not exist. Starting Node server.");
+                        await startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer);
+                        updateStatus(isPhpServerRunning);
                         loadScreen();
                     }
                 } catch (error) {
                     log.error('Error starting PHP server:', error);
-                    // Handle fallback or failure
                 } finally {
-                    isPhpServerStarting = false; // Unlock after server start
+                    isPhpServerStarting = false;
                 }
             }
         });
@@ -73,86 +77,74 @@ async function phpCheck() {
 }
 
 // Check if PHP is available in the environment
-function checkPhpInEnvironment() {
+function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification) {
     return new Promise((resolve, reject) => {
         const command = process.platform === 'win32' ? 'where php' : 'which php';
 
-        exec(command, (error, stdout) => {
-            phpEnv_Exists = !error && stdout.trim() !== '';
-            phpEnv_Exists ? resolve() : reject('PHP not found in system environment');
-        });
+        exec(command, (error, stdout, stderr) => {
+            if (error || stderr) {
+                log.error('Error checking PHP:', stderr || error.message);
+                phpEnv_Exists = false;
+                reject('PHP is not found in the system environment or an error occurred.');
+                return;
+            }
 
-        if (!phpEnv_Exists) {
-            setPhpEnvVariable();
-        }
+            if (stdout.trim()) {
+                log.info('PHP is available at:', stdout.trim());
+                phpEnv_Exists = true;
+                resolve();
+            } else {
+                log.info('PHP is not found in the system environment.');
+                phpEnv_Exists = false;
+                reject('PHP not found.');
+            }
+
+            if (!phpEnv_Exists) {
+                log.error('.Env does not exist, Creating PHP Variables for .env');
+                setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification);
+            }
+        });
     });
 }
 
-// Set the PHP environment variable dynamically
-function setPhpEnvVariable() {
-    const phpPath = isDev
-        ? path.join(__dirname, '../php', 'php.exe') // Development
-        : path.join(process.resourcesPath, 'app', 'php', 'php.exe'); // Production
-
-    const wwwPath = isDev
-        ? path.join(__dirname, '../www', 'public') // Development
-        : path.join(process.resourcesPath, 'app', 'www', 'public'); // Production
-
-    if (fs.existsSync(phpPath)) {
-        process.env.PHP_PATH = phpPath;
-        console.log(`PHP_PATH set to: ${process.env.PHP_PATH}`);
-    } else {
-        console.error(`PHP executable not found at: ${phpPath}`);
-    }
-
-    if (fs.existsSync(wwwPath)) {
-        process.env.WWW_PATH = wwwPath;
-        console.log(`WWW_PATH set to: ${process.env.WWW_PATH}`);
-    } else {
-        console.error(`PHP executable not found at: ${wwwPath}`);
-    }
-
-    savePathsToEnv();
-}
-
-// Run a PHP script using the environment variable or Node
+// PHP Servers 
 // Start the PHP server using PHP CLI
-function startPhpServer() {
+function startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log) {
     return new Promise((resolve, reject) => {
         const command = phpEnv_Exists
             ? `php -S 127.0.0.1:8000 -t "${wwwFolderPath}"`
             : `"${phpFolderPath}" -S 127.0.0.1:8000 -t "${wwwFolderPath}"`;
 
-        log.log(command);
+        log.warn(command);
 
         const phpServerCMD = exec(command, (err, stdout, stderr) => {
             if (err) return reject(`Error starting PHP server: ${err.message}`);
-            log.log(`PHP server started: ${stdout}`);
+            log.info(`PHP server started: ${stdout}`);
             isPhpServerRunning = true;
-            log.log(`'server running': ${isPhpServerRunning}`);
+            log.info(`'server running': ${isPhpServerRunning}`);
             resolve();
         });
 
-        phpServerPID = phpServerCMD.pid; // Store process ID
+        phpServerPID = phpServerCMD.pid;
 
         loadScreen();
     });
 }
 
 // Start the Node-based PHP server
-function startPhpServer_Node() {
+function startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer) {
     return new Promise((resolve, reject) => {
         try {
             phpServer.createServer({
                 port: 8000,
                 hostname: '127.0.0.1',
-                base: `${__dirname}/www/public`,
+                base: `${wwwFolderPath}`,
                 keepalive: false,
                 open: false,
                 bin: phpFolderPath,
-                router: `${__dirname}/www/server.php`
+                router: `${serverFolderPath}`
             });
-            log.log(`Node-PHP server started at ${serverUrl}`);
+            log.info(`Node-PHP server started at ${serverUrl}`);
             isPhpServerRunning = true;
             resolve();
         } catch (err) {
@@ -161,26 +153,45 @@ function startPhpServer_Node() {
     });
 }
 
+// get PHP Environment info
+function setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification) {
+    if (fs.existsSync(phpFolderPath)) {
+        process.env.PHP_PATH = phpFolderPath;
+        log.warn(`PHP_PATH set to: ${process.env.PHP_PATH}`);
+    } else {
+        log.error(`PHP file & executable not found at: ${phpFolderPath}`);
+        getPHP(log, showNotification, phpFolderPath);
+    }
+
+    if (fs.existsSync(wwwFolderPath)) {
+        process.env.WWW_PATH = wwwFolderPath;
+        log.warn(`WWW_PATH set to: ${process.env.WWW_PATH}`);
+    } else {
+        log.error(`PHP executable not found at: ${wwwFolderPath}`);
+    }
+
+    savePathsToEnv(log);
+}
 
 // Save the paths to a .env file
-function savePathsToEnv() {
+function savePathsToEnv(log) {
     const phpPath = process.env.PHP_PATH;
     const wwwPath = process.env.WWW_PATH;
 
     if (!phpPath) {
-        console.error('PHP_PATH is not set.');
+        log.error('PHP_PATH is not set.');
         return;
     }
 
     if (!wwwPath) {
-        console.error('WWW_PATH is not set.');
+        log.error('WWW_PATH is not set.');
         return;
     }
 
     // Read the current .env file content
     const envFilePath = isDev
-        ? path.join(__dirname, '../.env') // Development
-        : path.join(process.resourcesPath, 'app', '.env'); // Production
+        ? path.join(__dirname, '../.env')           // Path in development
+        : path.join(__dirname, 'app','.env');        // Path in production
 
     let envContent = '';
 
@@ -194,7 +205,7 @@ function savePathsToEnv() {
 
         // Write the .env file with the content
         fs.writeFileSync(envFilePath, envContent, { encoding: 'utf8' });
-        console.log(`.env file created at ${envFilePath}`);
+        log.warn(`.env file created at ${envFilePath}`);
     } else {
         envContent = fs.readFileSync(envFilePath, { encoding: 'utf8' });
     }
@@ -218,18 +229,81 @@ function savePathsToEnv() {
 
     // Write the updated content back to the .env file
     fs.writeFileSync(envFilePath, envContent, { encoding: 'utf8' });
-    console.log('PHP_PATH and WWW_PATH saved to .env file.');
+    log.warn('PHP_PATH and WWW_PATH saved to .env file.');
 }
 
-function setupPHPInfo() {
-    setPhpEnvVariable();
-    // return runPhpScript();
+const tempZipPath = isDev
+    ? path.join(__dirname, '../compressed', 'php.zip') // Development
+    : path.join(process.resourcesPath, 'app', 'compressed', 'php.zip'); // Production
+
+function getPHP(log, showNotification, phpFolderPath) {
+    if (!phpEnv_Exists || !fs.existsSync(phpFolderPath)) {
+        if (fs.existsSync(tempZipPath)) {
+            log.warn(`PHP ZIP FOUND AT ${tempZipPath}, EXTACTION STARTING`);
+            unzipPHP(log, showNotification, phpFolderPath);
+        } else {
+            log.warn(`PHP ZIP NOT FOUND, DOWNLOAD STARTING`);
+            downloadPHP(log, showNotification, phpFolderPath);
+        }
+    }
+}
+
+function unzipPHP(log, showNotification, phpFolderPath) {
+    log.warn('UNZIPPING PHP FILE...');
+    showNotification('Preparing Resources', 'Unzipping Server files');
+
+    const phpDirPath = isDev
+        ? path.join(__dirname, '../php/') // Development
+        : path.join(process.resourcesPath, 'app', 'php'); // Production
+
+    console.log(phpDirPath);
+
+    // Unzip the zipped file
+    fs.createReadStream(tempZipPath)
+        .pipe(unzipper.Extract({ path: phpDirPath }))
+        .on('close', () => {
+            showNotification('Resources Extracted Successfully', 'Resources Extracted Successfully');
+            log.warn('PHP extracted successfully.');
+            process.env.PHP_PATH = phpFolderPath;
+            log.warn(`PHP_PATH set to: ${process.env.PHP_PATH}`);
+            // fs.unlinkSync(tempZipPath); // Clean up temporary zip file
+        })
+        .on('error', (err) => {
+            log.error('Error extracting PHP:', err.message);
+        });
+}
+
+function downloadPHP(log, showNotification, phpFolderPath) {
+    log.log('Downloading PHP...');
+
+    // Download PHP zip file
+    const file = fs.createWriteStream(tempZipPath);
+    https.get(phpDownloadUrl, (response) => {
+        response.pipe(file);
+
+        file.on('finish', () => {
+            file.close(() => {
+                log.log('PHP download completed. Extracting...');
+
+                // Unzip the downloaded file
+                fs.createReadStream(tempZipPath)
+                    .pipe(unzipper.Extract({ path: phpFolderPath }))
+                    .on('close', () => {
+                        log.log('PHP extracted successfully.');
+                        process.env.PHP_PATH = phpFolderPath;
+                        log.log(`PHP_PATH set to: ${process.env.PHP_PATH}`);
+                        fs.unlinkSync(tempZipPath); // Clean up temporary zip file
+                    })
+                    .on('error', (err) => {
+                        log.error('Error extracting PHP:', err.message);
+                    });
+            });
+        });
+    }).on('error', (err) => {
+        log.error('Error downloading PHP:', err.message);
+    });
 }
 
 module.exports = {
-    phpCheck,
-    setPhpEnvVariable,
-    // runPhpScript,
-    savePathsToEnv,
-    setupPHPInfo
+    phpCheck
 };
