@@ -1,6 +1,6 @@
 {
   "name": "athonichama-app",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "This application streamlines the management of member contributions and welfare tracking, organizing all data into monthly cycles for easy access and reporting. Admin can record contributions, track both received and owed welfare amounts, and generate detailed reports. The app includes a built-in option to export monthly summaries to Excel spreadsheets, making it simple to review and share financial records. Ideal for organizations or groups that need to efficiently monitor member contributions and welfare transactions in an organized, user-friendly platform.",
   "repository": {
     "type": "git",
