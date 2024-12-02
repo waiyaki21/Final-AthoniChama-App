@@ -11,3 +11,4 @@ package-copy.json
 prev-main.js
 /compressed
 /downloads
+.env
