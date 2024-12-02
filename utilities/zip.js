@@ -1,13 +1,12 @@
 const fs = require('fs');
+const path = require('path');
 const archiver = require('archiver');
 
 // Function to create a zip file from a folder
 function createZip(inputFolder, outputZipPath) {
     return new Promise((resolve, reject) => {
         const output = fs.createWriteStream(outputZipPath);
-        const archive = archiver('zip', {
-            zlib: { level: 9 } // maximum compression
-        });
+        const archive = archiver('zip', { zlib: { level: 9 } });
 
         output.on('close', () => {
             console.log(`${archive.pointer()} total bytes`);
@@ -15,9 +14,7 @@ function createZip(inputFolder, outputZipPath) {
             resolve();
         });
 
-        archive.on('error', (err) => {
-            reject(err);
-        });
+        archive.on('error', (err) => reject(err));
 
         archive.pipe(output);
         archive.directory(inputFolder, false);
@@ -26,10 +23,16 @@ function createZip(inputFolder, outputZipPath) {
 }
 
 // Get folder paths from arguments
-const inputFolder = process.argv[2];  // Folder to zip
-const outputZipPath = process.argv[3]; // Output zip file
+const inputFolder = path.resolve(process.argv[2]);
+const outputZipPath = path.resolve(process.argv[3]);
+
+// Ensure output directory exists
+const outputDir = path.dirname(outputZipPath);
+if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+}
 
 // Call the createZip function
 createZip(inputFolder, outputZipPath)
     .then(() => console.log('Done!'))
-    .catch(err => console.error('Error:', err));
+    .catch(err => console.error('Error:', err.message));
