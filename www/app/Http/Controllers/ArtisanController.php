@@ -37,10 +37,17 @@ class ArtisanController extends Controller
 
         $this->backupDB();
         
-        Artisan::call('migrate:refresh');
+        // refresh the DB 
+        if (env('APP_ENV') === 'local') {
+            // If the environment is local, run the migration without specifying the --env flag
+            Artisan::call('migrate:refresh');
+        } else {
+            // Otherwise, run the migration with the --env=production flag
+            Artisan::call('database:refresh');
+        }
 
         return redirect('/register');
-    }
+    } 
 
     public function backupDB()
     {

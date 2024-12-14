@@ -42,10 +42,6 @@ export default defineConfig({
                         // Group all dependencies from node_modules into "vendor" chunk
                         return 'vendor';
                     }
-                    if (id.includes('resources/js/Pages/')) {
-                        // Group components in "components" chunk
-                        return 'pages';
-                    }
                     if (id.includes('resources/js/Pages/Components/tables')) {
                         // Group components in "components" chunk
                         return 'tables';
@@ -57,6 +53,22 @@ export default defineConfig({
                     if (id.includes('resources/js/Pages/Components/forms') || id.includes('resources/js/Pages/Components/modal-forms') || id.includes('resources/js/Pages/Components/modals')) {
                         // Group components in "components" chunk
                         return 'forms';
+                    }
+                    if (id.includes('resources/js/Pages/Components/tabs')) {
+                        // Group components in "components" chunk
+                        return 'tabs';
+                    }
+                    if (id.includes('resources/js/Pages/Components/progress')) {
+                        // Group components in "components" chunk
+                        return 'progress';
+                    }
+                    if (id.includes('resources/js/Pages/Components/infopanel')) {
+                        // Group components in "components" chunk
+                        return 'infopanel';
+                    }
+                    if (id.includes('resources/js/Pages/Utilities')) {
+                        // Group components in "components" chunk
+                        return 'Utilities';
                     }
                 }
             }
