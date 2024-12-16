@@ -482,3 +482,83 @@ function handleErrors(error, { flashTimed, loadingError }) {
         flashTimed('An error occurred. Please try again.', 'danger', 60000);
     }
 }
+
+// Reset DB used in resetDB in Settings
+// export function onResetDBAsync(classInfo, form, state, sheetMembers, { flashShow, flashTimed, flashHide, refresh, getAllMembers, clearAll }) {
+//     const submitSheetAsync = async () => {
+//         if (confirm(classInfo.confirmText)) {
+//             // Timed flash message
+//             flashTimed('Spreadsheet Members Processing, please wait...', 'loading', 300000);
+
+//             // Filter out the needed members
+//             const toBeUpdated = sheetMembers.value;
+
+//             // Loop through each member and await the Axios request
+//             for (let [index, member] of toBeUpdated.entries()) {
+//                 const remainingMembers = toBeUpdated.length - index - 1;
+//                 let memberData = `${member.name}`;
+
+//                 try {
+//                     if (member.exists) {
+//                         form.name = member.name;
+//                         form.telephone = member.telephone;
+//                         form.amount_before = member.amount_before;
+//                         form.welfare_before = member.welfare_before;
+//                         form.welfareowed_before = member.welfareowed_before;
+//                         form.active = member.active;
+
+//                         if (member.welfare_owing_may) {
+//                             form.welfare_owing_may = member.welfare_owing_may;
+//                         }
+
+//                         // Await the Axios PUT request
+//                         await axios.put('/update/member/modal/' + member.id, form);
+
+//                         // Show a success flash message after the update
+//                         flashShow(`${memberData} Updated. (${remainingMembers} members left)`, 'info');
+//                     } else {
+//                         form.name = member.name;
+//                         form.telephone = member.telephone;
+//                         form.amount_before = member.amount_before;
+//                         form.welfare_before = member.welfare_before;
+//                         form.welfareowed_before = member.welfareowed_before;
+//                         form.active = member.active;
+
+//                         if (member.welfare_owing_may) {
+//                             form.welfare_owing_may = member.welfare_owing_may;
+//                         }
+
+//                         // Await the Axios GET request
+//                         await axios.post('/member', form);
+
+//                         // Show a success flash message after the update
+//                         flashShow(`${memberData} Added. (${remainingMembers} members left)`, 'success');
+//                     }
+//                 } catch (error) {
+//                     // Show an error flash message if the update fails
+//                     flashShow(`${memberData} Update failed. (${remainingMembers} members left)`, 'danger');
+//                 }
+
+//                 // After all members are updated, show a final flash message
+//                 if (remainingMembers === 0) {
+//                     flashHide();
+//                     const time = 9 * 90 * 90;
+//                     setTimeout(() => {
+//                         flashShow(`Upload Success.`, 'success', time);
+//                     }, 1000);
+
+//                     if (state) {
+//                         await refresh(); // Wait for the refresh method to complete
+//                         await getAllMembers(); // get all members   
+//                         await clearAll(); // clear all file info   
+//                     }
+//                 }
+//             }
+//         } else {
+//             flashHide();
+//             flashShow('Upload Cancelled', 'danger');
+//         }
+//     };
+
+//     return { submitSheetAsync };
+// }

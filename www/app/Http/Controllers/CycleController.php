@@ -14,10 +14,12 @@ use App\Models\Project;
 use App\Models\Setting;
 use App\Models\Welfare;
 use Illuminate\Support\Str;
+use App\Models\CycleExpense;
 use Illuminate\Http\Request;
 use App\Imports\MembersImport;
 use App\Imports\PaymentsImport;
 use App\Imports\MembersPayments;
+use App\Models\CycleExpenseNames;
 use Illuminate\Support\Facades\DB;
 use App\Imports\NewMembersPayments;
 use Maatwebsite\Excel\Facades\Excel;
@@ -26,7 +28,6 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\FinancesController;
 use App\Http\Controllers\ExcelUploads\LedgersExcelController;
 use App\Http\Controllers\ExcelUploads\PaymentExcelController;
-use App\Models\CycleExpense;
 
 class CycleController extends Controller
 {
@@ -705,6 +706,13 @@ class CycleController extends Controller
                             ->get();
         foreach ($welfares as $welfare) {
             $welfare->delete();
+        }
+
+        // get & delete cycleexpenses 
+        $cycleexpneses = CycleExpense::where('cycle_id', $cycle->id)
+                            ->get();
+        foreach ($cycleexpneses as $cycleexpense) {
+            $cycleexpense->delete();
         }
 
         // get & delete expenses 

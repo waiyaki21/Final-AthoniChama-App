@@ -2,7 +2,21 @@ import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
 
+import { name, version } from "../package.json";
+
+// Function to capitalize the first letter of each word, including hyphen-separated words
+function capitalizeFirstLetter(str) {
+    return str
+        .split(' ') // Split the string into words
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+        .join(' '); // Join the words back into a single string
+}
+
 export default defineConfig({
+    define: {
+        'process.env.PACKAGE_NAME': JSON.stringify(capitalizeFirstLetter(name)),
+        'process.env.PACKAGE_VERSION': JSON.stringify(version),
+    },
     plugins: [
         laravel({
             

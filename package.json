@@ -1,6 +1,6 @@
 {
   "name": "athonichama-app",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "This application streamlines the management of member contributions and welfare tracking, organizing all data into monthly cycles for easy access and reporting. Admin can record contributions, track both received and owed welfare amounts, and generate detailed reports. The app includes a built-in option to export monthly summaries to Excel spreadsheets, making it simple to review and share financial records. Ideal for organizations or groups that need to efficiently monitor member contributions and welfare transactions in an organized, user-friendly platform.",
   "repository": {
     "type": "git",
@@ -14,12 +14,15 @@
     "make": "electron-forge make",
     "lint": "echo \"No linting configured\"",
     "publish": "electron-forge publish",
+    "publish-only": "electron-forge publish --ci",
     "pack": "electron-packager . AthoniChamaApp --platform=win32 --arch=x64 --out=dist --icon=icons/chama_icon.ico --overwrite --prune",
     "cmd-pack": "node ./utilities/pack.js",
     "zip": "node ./utilities/zip.js ./dist/AthoniChamaApp-win32-x64 ./dist/AthoniChamaApp-win32-x64.zip",
     "release": "node ./utilities/release.js",
-    "app-r": "gh release create v1.0.2 \"C:\\Users\\Kelvin Waiyaki\\Desktop\\Work Projects\\Final AthoniChama-App\\dist\\AthoniChamaApp-win32-x64\\AthoniChamaApp.exe\" --title \"Release v1.0.2\" --notes \"Automated release via GitHub CLI.\" --generate-notes --repo \"waiyaki21/Final-AthoniChama-App\"",
-    "zip-r": "gh release create v1.0.2 \"C:\\Users\\Kelvin Waiyaki\\Desktop\\Work Projects\\Final AthoniChama-App\\dist\\AthoniChamaApp-win32-x64.zip\" --title \"Release v1.0.2\" --notes \"Automated release via GitHub CLI.\" --generate-notes --repo \"waiyaki21/Final-AthoniChama-App\""
+    "app-r": "gh release create v1.0.5 \"C:\\Users\\Kelvin Waiyaki\\Desktop\\Work Projects\\Final AthoniChama-App\\out\\make\\squirrel.windows\\x64\\AthoniChamaAppSetup.exe\" --title \"Release v1.0.5\" --notes \"Automated release via GitHub CLI.\" --generate-notes --repo \"waiyaki21/Final-AthoniChama-App\"",
+    "zip-r": "gh release create v1.0.5 \"C:\\Users\\Kelvin Waiyaki\\Desktop\\Work Projects\\Final AthoniChama-App\\dist\\AthoniChamaApp-win32-x64.zip\" --title \"Release v1.0.5\" --notes \"Automated release via GitHub CLI.\" --generate-notes --repo \"waiyaki21/Final-AthoniChama-App\"",
+    "app-r-new": "node -e \"const { exec } = require('child_process'); const { version } = require('./package.json'); const command = `gh release create v${version} \\\"C:/Users/Kelvin Waiyaki/Desktop/Work Projects/Final AthoniChama-App/out/make/squirrel.windows/x64/AthoniChamaAppSetup.exe\\\" --title \\\"Release v${version}\\\" --notes \\\"Automated release via GitHub CLI.\\\" --generate-notes --repo \\\"waiyaki21/Final-AthoniChama-App\\\"`; exec(command, (err, stdout, stderr) => { if (err) { console.error('Error:', err); } else { console.log(stdout); console.error(stderr); } });\"",
+    "zip-r-new": "node -e \"const { version } = require('./package.json'); console.log(version);\" | xargs -I {} gh release create v{} \"C:\\Users\\Kelvin Waiyaki\\Desktop\\Work Projects\\Final AthoniChama-App\\dist\\AthoniChamaApp-win32-x64.zip\" --title \"Release v{}\" --notes \"Automated release via GitHub CLI.\" --generate-notes --repo \"waiyaki21/Final-AthoniChama-App\""
   },
   "author": "Kelvin Waiyaki",
   "license": "MIT",

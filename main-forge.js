@@ -1,41 +1,40 @@
-const { app, BrowserWindow, Notification, autoUpdater, dialog } = require('electron');
-const path          = require('path');
-const { exec }      = require('child_process');
-const http          = require('http');
-
-// const initializeAutoUpdaterListeners = require('./uilities/autoUpdaterListeners');
-// const fs = require('fs');
+// load the dependencies 
+const { 
+    app, 
+    BrowserWindow, 
+    Notification, 
+    ipcMain 
+}                                           = require('electron');
+const path                                  = require('path');
+let phpServer                               = require('node-php-server');
+const log                                   = require('electron-log');
 
 // Determine if the app is in production or development
-const isDev = !app.isPackaged;
+const isDev                                 = !app.isPackaged;
 
-// Adjust module path based on the environment
-let phpServer = require('node-php-server');
-const log     = require('electron-log');
+// load in the autoUpdater listener file from utilities 
+const initializeAutoUpdater                 = require('./utilities/autoUpdaterListeners');
 
-let phpServerCMD = null; // Global reference for the CMD process
+// load in the log listener file from utilities 
+const { 
+    initializeLogs, 
+    splashLog
+}                                           = require('./utilities/logsListeners');
+initializeLogs(log, isDev, path, app);
+
+const { 
+    createWindow, 
+    getAppDetails 
+}                                           = require('./utilities/windowUtils');
+
+// create the windows 
 let mainWindow;
 let splashWindow;
 
 // Check for more than one instance of the app running
-const singleInstanceLock = app.requestSingleInstanceLock();
+const singleInstanceLock                   = app.requestSingleInstanceLock();
 
-// Logging configuration
-log.transports.file.resolvePathFn = () => {
-    const appData = isDev
-        ? path.resolve(__dirname, 'logs/main.log') // Dev mode path
-        : path.join(
-            app.getPath('appData').replace('Roaming', 'Local'),`${app.getName()}/logs/main.log`
-        ); // Production mode path
-
-    return appData;
-};
-
-// log the app version 
-log.log("Application Version: " + app.getVersion())
-// END LOGS 
-
-let isPhpServerRunning  = false; // State variable to track server status
+let isPhpServerRunning                     = false; // State variable to track server status
 
 const phpFolderPath = isDev
     ? path.join(__dirname, 'php', 'php.exe') // Development
@@ -49,12 +48,20 @@ const { phpCheck } = require(isDev
     ? './utilities/phpInfo' // Development
     : path.join(process.resourcesPath, 'app', 'utilities', 'phpInfo')); // Production
 
-log.log(phpFolderPath);
-log.log(wwwFolderPath);
+// Ensure the ipcMain listener is registered only once
+ipcMain.on('update-status', (event, { message, type }) => {
+    if (splashWindow) {
+        splashWindow.webContents.send('status-change', { message, type });
+    }
+});
 
 // Helper function to show notifications
 const showNotification = (title, body) => {
     new Notification({ title, body }).show();
+}
+
+const showLogInfo = (message, type) => {
+    splashLog(splashWindow, message, type, log);
 }
 
 // updates the isPhpServerRunning value 
@@ -65,89 +72,83 @@ const updateStatus = (status) => {
 // Load the main application window
 const loadScreen = () => {
     if (isPhpServerRunning) {
-        log.log('Success open main');
+        showLogInfo('Success open main', 'info');
         // Proceed to open the main window and close splash screen
         createMainWindow();
-        setTimeout(() => {
-            if (splashWindow) {
-                splashWindow.close();
-            }
-        }, 1000);
     } else {
         // Retry PHP check if server is still not running
-        log.log('Recheck phpCheck');
-        phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification);
+        showLogInfo('Recheck phpCheck', 'warn');
+        phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification, showLogInfo);
     }
 };
 
-function capitalize(str) {
-    return str.replace(/\b\w/g, char => char.toUpperCase());
-}
-
-function getAppDetails() {
-    const appName = capitalize(app.getName());
-    const appVersion = app.getVersion();
-    return {
-        title: `${ appName } v${ appVersion }`,
-        iconPath: path.join(__dirname, 'icons/chama_icon.ico') // Adjust this path
-    };
-}
-
-function createWindow(options) {
-    const { title, iconPath } = getAppDetails();
-    const defaultOptions = {
-        title,
-        icon: iconPath,
-        webPreferences: {
-            nodeIntegration: true
-        },
-        autoHideMenuBar: !isDev
-    };
-    return new BrowserWindow({ ...defaultOptions, ...options });
-}
-
 // Load the application splash screen
 function createSplashWindow() {
-    // initializeAutoUpdaterListeners(showNotification, log ,phpServer);
-    phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification); // Start server check
+    // updates check info 
+    showLogInfo('Searching for updates...', 'info');
+    initializeAutoUpdater(showNotification, log, isDev, showLogInfo);
 
-    // Notification 
+    // Start PHP-server check
+    showLogInfo('Starting PHP server...', 'log');
+    phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification, showLogInfo); 
+
+    // get App info & notify 
     const { title } = getAppDetails();
-    showNotification(`${title} Loading!`, `${title} loading, Please Wait...`);
+    showLogInfo(`${title} loading, Please Wait...`, 'info')
 
+    // create splash window 
     splashWindow = createWindow({
-        width: 840,
-        height: 600,
-        frame: true,
-        transparent: true,
-        alwaysOnTop: false,
-        resizable: true
+        width:          840,
+        height:         600,
+        frame:          true,
+        transparent:    true,
+        alwaysOnTop:    false,
+        resizable:      true,
+        isDev,
+        webPreferences: {
+            preload:            path.join(__dirname, 'preload.js'),
+            contextIsolation:   true,
+            nodeIntegration:    false,
+        },
     });
 
+    // load splash window 
     splashWindow.loadFile('splash.html');
+
+    // center splash window
+    splashWindow.center();
 }
 
 // Function to create the main window
 function createMainWindow() {
-    // notification 
+    // get App info & notify 
     const { title } = getAppDetails();
-    showNotification(`${title} Launching!`, `Loading complete now launching`);
+    showLogInfo(`${title} Launching!`, 'log');
 
     // Create a new browser window for the main application
-    mainWindow = new BrowserWindow({
+    mainWindow = createWindow({
         width: 1280,
         height: 800,
         show: false, // Do not show immediately, only after content is loaded
+        isDev,
         webPreferences: {
             nodeIntegration: true, // Enable node integration for this window
             contextIsolation: false // Allow node.js integration in the renderer process
         }
     });
 
-    // Load the main content (HTML, for example)
-    mainWindow.loadURL('http://localhost:8000'); // Or your desired URL
+    // Load the main content using URL
+    mainWindow.loadURL('http://localhost:8000');
+
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show(); // Show window after content is loaded
+        setTimeout(() => {
+            // if splash window is still open close it 
+            if (splashWindow) {
+                splashWindow.close();
+            }
+            // Show window after content is loaded
+            mainWindow.show();
+        }, 2000);
     });
 
     // Handle window close event
@@ -158,89 +159,43 @@ function createMainWindow() {
 }
 
 // App initialization and configuration
+// Check if the app instance is already running, if not, quit the app and show error log
 if (!singleInstanceLock) {
-    app.quit();
+    app.quit(); // Exit the app if another instance is already running
+    showLogInfo('App Already Running', 'error'); // Log the error message
 } else {
+    // If this is the first instance, handle the second instance logic
     app.on('second-instance', () => {
+        // If the main window is minimized, restore it
         if (mainWindow?.isMinimized()) mainWindow.restore();
+        // Focus the main window
         mainWindow?.focus();
     });
 
+    // When the app is ready, set up the splash window and log the app details
     app.whenReady().then(() => {
+        // Log the application version
+        showLogInfo(`Application Version: ${app.getVersion()}`, 'info');
+
+        // Log the paths for PHP folder and WWW folder
+        showLogInfo(phpFolderPath, 'info');
+        showLogInfo(wwwFolderPath, 'info');
+
+        // Create the splash window
         createSplashWindow();
+
+        // Handle activation (macOS behavior), prevent splash window duplication
         app.on('activate', () => {
+            // If no other windows are open, create a new splash window
             if (BrowserWindow.getAllWindows().length === 0) createSplashWindow();
         });
     });
 
+    // When all windows are closed, quit the app
     app.on('window-all-closed', () => app.quit());
 }
 
 // Handle when all windows are closed
 app.on("quit", () => {
-    // stopPHPServer();
-    if (autoUpdater) autoUpdater.removeAllListeners();
     app.quit();
-});
-
-// AutoUpdater Event Listeners with Notifications
-autoUpdater.on("checking-for-update", () => {
-    log.info("Checking for updates...");
-});
-
-autoUpdater.on("update-available", (info) => {
-    // Get the version of the upcoming update
-    const nextVersion = info.version;
-    log.info(`Update available: Version ${nextVersion}`);
-    showNotification("Update Available", `A new update (Version ${nextVersion}) is available. Downloading now...`);
-});
-
-autoUpdater.on("update-not-available", (info) => {
-    log.info("No updates available:");
-    showNotification("No Update Available", "App is already on the latest version.");
-});
-
-autoUpdater.on("download-progress", (progressTrack) => {
-    const percent = Math.round(progressTrack.percent);
-
-    // Convert bytes to megabytes
-    const transferredMB = (progressTrack.transferred / (1024 * 1024)).toFixed(2);
-    const totalMB = (progressTrack.total / (1024 * 1024)).toFixed(2);
-
-    // Log the download progress
-    const progressMsg = `Downloaded ${percent}% (${transferredMB} MB / ${totalMB} MB)`;
-    log.info(progressMsg);
-
-    // Show notifications only at 25%, 50%, and 90%
-    if (percent === 25 || percent === 50 || percent === 90) {
-        showNotification("Download Progress", progressMsg);
-    }
-});
-
-autoUpdater.on("update-downloaded", () => {
-    log.info(`Update downloaded`);
-
-    const dialogOpts = {
-        type: 'info',
-        buttons: ['Restart', 'Later'],
-        title: 'Application Update',
-        message: process.platform === 'win32' ? releaseNotes : releaseName,
-        detail:
-            'A new version has been downloaded. Restart the application to apply the updates.'
-    }
-
-    dialog.showMessageBox(dialogOpts).then((returnValue) => {
-        if (returnValue.response === 0) {
-            // Display a notification to inform the user that the update is ready
-            showNotification("Update Installing", `Restarting to apply the update.`);
-
-            autoUpdater.quitAndInstall();
-        }
-    })
-});
-
-autoUpdater.on("error", (err) => {
-    log.error("Update error:", err);
-    log.info("Update Error " + err);
-    showNotification("Update Error", `An error occurred: ${err.message}`);
 });

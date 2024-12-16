@@ -13,10 +13,6 @@ import { createApp, h }                             from 'vue';
 import { createInertiaApp, Head, router, Link }     from '@inertiajs/vue3';
 import { ZiggyVue }                                 from '../../vendor/tightenco/ziggy/dist/vue.m';
 
-const appName       = import.meta.env.VITE_APP_NAME;
-const appShortName  = import.meta.env.VITE_APP_SHORTNAME;
-const appVersion    = import.meta.env.VITE_APP_VERSION;
-
 // form imports 
 import InputError       from '@/Components/FormComponents/InputError.vue';
 import InputLabel       from '@/Components/FormComponents/InputLabel.vue';
@@ -161,8 +157,12 @@ import tabButton        from './Pages/Utilities/Button/tabButton.vue';
 
 import { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CheckIcon, XMarkIcon, HomeIcon, DocumentCheckIcon, PencilIcon, TrashIcon, FolderArrowDownIcon, PhoneIcon, ChevronUpDownIcon, CalendarDaysIcon, PlusIcon, TableCellsIcon, DocumentPlusIcon, MagnifyingGlassIcon, BellAlertIcon, ArrowPathIcon, CurrencyDollarIcon, ClockIcon, MoonIcon, LightBulbIcon, UserGroupIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, HandRaisedIcon, PaperAirplaneIcon, SparklesIcon, UserPlusIcon, DocumentArrowDownIcon, CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, HomeModernIcon, XCircleIcon, PresentationChartLineIcon, Cog8ToothIcon, UserIcon, ArrowUpCircleIcon, ArrowDownCircleIcon, ArrowLeftCircleIcon, ArrowRightCircleIcon, UserMinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/vue/24/solid';
 
+const appName       = import.meta.env.VITE_APP_NAME;
+const appShortName  = process.env.PACKAGE_NAME;
+const appVersion    = process.env.PACKAGE_VERSION;
+
 createInertiaApp({
-    title: (title) => `${title} - ${appShortName} ${appVersion}`,
+    title: (title) => `${title} - ${appShortName} v${appVersion}`,
     resolve: name => {
         const pages = import.meta.glob('./Pages/**/*.vue', { eager: true })
         let page    = pages[`./Pages/${name}.vue`]

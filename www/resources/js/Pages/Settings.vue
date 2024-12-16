@@ -22,7 +22,7 @@
                 <ul class="flex flex-row -mb-px overflow-x-scroll">
                     <li class="me-2" role="presentation">
                         <button :class="[classInfo.tab1]" id="setup-tab" data-tabs-target="#setup" type="button"
-                            role="tab" aria-controls="setup" aria-selected="false" @click="tabSwitch">
+                            role="tab" aria-controls="setup" aria-selected="false" @click="tabSwitch1">
                             System Settings
                             <span :class="[classInfo.tab2svg]">
                                 1
@@ -75,7 +75,7 @@
             <hr-line :color="classInfo.hrClass"></hr-line>
             <!-- tabs body  -->
             <div class="md:my-4 my-2">
-                <settingTabs :settings=settings :show="classInfo.tab1show" :updated=props.updated @reload=reloadNav @changed=settingsChanged @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab1show"></settingTabs>
+                <settingTabs :settings=settings :updated=props.updated @reload=reloadNav @changed=settingsChanged @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab1show"></settingTabs>
 
                 <setmembersTabs :route=props.route @changed=membersChanged v-if="classInfo.tab2show"></setmembersTabs>
 
@@ -180,8 +180,8 @@
         tab2: '',
         tab3: '',
         tab1show: true,
-        tab2show: true,
-        tab3show: true,
+        tab2show: false,
+        tab3show: false,
 
         tab2svg: '',
         tab3svg: '',
@@ -215,10 +215,41 @@
                     if (classInfo.membersNo == 0) {
                         membersTemplate()
                     }
-                    if (classInfo.cyclesNo == 0) {
-                        cyclesTemplate()
-                    }
                 });
+    }
+
+    function settingsChanged() {
+        setInfo();
+
+        // if (classInfo.tab1show) {
+        //     classInfo.tab1 = classInfo.tabActive;
+        //     classInfo.tab1svg = classInfo.svgActive;
+        // } else {
+        //     classInfo.tab1 = classInfo.setup ? classInfo.tabSuccess : classInfo.tabDanger;
+        //     classInfo.tab1svg = classInfo.setup ? classInfo.svgActive : classInfo.svgInactive;
+
+        //     classInfo.tab2 = classInfo.setup ? classInfo.tabInactive : classInfo.tabDanger;
+        //     classInfo.tab2svg = classInfo.setup ? classInfo.svgInactive : classInfo.svgActive;
+        // }
+
+        // if (classInfo.tab2show) {
+        //     classInfo.tab2 = classInfo.tabActive;
+        //     classInfo.tab2svg = classInfo.svgActive;
+        // } else {
+        //     classInfo.tab2 = classInfo.membersNo != 0 ? classInfo.tabSuccess : classInfo.tabDanger;
+        //     classInfo.tab2svg = classInfo.membersNo != 0 ? classInfo.svgActive : classInfo.svgInactive;
+
+        //     classInfo.tab3 = classInfo.membersNo != 0 ? classInfo.tabInactive : classInfo.tabDanger;
+        //     classInfo.tab3svg = classInfo.membersNo != 0 ? classInfo.svgInactive : classInfo.svgActive;
+        // }
+
+        // if (classInfo.tab3show) {
+        //     classInfo.tab3 = classInfo.tabActive;
+        //     classInfo.tab3svg = classInfo.svgActive;
+        // } else {
+        //     classInfo.tab3 = classInfo.cyclesNo != 0 ? classInfo.tabSuccess : classInfo.tabDanger;
+        //     classInfo.tab3svg = classInfo.cyclesNo != 0 ? classInfo.svgActive : classInfo.svgInactive;
+        // }
     }
 
     function membersTemplate() {
@@ -240,6 +271,8 @@
         classInfo[`tab${tabNumber}show`] = true;
         classInfo[`tab${tabNumber}`] = classInfo.tabActive;
         classInfo.hrClass = hrClass;
+
+        settingsChanged();
     }
 
     function resetTabClass() {
@@ -247,6 +280,7 @@
             classInfo[tab] = classInfo.tabInactive;
             classInfo[`${tab}show`] = false;
         });
+
         classInfo.hrClass = 'border-rose-800 dark:border-rose-300 my-1';
         classInfo.tab2svg = classInfo.svgActive;
         classInfo.tab3svg = classInfo.svgActive;
@@ -257,13 +291,14 @@
     }
 
     function tabSwitch2() {
+        // Scroll to the top of the page
+    // window.scrollTo({ top: 0, behavior: 'smooth' });
         tabSwitch(2, 'border-emerald-800 dark:border-emerald-300 my-1');
         membersTemplate();
     }
 
     function tabSwitch3() {
         tabSwitch(3, 'border-amber-800 dark:border-amber-300 my-1');
-        cyclesTemplate();
     }
 
     function finishSettings() {
@@ -289,19 +324,14 @@
         // emit('reload');
     }
 
-    function settingsChanged() {
-        setInfo();
-        if (classInfo.setup) {
-            tabSwitch2()
-        } else {
-            tabSwitch1()
-        }
-    }
-
     function membersChanged() {
         setInfo();
+        // if (classInfo.membersNo != 0) {
+        //     tabSwitch2()
+        // } else {
+        //     tabSwitch1()
+        // }
         if (classInfo.membersNo != 0) {
-            // console.log('members main check success');
             if (classInfo.tab2show) {
                 classInfo.tab2 = classInfo.tabActive;
                 classInfo.tab2svg = classInfo.svgActive;
@@ -322,6 +352,19 @@
 
     function cyclesChanged() {
         setInfo();
+        // if (classInfo.cyclesNo != 0) {
+        //     tabSwitch3();
+        // } else {
+        //     if (classInfo.membersNo != 0) {
+        //         tabSwitch2()
+        //     } else {
+        //         if (classInfo.setup) {
+        //             tabSwitch2();
+        //         } else {
+        //             tabSwitch1();
+        //         }
+        //     }
+        // }
         // this.membersCount = members.length;
         if (classInfo.cyclesNo != 0) {
             // console.log('cycles main check success');
@@ -349,13 +392,111 @@
         router.get(url);
     } 
 
-    function resetDB() {
-        let url     = '/resetDB';
-        let header  = 'Delete All info & Reset Database!';
-        let button  = `Reset Database`;
-        let message = `All information will be deleted! User Accounts, Payment Cycles, Members, Contribution Records & Welfare Records, Are you sure you want to delete everything?`;
+    async function getRegister() {
+        let url = '/register';
 
-        flashShowView(message, 'danger', header, url, button, 15000, true);
+        router.get(url);
+    } 
+
+    async function resetInfo() {
+        axios.get('/api/getSettings')
+            .then(
+                ({ data }) => {
+                    classInfo.setup         = data[0];
+                    classInfo.membersNo     = data[1];
+                    classInfo.cyclesNo      = data[2];
+                    classInfo.projectsNo    = data[3];
+
+                    if (classInfo.membersNo == 0) {
+                        membersTemplate()
+                    }
+                });
+    }
+
+    async function resetDB() {
+        const message = `All information will be deleted! User Accounts, Payment Cycles, Members, Contribution Records & Welfare Records. Are you sure you want to delete everything?`;
+
+        if (confirm(message)) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+            await fullResetCycles(); // Wait for the cycles reset to complete
+            await resetInfo();
+        } else {
+            flashShow('Database Reset Cancelled!', 'info');
+            // reload info 
+            await resetInfo();
+        }
+    }
+
+    async function fullResetCycles() {
+        if (confirm('Are You Sure you want to delete all Payment Cycles with Member Payments, Welfares, Projects & Expenses?')) {
+            flashLoading('Deleting all Payment Cycles with Member Payments, Welfares, Projects & Expenses');
+            try {
+                const { data } = await axios.get('/fullReset/cycles');
+                classInfo.setup         = data[0];
+                classInfo.membersNo     = data[1];
+                classInfo.cyclesNo      = data[2];
+                classInfo.projectsNo    = data[3];
+                flashHide();
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                flashShow('All Payment Cycles with Member Payments, Welfares, Projects & Expenses Deleted', 'delete');
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                await fullResetMembers(); // Wait for the members reset to complete
+            } catch (error) {
+                console.error('Error resetting payment cycles:', error);
+            }
+        } else {
+            flashShow('Payment Cycles Reset Cancelled!', 'warning');
+            // reload info 
+            await resetInfo();
+        }
+    }
+
+    async function fullResetMembers() {
+        if (confirm('Are You Sure you want to delete all Members?')) {
+            flashLoading('Deleting all Members!');
+            try {
+                const { data } = await axios.get('/fullReset/members');
+                classInfo.setup         = data[0];
+                classInfo.membersNo     = data[1];
+                classInfo.cyclesNo      = data[2];
+                classInfo.projectsNo    = data[3];
+                flashHide();
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                flashShow('All Members Deleted', 'delete');
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                await fullResetUsers(); // Wait for the users reset to complete
+            } catch (error) {
+                console.error('Error resetting members:', error);
+            }
+        } else {
+            flashShow('Members Reset Cancelled!', 'warning');
+            // reload info 
+            await resetInfo();
+        }
+    }
+
+    async function fullResetUsers() {
+        if (confirm('Are You Sure you want to delete all User Accounts, Including yourself?')) {
+            flashLoading('Deleting all User Accounts');
+            try {
+                const { data } = await axios.get('/fullReset/users');
+                classInfo.setup         = data[0];
+                classInfo.membersNo     = data[1];
+                classInfo.cyclesNo      = data[2];
+                classInfo.projectsNo    = data[3];
+                flashHide();
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                flashShow('All User Accounts Deleted', 'delete');
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                await getRegister();
+            } catch (error) {
+                console.error('Error resetting users:', error);
+            }
+        } else {
+            flashShow('Users Reset Cancelled!', 'warning');
+            // reload info 
+            await resetInfo();
+        }
     }
 
     // Reference for toast notification
@@ -372,7 +513,7 @@
     }
 
     const flashLoading = (info) => {
-        flashTimed(info, 'loading', 9999999)
+        flashTimed(info, 'loading', 20000)
     }
 
     // Method to trigger a timed flash message
@@ -391,7 +532,9 @@
     // Method to hide the loading flash message after a delay
     const flashHide = () => {
         if (toastNotificationRef.value) {
-            toastNotificationRef.value.loadHide();
+            setTimeout(() => {
+                toastNotificationRef.value.loadHide();
+            }, 1000);
         }
     }
 

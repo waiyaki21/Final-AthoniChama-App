@@ -24,84 +24,86 @@ const serverFolderPath = isDev
 const https             = require('https');
 const unzipper          = require('unzipper');
 
-const phpDownloadUrl    = 'https://windows.php.net/downloads/releases/php-8.2.26-nts-Win32-vs16-x64.zip'; // Replace with actual download URL
+// const phpDownloadUrl    = 'https://windows.php.net/downloads/releases/php-8.2.26-nts-Win32-vs16-x64.zip'; // Replace with actual download URL
+const phpDownloadUrl    = 'https://newblessings.co.ke/preset/template/zip';
 
 // Main server initialization logic
-async function phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification) {
-    log.warn('PHP server check.');
+async function phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification, showLogInfo) {
+    showLogInfo('PHP server check.', 'warn');
     try {
         if (!isPhpEnv_Checked) {
-            await checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification);
+            await checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo);
         }
 
         http.get(serverUrl, (res) => {
             if ([200, 302].includes(res.statusCode)) {
-                log.info('running: load screen 1');
+                showLogInfo('running: load screen 1', 'info');
                 isPhpServerRunning = true;
-                log.info(`PHP server already running at ${serverUrl}`);
+                showLogInfo(`PHP server already running at ${serverUrl}`, 'info');
                 updateStatus(isPhpServerRunning);
                 loadScreen();
             } else {
-                log.warn('not running: start php server 1');
+                showLogInfo('not running: start php server 1', 'warn');
                 isPhpServerRunning = false;
                 startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log);
             }
         }).on('error', async (err) => {
-            log.error(`PHP server not running: ${err.message}`);
+            showLogInfo(`PHP server not running: ${err.message}`, 'error');
             isPhpServerRunning = false;
 
             if (!isPhpServerStarting) {
                 isPhpServerStarting = true;
                 try {
                     if (phpEnv_Exists) {
-                        log.log("'php' environment exists. Starting PHP server.");
-                        await startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log);
+                        showLogInfo("'php' environment exists. Starting PHP server.", 'log');
+                        await startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log, showLogInfo);
                         updateStatus(isPhpServerRunning);
                         loadScreen();
                     } else {
-                        log.log("'php' environment does not exist. Starting Node server.");
-                        await startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer);
+                        showLogInfo("'php' environment does not exist. Starting Node server.", 'log');
+                        await startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, showLogInfo);
                         updateStatus(isPhpServerRunning);
                         loadScreen();
                     }
                 } catch (error) {
-                    log.error('Error starting PHP server:', error);
+                    showLogInfo(`Error starting PHP server: ${error}`, 'error');
                 } finally {
                     isPhpServerStarting = false;
                 }
             }
         });
     } catch (error) {
-        log.error('Error checking PHP environment:', error.message);
+        showLogInfo(`Error checking PHP environment: ${error.message}`, 'error');
     }
 }
 
 // Check if PHP is available in the environment
-function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification) {
+function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo) {
     return new Promise((resolve, reject) => {
         const command = process.platform === 'win32' ? 'where php' : 'which php';
 
         exec(command, (error, stdout, stderr) => {
             if (error || stderr) {
-                log.error('Error checking PHP:', stderr || error.message);
+                // log.error('Error checking PHP:', stderr || error.message);
+                showLogInfo(`Error checking PHP: ${stderr || error.message }`, 'error');
                 phpEnv_Exists = false;
                 reject('PHP is not found in the system environment or an error occurred.');
                 return;
             }
 
             if (stdout.trim()) {
-                log.info('PHP is available at:', stdout.trim());
+                showLogInfo(`PHP is available at:, ${stdout.trim()}`, 'info');
                 phpEnv_Exists = true;
                 resolve();
             } else {
-                log.info('PHP is not found in the system environment.');
+                showLogInfo('PHP is not found in the system environment.', 'info');
                 phpEnv_Exists = false;
                 reject('PHP not found.');
             }
 
             if (!phpEnv_Exists) {
-                log.error('.Env does not exist, Creating PHP Variables for .env');
-                setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification);
+                showLogInfo('.Env does not exist, Creating PHP Variables for .env', 'error');
+                setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo);
             }
         });
     });
@@ -109,19 +111,19 @@ function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotificati
 
 // PHP Servers 
 // Start the PHP server using PHP CLI
-function startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log) {
+function startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log, showLogInfo) {
     return new Promise((resolve, reject) => {
         const command = phpEnv_Exists
             ? `php -S 127.0.0.1:8000 -t "${wwwFolderPath}"`
             : `"${phpFolderPath}" -S 127.0.0.1:8000 -t "${wwwFolderPath}"`;
 
-        log.warn(command);
+        showLogInfo(command, 'warn');
 
         const phpServerCMD = exec(command, (err, stdout, stderr) => {
             if (err) return reject(`Error starting PHP server: ${err.message}`);
-            log.info(`PHP server started: ${stdout}`);
+            showLogInfo(`PHP server started: ${stdout}`, 'info');
             isPhpServerRunning = true;
-            log.info(`'server running': ${isPhpServerRunning}`);
+            showLogInfo(`'server running': ${isPhpServerRunning}`, 'info');
             resolve();
         });
 
@@ -132,7 +134,7 @@ function startPhpServer(loadScreen, wwwFolderPath, phpFolderPath, log) {
 }
 
 // Start the Node-based PHP server
-function startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer) {
+function startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, showLogInfo) {
     return new Promise((resolve, reject) => {
         try {
             phpServer.createServer({
@@ -144,7 +146,7 @@ function startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpS
                 bin: phpFolderPath,
                 router: `${serverFolderPath}`
             });
-            log.info(`Node-PHP server started at ${serverUrl}`);
+            showLogInfo(`Node-PHP server started at ${serverUrl}`, 'info');
             isPhpServerRunning = true;
             resolve();
         } catch (err) {
@@ -154,37 +156,37 @@ function startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpS
 }
 
 // get PHP Environment info
-function setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification) {
+function setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo) {
     if (fs.existsSync(phpFolderPath)) {
         process.env.PHP_PATH = phpFolderPath;
-        log.warn(`PHP_PATH set to: ${process.env.PHP_PATH}`);
+        showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'warn');
     } else {
-        log.error(`PHP file & executable not found at: ${phpFolderPath}`);
-        getPHP(log, showNotification, phpFolderPath);
+        showLogInfo(`PHP file & executable not found at: ${phpFolderPath}`, 'error');
+        getPHP(log, showNotification, phpFolderPath, showLogInfo);
     }
 
     if (fs.existsSync(wwwFolderPath)) {
         process.env.WWW_PATH = wwwFolderPath;
-        log.warn(`WWW_PATH set to: ${process.env.WWW_PATH}`);
+        showLogInfo(`WWW_PATH set to: ${process.env.WWW_PATH}`, 'warn');
     } else {
-        log.error(`PHP executable not found at: ${wwwFolderPath}`);
+        showLogInfo(`PHP executable not found at: ${wwwFolderPath}`, 'error');
     }
 
-    savePathsToEnv(log);
+    savePathsToEnv(log, showLogInfo);
 }
 
 // Save the paths to a .env file
-function savePathsToEnv(log) {
+function savePathsToEnv(log, showLogInfo) {
     const phpPath = process.env.PHP_PATH;
     const wwwPath = process.env.WWW_PATH;
 
     if (!phpPath) {
-        log.error('PHP_PATH is not set.');
+        showLogInfo('PHP_PATH is not set.', 'error');
         return;
     }
 
     if (!wwwPath) {
-        log.error('WWW_PATH is not set.');
+        showLogInfo('WWW_PATH is not set.', 'error');
         return;
     }
 
@@ -205,7 +207,7 @@ function savePathsToEnv(log) {
 
         // Write the .env file with the content
         fs.writeFileSync(envFilePath, envContent, { encoding: 'utf8' });
-        log.warn(`.env file created at ${envFilePath}`);
+        showLogInfo(`.env file created at ${envFilePath}`, 'warn');
     } else {
         envContent = fs.readFileSync(envFilePath, { encoding: 'utf8' });
     }
@@ -229,27 +231,27 @@ function savePathsToEnv(log) {
 
     // Write the updated content back to the .env file
     fs.writeFileSync(envFilePath, envContent, { encoding: 'utf8' });
-    log.warn('PHP_PATH and WWW_PATH saved to .env file.');
+    showLogInfo('PHP_PATH and WWW_PATH saved to .env file.', 'warn');
 }
 
 const tempZipPath = isDev
     ? path.join(__dirname, '../compressed', 'php.zip') // Development
     : path.join(process.resourcesPath, 'app', 'compressed', 'php.zip'); // Production
 
-function getPHP(log, showNotification, phpFolderPath) {
+function getPHP(log, showNotification, phpFolderPath, showLogInfo) {
     if (!phpEnv_Exists || !fs.existsSync(phpFolderPath)) {
         if (fs.existsSync(tempZipPath)) {
-            log.warn(`PHP ZIP FOUND AT ${tempZipPath}, EXTACTION STARTING`);
-            unzipPHP(log, showNotification, phpFolderPath);
+            showLogInfo(`PHP ZIP FOUND AT ${tempZipPath}, EXTACTION STARTING`, 'warn');
+            unzipPHP(log, showNotification, phpFolderPath, showLogInfo);
         } else {
-            log.warn(`PHP ZIP NOT FOUND, DOWNLOAD STARTING`);
-            downloadPHP(log, showNotification, phpFolderPath);
+            showLogInfo(`PHP ZIP NOT FOUND, DOWNLOAD STARTING`, 'warn');
+            downloadPHP(log, showNotification, phpFolderPath, showLogInfo);
         }
     }
 }
 
-function unzipPHP(log, showNotification, phpFolderPath) {
-    log.warn('UNZIPPING PHP FILE...');
+function unzipPHP(log, showNotification, phpFolderPath, showLogInfo) {
+    showLogInfo('UNZIPPING PHP FILE...', 'warn');
     showNotification('Preparing Resources', 'Unzipping Server files');
 
     const phpDirPath = isDev
@@ -263,18 +265,18 @@ function unzipPHP(log, showNotification, phpFolderPath) {
         .pipe(unzipper.Extract({ path: phpDirPath }))
         .on('close', () => {
             showNotification('Resources Extracted Successfully', 'Resources Extracted Successfully');
-            log.warn('PHP extracted successfully.');
+            showLogInfo('PHP extracted successfully.', 'warn');
             process.env.PHP_PATH = phpFolderPath;
-            log.warn(`PHP_PATH set to: ${process.env.PHP_PATH}`);
+            showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'warn');
             // fs.unlinkSync(tempZipPath); // Clean up temporary zip file
         })
         .on('error', (err) => {
-            log.error('Error extracting PHP:', err.message);
+            showLogInfo(`Error extracting PHP: ${err.message}`, 'error');
         });
 }
 
-function downloadPHP(log, showNotification, phpFolderPath) {
-    log.log('Downloading PHP...');
+function downloadPHP(log, showNotification, phpFolderPath, showLogInfo) {
+    showLogInfo('Downloading PHP...', 'log');
 
     // Download PHP zip file
     const file = fs.createWriteStream(tempZipPath);
@@ -283,24 +285,24 @@ function downloadPHP(log, showNotification, phpFolderPath) {
 
         file.on('finish', () => {
             file.close(() => {
-                log.log('PHP download completed. Extracting...');
+                showLogInfo('PHP download completed. Extracting...', 'log');
 
                 // Unzip the downloaded file
                 fs.createReadStream(tempZipPath)
                     .pipe(unzipper.Extract({ path: phpFolderPath }))
                     .on('close', () => {
-                        log.log('PHP extracted successfully.');
+                        showLogInfo('PHP extracted successfully.', 'log');
                         process.env.PHP_PATH = phpFolderPath;
-                        log.log(`PHP_PATH set to: ${process.env.PHP_PATH}`);
+                        showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'log');
                         fs.unlinkSync(tempZipPath); // Clean up temporary zip file
                     })
                     .on('error', (err) => {
-                        log.error('Error extracting PHP:', err.message);
+                        showLogInfo(`Error extracting PHP: ${err.message}`, 'error');
                     });
             });
         });
     }).on('error', (err) => {
-        log.error('Error downloading PHP:', err.message);
+        showLogInfo(`Error downloading PHP: ${err.message}`, 'error');
     });
 }
 

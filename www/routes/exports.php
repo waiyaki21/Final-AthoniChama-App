@@ -20,7 +20,7 @@ Route::middleware('auth')->controller(ExportSheetsController::class)->group(func
 
     // MEMBERS
     // download member sheet template
-    Route::get('/download/template/new/members', 'exportMemberTemplate');
+    Route::get('/download/template/members', 'exportMemberTemplate');
     // download member sheet single member
     Route::get('/download/current/member/{member}', 'exportTemplateMember');
 

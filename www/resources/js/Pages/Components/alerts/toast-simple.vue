@@ -17,7 +17,7 @@
                         <h3 class="text-sm md:text-md font-medium uppercase underline">{{ flash.header }}</h3>
                     </div>
                     <!-- body  -->
-                    <div class="font-sans font-semibold my-2 text-xs w-full text-left">
+                    <div class="font-boldened font-medium my-2 text-xs w-full text-left">
                         {{ flash.body }}
                     </div>
                     <!-- close  -->

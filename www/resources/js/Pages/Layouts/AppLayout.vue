@@ -21,7 +21,7 @@
                     <div class="flex items-center">
                         <div class="flex items-center ml-3 font-boldened">
                             <div class="inline-flex text-gray-900 hover:text-cyan-900 dark:text-gray-100 dark:hover:text-cyan-400 ">
-                                <button type="button" class="font-sans px-2 py-1 bg-transparent dark:bg-gray-800 sm:flex hidden text-sm md:text-md hover:underline uppercase font-normal" @click="switchDrop()">
+                                <button type="button" class="font-boldened px-2 py-1 bg-transparent dark:bg-gray-800 sm:flex hidden text-sm md:text-md hover:underline uppercase font-normal" @click="switchDrop()">
                                     <span class="sr-only">Open user menu</span>
                                     {{ $page.props.auth.user.name }}.
                                 </button>
@@ -114,7 +114,7 @@
 <script setup>
     import  sidenav     from "../Navs/sideNav.vue";
     import  mainplugin  from "../Components/plugins/mainPlugin.vue";
-    import  packageJson from "../../../../package.json";
+    import  packageJson from "../../../../../package.json";
     import { reactive, defineProps, ref, nextTick, onMounted, onBeforeUnmount } from "vue";
 
     const version       = packageJson.version;

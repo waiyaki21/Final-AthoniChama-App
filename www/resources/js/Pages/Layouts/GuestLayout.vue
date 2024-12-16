@@ -32,6 +32,9 @@
     import  guestplugin  from "../Components/plugins/guestPlugin.vue";
     import { ref, onBeforeUnmount, onMounted } from "vue";
 
+    import  packageJson from "../../../../../package.json";
+    const version       = packageJson.version;
+
     // Create a ref to the mainPlugin component
     const pluginRef = ref(null);
 

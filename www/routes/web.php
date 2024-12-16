@@ -31,6 +31,12 @@ Route::middleware('auth')->controller(ArtisanController::class)->group(function 
     Route::get('/bust', 'bustCache');
     // resetDB
     Route::get('/resetDB', 'resetDB');
+    // resetDB Cycles
+    Route::get('/fullReset/cycles', 'resetCycles');
+    // resetDB Members
+    Route::get('/fullReset/members', 'resetMembers');
+    // resetDB Users
+    Route::get('/fullReset/users', 'resetUsers');
 });
 
 Route::middleware('auth')->controller(DashboardController::class)->group(function () {
