@@ -3,6 +3,7 @@ const http                      = require('http');
 const { app }                   = require('electron');
 const path                      = require('path');
 const fs                        = require('fs');
+const os                        = require('os');
 // const phpServer              = require('php-server');
 
 let isPhpEnv_Checked            = false;
@@ -101,6 +102,7 @@ function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotificati
                 reject('PHP not found.');
             }
 
+            // bool change here
             if (!phpEnv_Exists) {
                 showLogInfo('.Env does not exist, Creating PHP Variables for .env', 'error');
                 setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo);
@@ -169,10 +171,14 @@ function setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification, 
         process.env.WWW_PATH = wwwFolderPath;
         showLogInfo(`WWW_PATH set to: ${process.env.WWW_PATH}`, 'warn');
     } else {
-        showLogInfo(`PHP executable not found at: ${wwwFolderPath}`, 'error');
+        showLogInfo(`WWW_PATH not found at: ${wwwFolderPath}`, 'error');
+        // get WWW file as well 
+        // getWWW(log, showNotification, phpFolderPath, showLogInfo);
     }
 
-    savePathsToEnv(log, showLogInfo);
+    // if (fs.existsSync(wwwFolderPath) && fs.existsSync(phpFolderPath)) {
+        savePathsToEnv(log, showLogInfo);
+    // }
 }
 
 // Save the paths to a .env file
@@ -240,12 +246,19 @@ const tempZipPath = isDev
 
 function getPHP(log, showNotification, phpFolderPath, showLogInfo) {
     if (!phpEnv_Exists || !fs.existsSync(phpFolderPath)) {
+        const phpDirPath = isDev
+            ? path.join(__dirname, '../php/') // Development
+            : path.join(process.resourcesPath, 'app', 'php'); // Production
+
+        console.log(phpDirPath);
+
         if (fs.existsSync(tempZipPath)) {
             showLogInfo(`PHP ZIP FOUND AT ${tempZipPath}, EXTACTION STARTING`, 'warn');
-            unzipPHP(log, showNotification, phpFolderPath, showLogInfo);
+            // unzipPHP(log, showNotification, phpFolderPath, showLogInfo, phpDirPath);
+            unzipAndProcess(tempZipPath, phpDirPath, phpFolderPath, showLogInfo, phpCheck);
         } else {
             showLogInfo(`PHP ZIP NOT FOUND, DOWNLOAD STARTING`, 'warn');
-            downloadPHP(log, showNotification, phpFolderPath, showLogInfo);
+            downloadPHP(log, showNotification, phpFolderPath, showLogInfo, phpCheck, phpDirPath);
         }
     }
 }
@@ -260,50 +273,99 @@ function unzipPHP(log, showNotification, phpFolderPath, showLogInfo) {
 
     console.log(phpDirPath);
 
-    // Unzip the zipped file
-    fs.createReadStream(tempZipPath)
+    // Extract the zip file
+    fs.createReadStream(tempDownPath)
         .pipe(unzipper.Extract({ path: phpDirPath }))
-        .on('close', () => {
-            showNotification('Resources Extracted Successfully', 'Resources Extracted Successfully');
-            showLogInfo('PHP extracted successfully.', 'warn');
+        .on('close', async () => {
+            showLogInfo('PHP extracted successfully.', 'log');
             process.env.PHP_PATH = phpFolderPath;
-            showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'warn');
-            // fs.unlinkSync(tempZipPath); // Clean up temporary zip file
+            showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'log');
+            fs.unlinkSync(tempDownPath); // Clean up temporary zip file
+
+            // Call phpCheck after extraction
+            try {
+                showLogInfo('PHP rechecking!', 'log');
+                await phpCheck();
+            } catch (err) {
+                showLogInfo(`Error during PHP check: ${err.message}`, 'error');
+            }
         })
         .on('error', (err) => {
             showLogInfo(`Error extracting PHP: ${err.message}`, 'error');
         });
 }
 
-function downloadPHP(log, showNotification, phpFolderPath, showLogInfo) {
-    showLogInfo('Downloading PHP...', 'log');
+async function downloadPHP(log, showNotification, phpFolderPath, showLogInfo, phpCheck, phpDirPath) {
+    const tempDownPath = path.join(os.tmpdir(), 'php.zip');
+    let totalBytes = 0;
 
-    // Download PHP zip file
-    const file = fs.createWriteStream(tempZipPath);
+    showLogInfo('Starting PHP download...', 'log');
+
     https.get(phpDownloadUrl, (response) => {
-        response.pipe(file);
+        if (response.statusCode !== 200) {
+            showLogInfo(`Download failed: HTTP ${response.statusCode} ${response.statusMessage}`, 'error');
+            return;
+        }
 
-        file.on('finish', () => {
-            file.close(() => {
-                showLogInfo('PHP download completed. Extracting...', 'log');
+        const data = [];
+        const totalFileSizeBytes = 38062523; // Actual file size in bytes
 
-                // Unzip the downloaded file
-                fs.createReadStream(tempZipPath)
-                    .pipe(unzipper.Extract({ path: phpFolderPath }))
-                    .on('close', () => {
-                        showLogInfo('PHP extracted successfully.', 'log');
-                        process.env.PHP_PATH = phpFolderPath;
-                        showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'log');
-                        fs.unlinkSync(tempZipPath); // Clean up temporary zip file
-                    })
-                    .on('error', (err) => {
-                        showLogInfo(`Error extracting PHP: ${err.message}`, 'error');
-                    });
-            });
+        response.on('data', (chunk) => {
+            data.push(chunk);
+            totalBytes += chunk.length;
+
+            // Calculate the downloaded size in MB and percentage
+            const downloadedMB = (totalBytes / (1024 * 1024)).toFixed(2); // Convert to MB
+            const percentageDownloaded = ((totalBytes / totalFileSizeBytes) * 100).toFixed(2); // Percentage
+
+            showLogInfo(`Downloading Files... ${downloadedMB} MB (${percentageDownloaded}%) completed`, 'log');
+        });
+
+        response.on('end', async () => {
+            showLogInfo(`Download complete. Total size: ${totalBytes} bytes`, 'log');
+
+            // Combine chunks and save to file
+            const buffer = Buffer.concat(data);
+            fs.writeFileSync(tempDownPath, buffer);
+
+            showLogInfo('File saved. Extracting...', 'log');
+
+            // Call the separate unzip function
+            try {
+                await unzipAndProcess(tempDownPath, phpDirPath, phpFolderPath, showLogInfo, phpCheck);
+            } catch (err) {
+                showLogInfo(`Error during extraction: ${err.message}`, 'error');
+            }
+        });
+
+        response.on('error', (err) => {
+            showLogInfo(`Error during download: ${err.message}`, 'error');
         });
     }).on('error', (err) => {
-        showLogInfo(`Error downloading PHP: ${err.message}`, 'error');
+        showLogInfo(`Error connecting to server: ${err.message}`, 'error');
     });
+}
+
+async function unzipAndProcess(tempDownPath, phpDirPath, phpFolderPath, showLogInfo, phpCheck) {
+    fs.createReadStream(tempDownPath)
+        .pipe(unzipper.Extract({ path: phpDirPath }))
+        .on('close', async () => {
+            showLogInfo('PHP extracted successfully.', 'log');
+            process.env.PHP_PATH = phpFolderPath;
+            showLogInfo(`PHP_PATH set to: ${process.env.PHP_PATH}`, 'log');
+            fs.unlinkSync(tempDownPath); // Clean up temporary zip file
+
+            // Call phpCheck after extraction
+            try {
+                showLogInfo('PHP rechecking!', 'log');
+                await phpCheck();
+            } catch (err) {
+                showLogInfo(`Error during PHP check: ${err.message}`, 'error');
+            }
+        })
+        .on('error', (err) => {
+            showLogInfo(`Error extracting PHP: ${err.message}`, 'error');
+        });
 }
 
 module.exports = {
