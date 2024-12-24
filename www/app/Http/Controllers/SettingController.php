@@ -148,7 +148,7 @@ class SettingController extends Controller
                 $setup = true;
             } else {
                 $setup = false;
-            }
+            } 
         } else {
             $setup = false;
         }

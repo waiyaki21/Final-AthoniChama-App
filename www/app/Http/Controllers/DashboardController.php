@@ -23,53 +23,69 @@ use App\Http\Controllers\FinancesController;
 
 class DashboardController extends Controller
 {
-    public function index() 
+    public function index()
     {
-        // get all cycles 
-        $cycles = Cycle::orderBy('created_at', 'desc')
-                        ->get();
+        // Get cycle count
+        $cycleCount = Cycle::count();
 
-        // get current cycle 
-        $current = Cycle::orderBy('id', 'desc')
-                        ->with('payments','projects')
+        // Fetch common data
+        $cycles     = Cycle::orderBy('created_at', 'desc')->get();
+        $current    = Cycle::orderBy('id', 'desc')
+                        ->with('payments', 'projects')
                         ->first();
+        $settings   = Setting::first();
 
-        // get finance 
-        $updateFinance = new FinancesController();
-        $finance =  $updateFinance->update();
-        // return $finance;
+        // Determine suitable name and date
+        $date       = Carbon::now()->format('d/m/Y');
+        $name       = $cycleCount == 0
+            ? Carbon::now()->format('F Y')
+            : Carbon::now()->addMonth()->format('F Y');
 
-        // get settings 
-        $settings = Setting::first();
+        if ($cycleCount != 0) {
+            // Fetch finance data
+            $updateFinance  = new FinancesController();
+            $finance        = $updateFinance->update();
 
-        // get cycle form data
-        if ($cycles->count() == 0) {
-            // get suitable name 
-            $date       = Carbon::now()->format('d/m/Y');
-            $thisMonth  = Carbon::now()->format('F Y');
-            $name       = $thisMonth;
+            // Fetch cycles info
+            $info = $this->CyclesInfo();
+
+            // Render Dashboard
+            return Inertia::render('Dashboard', [
+                'name'      => env('APP_NAME'),
+                'route'     => Route::current()->getName(),
+                'cycles'    => $cycles,
+                'current'   => $current,
+                'date'      => $date,
+                'finance'   => $finance,
+                'settings'  => $settings,
+                'nextname'  => $name,
+                'info'      => $info,
+            ]);
         } else {
-            // get suitable name 
-            $date       = Carbon::now()->format('d/m/Y');
-            $nextMonth  = Carbon::now()->addMonth()->format('F Y');
-            $name       = $nextMonth;
+            // Fetch additional data for settings view
+            $projects       = Project::orderBy('created_at', 'desc')->get();
+            $members        = DB::table('members')
+                                ->whereNull('deleted_at')
+                                ->orderBy('created_at', 'desc')
+                                ->get(['id', 'name']);
+            $finance        = Finances::first();
+            $updated        = $settings ? true : false;
+
+            // Render Settings
+            return Inertia::render('Settings', [
+                'name'      => env('APP_NAME'),
+                'route'     => Route::current()->getName(),
+                'cycles'    => $cycles,
+                'current'   => $current,
+                'members'   => $members,
+                'date'      => $date,
+                'finance'   => $finance,
+                'settings'  => $settings,
+                'projects'  => $projects,
+                'nextname'  => $name,
+                'updated'   => $updated,
+            ]);
         }
-
-        // get cycles info 
-        $info = $this->CyclesInfo();
-
-        return Inertia::render('Dashboard', [
-            'name'      => env('APP_NAME'),
-            'route'     => Route::current()->getName(),
-            'cycles'    => $cycles,
-            'current'   => $current,
-            'date'      => $date,
-            'finance'   => $finance,
-            'settings'  => $settings,
-            'nextname'  => $name,
-            'date'      => $date,
-            'info'      => $info
-        ]);
     }
 
     // API REQUESTS 

@@ -8,7 +8,7 @@
                 </h3> -->
                 <ol class="relative border-s border-gray-200 dark:border-gray-700 grid grid-cols-2">
                     <li class="mb-2 ms-2 col-span-2">
-                        <h3 class="text-sm mb-1 md:my-6 uppercase underline font-normal text-gray-800 dark:text-gray-500 text-center">System
+                        <h3 class="text-sm md:text-xl md:my-4 uppercase underline font-normal text-gray-800 dark:text-gray-500 text-center">System
                             Name</h3>
                         <p class="text-3xl font-semibold uppercase underline text-gray-900 dark:text-gray-200 text-center">
                             {{ settings.name }}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use App\Models\Admin;
+use App\Models\Cycle;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -69,11 +70,14 @@ class LoginController extends Controller
 
         $users = User::get();
 
+        //get cycle info
+        $cycles = Cycle::count();
+
         // get ,create & update finances
         $finances = new FinancesController();
         $finances->store();
 
-        if ($users->count() == 1) {
+        if ($users->count() == 1 || $cycles == 0) {
             return redirect('/settings');
         } else {
             return redirect('/dashboard');

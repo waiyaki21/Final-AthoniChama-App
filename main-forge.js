@@ -106,14 +106,14 @@ function createSplashWindow() {
         resizable:      true,
         isDev,
         webPreferences: {
-            preload:            path.join(__dirname, 'preload.js'),
+            preload:            path.join(__dirname, 'splashUtilities/preload.js'),
             contextIsolation:   true,
             nodeIntegration:    false,
         },
     });
 
     // load splash window 
-    splashWindow.loadFile('splash.html');
+    splashWindow.loadFile('splashUtilities/splash.html');
 
     // center splash window
     splashWindow.center();

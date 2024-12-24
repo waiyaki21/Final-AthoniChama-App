@@ -12,12 +12,12 @@ let isPhpServerRunning          = false;
 let isPhpServerStarting         = false;
 let phpServerPID;
 
-const serverUrl = 'http://127.0.0.1:8000';
+const serverUrl                 = 'http://127.0.0.1:8000';
 
 // Determine if the app is in production or development
-const isDev = !app.isPackaged;
+const isDev                     = !app.isPackaged;
 
-const serverFolderPath = isDev
+const serverFolderPath          = isDev
     ? path.join(__dirname, '../www', 'server.php') // Development
     : path.join(process.resourcesPath, 'app', 'www', 'server.php'); // Production
 
@@ -32,6 +32,7 @@ const phpDownloadUrl    = 'https://newblessings.co.ke/preset/template/zip';
 async function phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer, updateStatus, showNotification, showLogInfo) {
     showLogInfo('PHP server check.', 'warn');
     try {
+        // check if php env has been checked on boot 
         if (!isPhpEnv_Checked) {
             await checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo);
         }
@@ -52,7 +53,7 @@ async function phpCheck(loadScreen, wwwFolderPath, phpFolderPath, log, phpServer
             showLogInfo(`PHP server not running: ${err.message}`, 'error');
             isPhpServerRunning = false;
 
-            if (!isPhpServerStarting) {
+            if (!isPhpServerRunning) {
                 isPhpServerStarting = true;
                 try {
                     if (phpEnv_Exists) {
@@ -85,7 +86,6 @@ function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotificati
 
         exec(command, (error, stdout, stderr) => {
             if (error || stderr) {
-                // log.error('Error checking PHP:', stderr || error.message);
                 showLogInfo(`Error checking PHP: ${stderr || error.message }`, 'error');
                 phpEnv_Exists = false;
                 reject('PHP is not found in the system environment or an error occurred.');
@@ -102,7 +102,7 @@ function checkPhpInEnvironment(wwwFolderPath, phpFolderPath, log, showNotificati
                 reject('PHP not found.');
             }
 
-            // bool change here
+            // environment bool change here
             if (!phpEnv_Exists) {
                 showLogInfo('.Env does not exist, Creating PHP Variables for .env', 'error');
                 setPhpEnvVariable(wwwFolderPath, phpFolderPath, log, showNotification, showLogInfo);
@@ -152,6 +152,7 @@ function startPhpServer_Node(loadScreen, wwwFolderPath, phpFolderPath, log, phpS
             isPhpServerRunning = true;
             resolve();
         } catch (err) {
+            isPhpServerRunning = false;
             reject(`Error starting Node-PHP server: ${err}`);
         }
     });

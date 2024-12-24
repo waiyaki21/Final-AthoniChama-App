@@ -180,7 +180,9 @@
         // badges 
         membersNo: 0,
         cyclesNo: 0,
-        projectsNo: 0
+        projectsNo: 0,
+
+        clicked: false
     })
 
     const links =  [
@@ -305,7 +307,9 @@
             info.reloadLink    = link;
         }
 
-        doneFlash();
+        info.clicked = !info.clicked;
+
+        doneFlash(info.clicked);
     }
 
     function getUrl() {
@@ -372,17 +376,39 @@
             let flashMessage = 'Other Views Disabled ,Complete All Settings!';
             let alertBody    = 'danger';
             emit('flash', flashMessage, alertBody);
+
+            otherFlash();
         }
 
         getUrl();
     }
 
-    function doneFlash() {
-        if (!props.done) {
+    function doneFlash(clicked) {
+        if (!props.done && clicked) {
             let flashMessage = 'Complete All Settings!';
             let alertBody    = 'danger';
             flashShow(flashMessage, alertBody);
+
+            otherFlash();
         }
+    }
+
+    function otherFlash() {
+        setTimeout(() => {
+            if (info.membersNo == 0) {
+                let flashMessage = '(0) Members, Enter Members!';
+                let alertBody = 'danger';
+                flashShow(flashMessage, alertBody);
+            }
+        }, 1000);
+
+        setTimeout(() => {
+            if (info.cyclesNo == 0) {
+                let flashMessage = '(0) Payment Cycles, Create Payment Cycles!';
+                let alertBody = 'danger';
+                flashShow(flashMessage, alertBody);
+            }
+        }, 1500);
     }
 
     function flashShow(message, type) {

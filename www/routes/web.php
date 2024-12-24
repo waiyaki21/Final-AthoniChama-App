@@ -1,10 +1,11 @@
 <?php
 
+use App\Models\Cycle;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\CycleController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\UpdateController;
+use App\Http\Controllers\ArtisanController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\LedgersController;
 use App\Http\Controllers\PaymentController;
@@ -14,13 +15,21 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\WelfareController;
 use App\Http\Controllers\FinancesController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ContributionsController;
 use App\Http\Controllers\CycleExpenseController;
-use App\Http\Controllers\CycleExpenseNamesController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ContributionsController;
+use App\Http\Controllers\CycleExpenseNamesController;
 
-Route::get('/', function () {    
-    return redirect('/dashboard');
+Route::get('/', function () {
+    // Check if there are no cycles
+    $cyclesCount = Cycle::count();
+
+    if ($cyclesCount == 0) {
+        // Redirect to the settings route
+        return redirect('/settings');
+    } else {
+        return redirect('/dashboard');
+    }  
 })->middleware(['auth', 'verified']);
 
 
