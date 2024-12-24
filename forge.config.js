@@ -4,8 +4,8 @@ module.exports = {
     packagerConfig: {
         icon: 'icons/chama_icon.ico',
         asar: false,
-        // ignore: [
-        //     // 'www/node_modules',
+        ignore: [
+            'www/node_modules',
         //     'www/storage/logs/*',
         //     'www/tests/*',
         //     'php',
@@ -15,7 +15,7 @@ module.exports = {
         //     'main-new.js',
         //     /node_modules\/.*(?!node-php-server)/, // Include node-php-server in the build
         //     /node_modules\/.*(?!electron-log)/, // Include node-php-server in the build
-        // ],
+        ],
         // extraResource: [
         //     path.join(__dirname, 'php'), // Include the PHP binary and related files
         //     path.join(__dirname, 'www'),
