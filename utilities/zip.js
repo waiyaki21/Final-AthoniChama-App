@@ -9,8 +9,9 @@ function createZip(inputFolder, outputZipPath) {
         const archive = archiver('zip', { zlib: { level: 9 } });
 
         output.on('close', () => {
-            console.log(`${archive.pointer()} total bytes`);
-            console.log('ZIP file has been created successfully');
+            const totalBytes = archive.pointer();
+            const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+            console.info(`ZIP file has been created successfully ${totalBytes} total bytes (${totalMB} MB)`);
             resolve();
         });
 
@@ -22,17 +23,4 @@ function createZip(inputFolder, outputZipPath) {
     });
 }
 
-// Get folder paths from arguments
-const inputFolder = path.resolve(process.argv[2]);
-const outputZipPath = path.resolve(process.argv[3]);
-
-// Ensure output directory exists
-const outputDir = path.dirname(outputZipPath);
-if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-}
-
-// Call the createZip function
-createZip(inputFolder, outputZipPath)
-    .then(() => console.log('Done!'))
-    .catch(err => console.error('Error:', err.message));
+module.exports = { createZip }; // Export the createZip function

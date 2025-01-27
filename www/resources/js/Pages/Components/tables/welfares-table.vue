@@ -5,7 +5,7 @@
         </span>
 
         <!-- options -->
-        <h3 :class="[classInfo.mainHeader, 'inline-flex justify-end md:justify-end col-span-2 lg:col-span-2 my-auto gap-2']">
+        <section :class="[classInfo.mainHeader, 'inline-flex justify-end md:justify-end col-span-2 lg:col-span-2 my-auto gap-2']">
             <a @click="tabSwitch2()" type="button" :class="[classInfo.welfareOption]"
                 v-tooltip="$tooltip(classInfo.btn1.toUpperCase(),'top')">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -37,7 +37,7 @@
                         d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                 </svg>
             </a>
-        </h3>
+        </section>
     </h3>
 
     <section class="grid grid-cols-5 lg:grid-cols-10 gap-2">

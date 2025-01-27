@@ -1,6 +1,8 @@
 <script setup>
 import { computed, watch } from 'vue';
 
+import { flashAllHide } from '../Pages/Globals/flashMessages';
+
 const props = defineProps({
     show: {
         type: Boolean,
@@ -21,6 +23,7 @@ const emit = defineEmits(['close']);
 watch(
     () => props.show,
     () => {
+        flashAllHide();
         if (props.show) {
             document.body.style.overflow = 'hidden';
         } else {
@@ -36,6 +39,7 @@ const close = () => {
 };
 
 const maxWidthClass = computed(() => {
+    
     return {
         sm: 'sm:max-w-sm',
         md: 'sm:max-w-md',
@@ -59,7 +63,7 @@ const maxWidthClass = computed(() => {
                     leave-to-class="opacity-0"
                 >
                     <div v-show="show" class="fixed inset-0 transform transition-all" @click="close">
-                        <div class="absolute inset-0 dark:bg-gray-800 bg-gray-500 opacity-75" />
+                        <div class="absolute inset-0 dark:bg-gray-800 bg-gray-500 opacity-80" @click="close"/>
                     </div>
                 </Transition>
 

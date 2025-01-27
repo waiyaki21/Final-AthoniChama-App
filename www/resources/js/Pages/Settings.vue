@@ -19,55 +19,57 @@
             <!--documents tabs  -->
             <div
                 class="text-xs font-boldened text-center text-gray-500 dark:text-gray-400 w-full mb-2 mx-2 p-1 inline-flex justify-between uppercase">
-                <ul class="flex flex-row -mb-px overflow-x-scroll">
+                <ul class="flex flex-row -mb-px overflow-x-scroll hidescroll">
                     <li class="me-2" role="presentation">
-                        <button :class="[classInfo.tab1]" id="setup-tab" data-tabs-target="#setup" type="button"
-                            role="tab" aria-controls="setup" aria-selected="false" @click="tabSwitch1">
+                        <button :class="[classInfo.setup ? classInfo.tab1 : classInfo.tabDanger]" id="setup-tab"
+                            data-tabs-target="#setup" type="button" role="tab" aria-controls="setup"
+                            aria-selected="false" @click="tabSwitch1"
+                            v-tooltip="$tooltip(classInfo.setup ? `Update System Settings`: `Enter System Settings`, 'top')">
                             System Settings
-                            <span :class="[classInfo.tab2svg]">
-                                1
-                            </span>
+                            <!-- <span :class="[classInfo.tab2svg]"> -->
+                            <checksolid-icon class="h-5 w-5 ml-1 text-green-600 dark:text-green-200"
+                                v-if="classInfo.setup"></checksolid-icon>
+                            <timessolid-icon class="h-5 w-5 ml-1 text-red-600 dark:text-red-200"
+                                v-else></timessolid-icon>
+                            <!-- </span> -->
                         </button>
                     </li>
                     <li class="me-2" role="presentation">
-                        <button :class="[classInfo.tab2]" v-if="classInfo.setup" @click="tabSwitch2">
+                        <button :class="[classInfo.setup ? classInfo.tab2 : classInfo.tabDanger]" @click="tabSwitch2"
+                            v-tooltip="$tooltip(classInfo.setup ? `Enter Group Members` : `Enter System Settings First`, 'top')">
                             Members
-                            <span :class="[classInfo.tab2svg]">
-                                {{ classInfo.membersNo }}
-                            </span>
-                        </button>
-                        <button :class="[classInfo.tabDanger, 'cursor-not-allowed opacity-25']" @click="finishSettings"
-                            v-else>
-                            Members
-                            <span :class="[classInfo.tab2svg]">
+                            <span :class="[classInfo.setup ? classInfo.tab2svg : classInfo.svgInactive]">
                                 {{ classInfo.membersNo }}
                             </span>
                         </button>
                     </li>
                     <li class="me-2" role="presentation">
-                        <button :class="[classInfo.tab3]"  @click="tabSwitch3">
+                        <button :class="[classInfo.membersNo ? classInfo.tab3 : classInfo.tabDanger]"
+                            @click="tabSwitch3"
+                            v-tooltip="$tooltip(classInfo.membersNo ? `Enter Payment Cycles` : `Enter Group Members First`, 'top')">
                             Contribution Cycles
-                            <span :class="[classInfo.tab3svg]">
+                            <span :class="[classInfo.membersNo ? classInfo.tab3svg : classInfo.svgInactive]">
                                 {{ classInfo.cyclesNo }}
                             </span>
                         </button>
                     </li>
                     <li class="me-2" role="presentation">
-                        <ActionButton buttonClass='pink' @handleClick="resetDB"
+                        <ActionButton buttonClass='danger' @handleClick="handleResetDB"
                             :tooltipText="`Reset the entire system fully?`" :buttonText="`Reset System.`">
-                            <warning-icon class="w-4 h-4 md:w-5 md:h-5"></warning-icon>
+                            <delete-icon class="w-4 h-4 md:w-5 md:h-5"></delete-icon>
                         </ActionButton>
                     </li>
                     <li role="presentation">
-                        <ActionButton :buttonClass="cycles.length == 0 ? 'danger' : 'purple'"
-                            @handleClick="cycles.length == 0 ? finishCycle : getRoute"
-                            :tooltipText="cycles.length == 0 ? classInfo.btn2.toUpperCase(): classInfo.btn3.toUpperCase()"
-                            :buttonText="cycles.length == 0 ? `Complete Setup!` : `Dashboard`"
-                            :class="cycles.length == 0 ? 'cursor-not-allowed opacity-25' : ''">
+                        <StyleButton :buttonClass="classInfo.cyclesNo == 0 ? 'warning' : 'success'"
+                            class="relative inline-flex rounded-md group items-center justify-between overflow-hidden text-sm md:text-base font-normal uppercase focus:ring-1 focus:outline-none px-2 py-1 md:px-2 whitespace-nowrap"
+                            @handleClick="classInfo.cyclesNo == 0 ? finishCycle : getRoute"
+                            :tooltipText="classInfo.cyclesNo == 0 ? `Finish Members & Cycles Setup!` : `Dashboard`"
+                            :buttonText="classInfo.cyclesNo == 0 ? `Finish Setup!` : `Dashboard`"
+                            :class="classInfo.cyclesNo == 0 ? 'cursor-not-allowed opacity-25' : ''">
                             <warningsolid-icon class="w-4 h-4 md:w-5 md:h-5"
-                                v-if="cycles.length == 0"></warningsolid-icon>
+                                v-if="classInfo.cyclesNo == 0"></warningsolid-icon>
                             <homesolid-icon class="w-4 h-4 md:w-5 md:h-5" v-else></homesolid-icon>
-                        </ActionButton>
+                        </StyleButton>
                     </li>
                 </ul>
             </div>
@@ -75,9 +77,12 @@
             <hr-line :color="classInfo.hrClass"></hr-line>
             <!-- tabs body  -->
             <div class="md:my-4 my-2">
-                <settingTabs :settings=settings :updated=props.updated @reload=reloadNav @changed=settingsChanged @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab1show"></settingTabs>
+                <settingTabs :settings=settings :updated=classInfo.setup @reload=resetInfo @changed=settingsChanged
+                    @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed @view=flashShowView
+                    v-if="classInfo.tab1show"></settingTabs>
 
-                <setmembersTabs :route=props.route @changed=membersChanged v-if="classInfo.tab2show"></setmembersTabs>
+                <setmembersTabs :route=props.route @changed=membersChanged @loading=flashLoading @flash=flashShow
+                    @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab2show"></setmembersTabs>
 
                 <setcycleTabs :route=props.route :current=current :cycles=cycles :nextname=nextname :date=date
                     :settings=settings :show="classInfo.tab3show" @changed=cyclesChanged v-if="classInfo.tab3show">
@@ -89,15 +94,17 @@
         <!-- end documents panel -->
     </div>
     <!--end Contribution documents  -->
-
-    <!-- toast notification  -->
-    <toast ref="toastNotificationRef"></toast>
 </template>
 
 <script setup>
-    import { defineProps, reactive, onMounted, computed, ref, nextTick} from "vue";
-    import { router } from '@inertiajs/vue3';
-    
+    import { router } from "@inertiajs/vue3";
+    import { defineProps, reactive, onMounted, onBeforeUnmount, computed} from "vue";
+    import { resetDB, fullResetCycles, fullResetMembers, fullResetUsers }      from "./Methods/resetDB";
+
+    // Globals 
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass, membersTemp, presetMembers, presetCycles } from '../Pages/Globals/flashMessages';
+    import eventBus     from "./Globals/eventBus";
+
     const props = defineProps({
         name: {
             type: String,
@@ -165,9 +172,9 @@
         info: [],
 
         // tabs 
-        tabActive: 'inline-flex p-2 border-b-base rounded-t-lg uppercase text-blue-600 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-500 border-blue-600 dark:border-blue-500 whitespace-nowrap',
-        tabInactive: 'inline-flex p-2 border-b-base rounded-t-lg uppercase hover:text-gray-600 border-gray-200 hover:border-gray-300 dark:hover:text-teal-300 dark:text-gray-300 cursor-pointer whitespace-nowrap',
-        tabDanger: 'inline-flex p-2 border-b-base rounded-t-lg uppercase hover:text-red-600 border-red-400 hover:border-red-600 dark:hover:text-red-300 dark:text-red-600 cursor-not-allowed whitespace-nowrap',
+        tabActive: 'inline-flex p-2 border rounded-lg uppercase hover:text-blue-600 border-blue-400 hover:border-blue-600 dark:hover:text-blue-300 dark:text-blue-600 cursor-pointer bg-blue-300 dark:bg-blue-300/10 whitespace-nowrap',
+        tabInactive: 'inline-flex p-2 border rounded-lg uppercase hover:text-teal-600 border-teal-400 hover:border-teal-600 dark:hover:text-teal-300 dark:text-teal-600 cursor-pointer bg-teal-300 dark:bg-teal-300/10 whitespace-nowrap',
+        tabDanger: 'inline-flex p-2 border rounded-lg uppercase hover:text-red-600 border-red-400 hover:border-red-600 dark:hover:text-red-300 dark:text-red-600 cursor-not-allowed bg-red-300 dark:bg-red-300/10 whitespace-nowrap opacity-75',
         tabReset: 'inline-flex p-2 border rounded-lg uppercase hover:text-red-600 border-red-500 hover:border-red-600 dark:hover:text-red-500 dark:text-red-600 cursor-pointer bg-red-300 dark:bg-red-300/10 whitespace-nowrap',
         tabInfo: 'inline-flex p-2 border rounded-lg uppercase hover:text-cyan-600 border-cyan-400 hover:border-cyan-600 dark:hover:text-cyan-300 dark:text-cyan-600 cursor-not-allowed bg-cyan-300 dark:bg-cyan-300/10 whitespace-nowrap',
         tabSuccess: 'inline-flex p-2 border rounded-lg uppercase hover:text-green-600 border-green-400 hover:border-green-600 dark:hover:text-green-300 dark:text-green-600 cursor-pointer bg-green-300 dark:bg-green-300/10 whitespace-nowrap',
@@ -188,6 +195,7 @@
 
         svgActive: 'bg-blue-100 text-gray-800 text-xs font-normal ml-1 px-1 rounded-full dark:bg-cyan-900 dark:text-gray-300 border border-cyan-900 dark:border-cyan-500',
         svgInactive: 'bg-red-100 text-gray-800 text-xs font-normal ml-1 px-1 rounded-full dark:bg-red-900 dark:text-gray-300 border border-red-900 dark:border-red-500',
+        svgSuccess: 'bg-green-100 text-gray-800 text-xs font-normal ml-1 px-1 rounded-full dark:bg-green-900 dark:text-gray-300 border border-green-900 dark:border-green-500',
 
         hrClass: 'border-teal-800 dark:border-teal-300 my-1',
 
@@ -200,7 +208,26 @@
     onMounted(() => {
         setInfo()
         tabSwitch1()
-    })
+
+        // Define a map of event handlers for various events
+        const eventHandlers = {
+            reloadMembers:                  resetInfo,
+            reloadCycles:                   resetInfo,
+            reloadPage:                     resetInfo,
+        };
+
+        // Register all event handlers
+        Object.entries(eventHandlers).forEach(([event, handler]) => {
+            eventBus.on(event, handler);
+        });
+
+        // Cleanup event listeners on component unmount
+        onBeforeUnmount(() => {
+            Object.keys(eventHandlers).forEach((event) => {
+                eventBus.off(event);
+            });
+        });
+    });
 
     function setInfo() {
         classInfo.info = props.cycles;
@@ -212,67 +239,89 @@
                     classInfo.cyclesNo      = data[2];
                     classInfo.projectsNo    = data[3];
 
-                    if (classInfo.membersNo == 0) {
-                        membersTemplate()
-                    }
+                    // check if temps are needed 
+                    templateCheck();
+                });
+    }
+
+    async function resetInfo() {
+        axios.get('/api/getSettings')
+            .then(
+                ({ data }) => {
+                    classInfo.setup         = data[0];
+                    classInfo.membersNo     = data[1];
+                    classInfo.cyclesNo      = data[2];
+                    classInfo.projectsNo    = data[3];
+
+                    // check if temps are needed 
+                    templateCheck();
+
+                    // reload all 
+                    reloadNav();
                 });
     }
 
     function settingsChanged() {
         setInfo();
-
-        // if (classInfo.tab1show) {
-        //     classInfo.tab1 = classInfo.tabActive;
-        //     classInfo.tab1svg = classInfo.svgActive;
-        // } else {
-        //     classInfo.tab1 = classInfo.setup ? classInfo.tabSuccess : classInfo.tabDanger;
-        //     classInfo.tab1svg = classInfo.setup ? classInfo.svgActive : classInfo.svgInactive;
-
-        //     classInfo.tab2 = classInfo.setup ? classInfo.tabInactive : classInfo.tabDanger;
-        //     classInfo.tab2svg = classInfo.setup ? classInfo.svgInactive : classInfo.svgActive;
-        // }
-
-        // if (classInfo.tab2show) {
-        //     classInfo.tab2 = classInfo.tabActive;
-        //     classInfo.tab2svg = classInfo.svgActive;
-        // } else {
-        //     classInfo.tab2 = classInfo.membersNo != 0 ? classInfo.tabSuccess : classInfo.tabDanger;
-        //     classInfo.tab2svg = classInfo.membersNo != 0 ? classInfo.svgActive : classInfo.svgInactive;
-
-        //     classInfo.tab3 = classInfo.membersNo != 0 ? classInfo.tabInactive : classInfo.tabDanger;
-        //     classInfo.tab3svg = classInfo.membersNo != 0 ? classInfo.svgInactive : classInfo.svgActive;
-        // }
-
-        // if (classInfo.tab3show) {
-        //     classInfo.tab3 = classInfo.tabActive;
-        //     classInfo.tab3svg = classInfo.svgActive;
-        // } else {
-        //     classInfo.tab3 = classInfo.cyclesNo != 0 ? classInfo.tabSuccess : classInfo.tabDanger;
-        //     classInfo.tab3svg = classInfo.cyclesNo != 0 ? classInfo.svgActive : classInfo.svgInactive;
-        // }
     }
 
-    function membersTemplate() {
+    function templateCheck() {
         if (classInfo.membersNo == 0 && classInfo.tab2show) {
-            let url     = '/preset/template/members/';
-            let header  = 'Use Members Preset Template!';
-            let button  = 'Use Preset Template';
-            let body    = 'file';
-            let message = `No Members exist in the system use the preset set by the program manufacturer to upload members. This Template has members records till September 2024!`;
+            presetMembers();
+        }
 
-            flashShowView(message, body, header, url, button, 30000, false);
+        if (classInfo.cyclesNo == 0 && classInfo.tab3show) {
+            presetCycles();
         }
     }
+
+    // function membersTemplate() {
+    //     if (classInfo.membersNo == 0 && classInfo.tab2show) {
+    //         presetMembers();
+    //     }
+    // }
+
+    // function cyclesTemplate() {
+    //     if (classInfo.membersNo != 0 && classInfo.cyclesNo == 0) {
+    //         presetCycles();
+    //     }
+    // }
 
     function tabSwitch(tabNumber, hrClass) {
         resetTabClass();
 
         // Set the appropriate tab to active and show
         classInfo[`tab${tabNumber}show`] = true;
-        classInfo[`tab${tabNumber}`] = classInfo.tabActive;
+        // classInfo[`tab${tabNumber}`] = classInfo.tabActive;
+        // settings tab 
+        if (classInfo.setup) {
+            classInfo.tab1 = classInfo.tabSuccess;
+        } else {
+            classInfo.tab1 = classInfo.tabInactive;
+        }
+
+        // members tab 
+        if (classInfo.membersNo != 0) {
+            classInfo.tab2 = classInfo.tabSuccess;
+            classInfo.tab2svg = classInfo.svgSuccess;
+        } else {
+            classInfo.tab2 = classInfo.tabInactive;
+            classInfo.tab2svg = classInfo.svgActive;
+        }
+
+        // cycles tab 
+        if (classInfo.cyclesNo != 0) {
+            classInfo.tab3 = classInfo.tabSuccess;
+            classInfo.tab3svg = classInfo.svgSuccess;
+        } else {
+            classInfo.tab3 = classInfo.tabInactive;
+            classInfo.tab3svg = classInfo.svgActive;
+        }
         classInfo.hrClass = hrClass;
 
         settingsChanged();
+        scrollToClass();
+        // console.log('scroll 1');
     }
 
     function resetTabClass() {
@@ -291,37 +340,36 @@
     }
 
     function tabSwitch2() {
-        // Scroll to the top of the page
-    // window.scrollTo({ top: 0, behavior: 'smooth' });
-        tabSwitch(2, 'border-emerald-800 dark:border-emerald-300 my-1');
-        membersTemplate();
+        if (classInfo.setup) {
+            // Scroll to the top of the page
+            tabSwitch(2, 'border-emerald-800 dark:border-emerald-300 my-1');
+            templateCheck();
+            setTimeout(() => {
+                scrollToClass()
+                // console.log('scroll 2');
+            }, 100);
+        } else {
+            let message   = 'Enter new System Settings To Proceeed!';
+            let type      = 'danger';
+            flashShow(message, type);
+            classInfo.hrClass        = 'border-emerald-800 dark:border-emerald-300 my-1';
+        }
     }
 
     function tabSwitch3() {
-        tabSwitch(3, 'border-amber-800 dark:border-amber-300 my-1');
-    }
-
-    function finishSettings() {
-        let message   = 'Enter new System Settings To Proceeed!';
-        let type      = 'danger';
-        flashShow(message, type);
-        classInfo.hrClass        = 'border-emerald-800 dark:border-emerald-300 my-1';
-    }
-
-    function finishMembers() {
-        let message   = 'Enter new Members To Proceeed!';
-        let type      = 'warning';
-        flashShow(message, type);
+        if (classInfo.membersNo != 0) {
+            tabSwitch(3, 'border-amber-800 dark:border-amber-300 my-1');
+        } else {
+            let message   = 'Enter new Members To Proceeed!';
+            let type      = 'danger';
+            flashShow(message, type);
+        } 
     }
 
     function finishCycle() {
         let message   = 'Create a new Payment Cycle To Proceeed!';
         let type      = 'info';
         flashShow(message, type);
-    }
-
-    function reloadNav() {
-        // emit('reload');
     }
 
     function membersChanged() {
@@ -396,152 +444,20 @@
         let url = '/register';
 
         router.get(url);
-    } 
-
-    async function resetInfo() {
-        axios.get('/api/getSettings')
-            .then(
-                ({ data }) => {
-                    classInfo.setup         = data[0];
-                    classInfo.membersNo     = data[1];
-                    classInfo.cyclesNo      = data[2];
-                    classInfo.projectsNo    = data[3];
-
-                    if (classInfo.membersNo == 0) {
-                        membersTemplate()
-                    }
-                });
     }
 
-    async function resetDB() {
-        const message = `All information will be deleted! User Accounts, Payment Cycles, Members, Contribution Records & Welfare Records. Are you sure you want to delete everything?`;
-
-        if (confirm(message)) {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-            await fullResetCycles(); // Wait for the cycles reset to complete
-            await resetInfo();
-        } else {
-            flashShow('Database Reset Cancelled!', 'info');
-            // reload info 
-            await resetInfo();
-        }
-    }
-
-    async function fullResetCycles() {
-        if (confirm('Are You Sure you want to delete all Payment Cycles with Member Payments, Welfares, Projects & Expenses?')) {
-            flashLoading('Deleting all Payment Cycles with Member Payments, Welfares, Projects & Expenses');
-            try {
-                const { data } = await axios.get('/fullReset/cycles');
-                classInfo.setup         = data[0];
-                classInfo.membersNo     = data[1];
-                classInfo.cyclesNo      = data[2];
-                classInfo.projectsNo    = data[3];
-                flashHide();
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-                flashShow('All Payment Cycles with Member Payments, Welfares, Projects & Expenses Deleted', 'delete');
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-                await fullResetMembers(); // Wait for the members reset to complete
-            } catch (error) {
-                console.error('Error resetting payment cycles:', error);
-            }
-        } else {
-            flashShow('Payment Cycles Reset Cancelled!', 'warning');
-            // reload info 
-            await resetInfo();
-        }
-    }
-
-    async function fullResetMembers() {
-        if (confirm('Are You Sure you want to delete all Members?')) {
-            flashLoading('Deleting all Members!');
-            try {
-                const { data } = await axios.get('/fullReset/members');
-                classInfo.setup         = data[0];
-                classInfo.membersNo     = data[1];
-                classInfo.cyclesNo      = data[2];
-                classInfo.projectsNo    = data[3];
-                flashHide();
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-                flashShow('All Members Deleted', 'delete');
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-                await fullResetUsers(); // Wait for the users reset to complete
-            } catch (error) {
-                console.error('Error resetting members:', error);
-            }
-        } else {
-            flashShow('Members Reset Cancelled!', 'warning');
-            // reload info 
-            await resetInfo();
-        }
-    }
-
-    async function fullResetUsers() {
-        if (confirm('Are You Sure you want to delete all User Accounts, Including yourself?')) {
-            flashLoading('Deleting all User Accounts');
-            try {
-                const { data } = await axios.get('/fullReset/users');
-                classInfo.setup         = data[0];
-                classInfo.membersNo     = data[1];
-                classInfo.cyclesNo      = data[2];
-                classInfo.projectsNo    = data[3];
-                flashHide();
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-                flashShow('All User Accounts Deleted', 'delete');
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
-                await getRegister();
-            } catch (error) {
-                console.error('Error resetting users:', error);
-            }
-        } else {
-            flashShow('Users Reset Cancelled!', 'warning');
-            // reload info 
-            await resetInfo();
-        }
-    }
-
-    // Reference for toast notification
-    const toastNotificationRef = ref(null);
-
-    // Flash message function
-    const flashShow = (info, type) => {
-        flashHide();
-        nextTick(() => {
-            if (toastNotificationRef.value) {
-                toastNotificationRef.value.toastOn([info, type]);
-            }
-        })
-    }
-
-    const flashLoading = (info) => {
-        flashTimed(info, 'loading', 20000)
-    }
-
-    // Method to trigger a timed flash message
-    const flashTimed = (message, type, duration) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastOnTime([message, type, duration]);
-        }
-    }
-
-    const flashShowView = (message, body, header, url, button, duration, linkState) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastClick([message, body, header, url, button, duration, linkState]);
-        }
-    }
-
-    // Method to hide the loading flash message after a delay
-    const flashHide = () => {
-        if (toastNotificationRef.value) {
-            setTimeout(() => {
-                toastNotificationRef.value.loadHide();
-            }, 1000);
-        }
-    }
-
-    // Method to hide all messages after a delay
-    const flashAllHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.allHide();
-        }
+    // reset DB to the ./Methods/ResetDB.js
+    async function handleResetDB() {
+        await resetDB(flashShow, resetInfo, () =>
+            fullResetCycles(flashShow, flashLoading, flashHide, resetInfo, () =>
+                fullResetMembers(flashShow, flashLoading, flashHide, resetInfo, () =>
+                    fullResetUsers(flashShow, flashLoading, flashHide, resetInfo, getRegister, reloadNav, classInfo),
+                    reloadNav,
+                    classInfo
+                ),
+                reloadNav,
+                classInfo
+            )
+        );
     }
 </script>

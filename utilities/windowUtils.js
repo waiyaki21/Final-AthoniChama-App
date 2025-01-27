@@ -26,7 +26,9 @@ function createWindow(options) {
         title,
         icon: iconPath,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: false, // Required for security
+            contextIsolation: true, // Required for modern Electron versions
+            javascript: true, // Ensures JavaScript is enabled
         },
         autoHideMenuBar: !isDev
     };

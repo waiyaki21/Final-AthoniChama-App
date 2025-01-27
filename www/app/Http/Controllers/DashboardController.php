@@ -175,14 +175,20 @@ class DashboardController extends Controller
 
         $projects = DB::table('projects')->where('deleted_at', null)->count();
 
+        if ($cycles == 0 || $members == 0) {
+            $done = false;
+        } else {
+            $done = true;
+        }
+
         if (url()->previous() !== route('login') && url()->previous() !== '' && url()->previous() !== url()->current()) {
             $state = true;
             $url   = url()->previous();
-            return [$state, $url, $members, $cycles, $projects];
+            return [$state, $url, $members, $cycles, $projects, $done];
         } else {
             $state = false;
             $url   = 'empty';
-            return [$state, $url, $members, $cycles, $projects];
-        }
+            return [$state, $url, $members, $cycles, $projects, $done];
+        } 
     }
 }

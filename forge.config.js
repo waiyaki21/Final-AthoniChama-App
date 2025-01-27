@@ -6,16 +6,12 @@ module.exports = {
         asar: false,
         ignore: [
             'www/node_modules',
-        //     'www/storage/logs/*',
-        //     'www/tests/*',
-        //     'php',
-        //     'www',
-        //     'logs',
-        //     'prev-main.js',
-        //     'main-new.js',
-        //     /node_modules\/.*(?!node-php-server)/, // Include node-php-server in the build
-        //     /node_modules\/.*(?!electron-log)/, // Include node-php-server in the build
+            'www/storage/logs/*',
+            'www/bootsrap/cache/*',
+            // './logs',
         ],
+        // Specify the directory where your Electron app source code resides
+        // dir: 'dist/AthoniChamaApp-win32-x64', // Adjust this path to the folder you want to package
         // extraResource: [
         //     path.join(__dirname, 'php'), // Include the PHP binary and related files
         //     path.join(__dirname, 'www'),

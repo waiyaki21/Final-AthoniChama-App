@@ -36,8 +36,8 @@ import GuestLayout      from './Pages/Layouts/GuestLayout.vue';
 
 // alerts
 import toast            from './Pages/Components/alerts/toast-simple.vue';
-import alertview        from './Pages/Components/alerts/toast-view.vue';
-import alertnew         from './Pages/Components/alerts/toast-new.vue';
+// import alertview        from './Pages/Components/alerts/toast-view.vue';
+// import alertnew         from './Pages/Components/alerts/toast-new.vue';
 
 // crumbs
 import dashboardcrumbs  from './Pages/Components/breadcrumbs/dashboard-crumbs.vue';
@@ -129,7 +129,10 @@ import settingTabs      from './Pages/Components/tabs/settings/settings-tabs.vue
 import setmembersTabs   from './Pages/Components/tabs/settings/members-tabs.vue';
 import setcycleTabs     from './Pages/Components/tabs/settings/cycle-tabs.vue';
 
-import membersPageTabs  from './Pages/Components/tabs/members/members-tabs.vue';
+// import membersPageTabs  from './Pages/Components/tabs/members/members-tabs.vue';
+
+// main tabs 
+import MainMembersTabs  from './Pages/Components/tabs/MainTabs/members-tabs.vue';
 
 // others
 import progressTable    from './Pages/Components/progress/progressTable.vue';
@@ -154,8 +157,9 @@ import hrLine           from './Pages/Utilities/hrLine/hrLine.vue';
 import actionButton     from './Pages/Utilities/Button/actionButton.vue';
 import styleButton      from './Pages/Utilities/Button/styleButton.vue';
 import tabButton        from './Pages/Utilities/Button/tabButton.vue';
+import ModalHeader      from './Pages/Utilities/Modals/ModalHeader.vue';
 
-import { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CheckIcon, XMarkIcon, HomeIcon, DocumentCheckIcon, PencilIcon, TrashIcon, FolderArrowDownIcon, PhoneIcon, ChevronUpDownIcon, CalendarDaysIcon, PlusIcon, TableCellsIcon, DocumentPlusIcon, MagnifyingGlassIcon, BellAlertIcon, ArrowPathIcon, CurrencyDollarIcon, ClockIcon, MoonIcon, LightBulbIcon, UserGroupIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, HandRaisedIcon, PaperAirplaneIcon, SparklesIcon, UserPlusIcon, DocumentArrowDownIcon, CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, HomeModernIcon, XCircleIcon, PresentationChartLineIcon, Cog8ToothIcon, UserIcon, ArrowUpCircleIcon, ArrowDownCircleIcon, ArrowLeftCircleIcon, ArrowRightCircleIcon, UserMinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/vue/24/solid';
+import { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CheckIcon, XMarkIcon, HomeIcon, DocumentCheckIcon, PencilIcon, TrashIcon, FolderArrowDownIcon, PhoneIcon, ChevronUpDownIcon, CalendarDaysIcon, PlusIcon, TableCellsIcon, DocumentPlusIcon, MagnifyingGlassIcon, BellAlertIcon, ArrowPathIcon, CurrencyDollarIcon, ClockIcon, MoonIcon, LightBulbIcon, UserGroupIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, HandRaisedIcon, PaperAirplaneIcon, SparklesIcon, UserPlusIcon, DocumentArrowDownIcon, CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, HomeModernIcon, XCircleIcon, PresentationChartLineIcon, Cog8ToothIcon, UserIcon, ArrowUpCircleIcon, ArrowDownCircleIcon, ArrowLeftCircleIcon, ArrowRightCircleIcon, UserMinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, Bars3Icon } from '@heroicons/vue/24/solid';
 
 const appName       = import.meta.env.VITE_APP_NAME;
 const appShortName  = process.env.PACKAGE_NAME;
@@ -232,6 +236,7 @@ createInertiaApp({
             .component('logout-icon',       UserMinusIcon)
             .component('expand-icon',       ArrowsPointingOutIcon)
             .component('inward-icon',       ArrowsPointingInIcon)
+            .component('bars-icon',         Bars3Icon)
 
         
             // inertia js components 
@@ -256,9 +261,9 @@ createInertiaApp({
 
             // alerts
             .component('toast', toast)
-            .component('alertview', alertview)
+            // .component('alertview', alertview)
             // .component('alertview', alertfile)
-            .component('alert', alertnew)
+            // .component('alert', alertnew)
 
             // crumbs
             .component('maincrumbs', maincrumbs)
@@ -306,11 +311,12 @@ createInertiaApp({
             .component('cyclesdelete',   cyclesdelete)
             .component('cyclesaddModal',   cyclesaddModal)
             .component('ledgersaddModal',  ledgersaddModal)
-            .component('autoSetup',        autoSetup)
+            // .component('autoSetup',        autoSetup)
             .component('cyclesExpensesupdate', CycleExpensesUpdate)
             .component('cyclesExpensesdelete', CycleExpensesDelete)
             .component('cyclesExpensesNamesupdate', CycleExpensesNamesUpdate)
             .component('cyclesExpensesNamesdelete', CycleExpensesNamesDelete)
+            .component('ModalHeader',               ModalHeader)
 
             // forms
             // members
@@ -346,12 +352,15 @@ createInertiaApp({
             .component('ledgerTab', ledgerTab)
             .component('settingTabs', settingTabs)
 
+            // main tabs
+            .component('mainMemberTabs', MainMembersTabs)
+
             // settings tabs 
             .component('setmembersTabs', setmembersTabs)
             .component('setcycleTabs', setcycleTabs)
 
             // members tabs 
-            .component('membersPageTabs', membersPageTabs)
+            // .component('membersPageTabs', membersPageTabs)
 
             // progress bar
             .component('progressTable', progressTable)

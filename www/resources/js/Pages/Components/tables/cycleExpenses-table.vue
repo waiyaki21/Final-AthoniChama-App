@@ -50,7 +50,7 @@
                             <select id="name_id" v-model="form.name_id" name="name_id"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full">
                                 <option v-for="name in classInfo.names" :value="name.id">
-                                    <span>{{ name.name }}</span>
+                                    {{ name.name }}
                                 </option>
                             </select>
 

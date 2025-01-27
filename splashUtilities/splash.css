@@ -1,0 +1,140 @@
+@font-face {
+    font-family: "Fjalla One";
+    src: url('../www/resources/fonts/Fjalla_One/FjallaOne-Regular.ttf');
+}
+
+body {
+    font-family: 'Fjalla One';
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #181818;
+    color: rgb(252, 252, 252);
+    margin: 0
+}
+
+.splash-content {
+    text-align: center
+}
+
+.splash-content h1 {
+    font-family: 'Fjalla One';
+    font-size: 3.2rem;
+    font-weight: 400;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-align: center;
+    color: rgb(246, 71, 71)
+}
+
+.splash-content h3 {
+    font-family: 'Fjalla One';
+    font-size: 0.9rem;
+    font-weight: 100;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.loader {
+    border: 3px solid #f3f3f327;
+    border-top: 3px solid #2d5bf4;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    animation: spin 3s linear infinite;
+    text-align: center
+}
+
+.image {
+    border-radius: 50%;
+    width: 8rem;
+    height: 8rem;
+    text-align: center
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+.status-list {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    scrollbar-width: none
+}
+
+.status-row {
+    margin-bottom: 5px;
+    font-size: 10px;
+    text-align: left
+}
+
+.splash-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%
+}
+
+#status-list-container {
+    scroll-behavior: smooth
+}
+
+.status-text {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 450px
+}
+
+/* Progress Bar Container */
+.progress-bar {
+    position: relative;
+    height: 12px;
+    background: #f3f3f327;
+    /* Light gray */
+    border-radius: 2px;
+    margin-top: 5px;
+    overflow: hidden;
+    border: 1px solid #2d5bf4;
+}
+
+/* Progress Bar Fill */
+.progress-bar-fill {
+    height: 100%;
+    background: #2d5bf4;
+    /* Blue */
+    transition: width 0.3s ease-in-out;
+    background-size: 40px 40px;
+    /* Size of stripes */
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    animation: progress-bar-stripes 0.75s linear infinite;
+    /* Striped animation */
+}
+
+/* Keyframes for the striped animation */
+@keyframes progress-bar-stripes {
+    0% {
+        background-position: 40px 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}

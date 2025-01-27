@@ -3,7 +3,7 @@
 
         <section class="grid grid-cols-1 md:grid-cols-5 gap-1">
             <!-- table  -->
-            <memberstable :members=classInfo.info :loading=classInfo.isLoading :height=sectionHeight @flash=flashShow @hide=flashHide @loading=flashLoading @timed=flashTimed @view=flashShowView @reload=getInfo>
+            <memberstable :members=classInfo.info :loading=classInfo.isLoading @flash=flashShow @hide=flashHide @loading=flashLoading @timed=flashTimed @view=flashShowView @reload=getInfo>
             </memberstable>
 
             <!-- forms  -->
@@ -17,7 +17,7 @@
 <script setup>
     import { reactive, onBeforeMount, defineEmits, ref, nextTick } from 'vue'
 
-    import {flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass } from '../../../Globals/flashMessages'
+    import {flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, reloadMembers } from '../../../Globals/flashMessages'
 
     const props = defineProps({
         route: {
@@ -61,9 +61,7 @@
                     classInfo.info      = data[0];
                     classInfo.isLoading = false;
                     emit('changed')
-                    reloadNav();
+                    reloadMembers();
                 });
     }
-
-    
 </script>

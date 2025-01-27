@@ -24,6 +24,7 @@
 
 <script setup>
     import { defineProps, onBeforeMount, reactive, defineEmits, onMounted, getCurrentInstance } from 'vue'
+    import {flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass } from '../../Globals/flashMessages'
 
     const props = defineProps({
         count : {
@@ -131,27 +132,6 @@
 
     function refresh() {
         emit('reload');
-    }
-
-    // flash messages 
-    function flashShow(message, body) {
-        emit('flash', message, body)
-    }
-
-    function flashLoading(message) {
-        classInfo.isLoading      = true;
-        emit('timed', message, 'warning', 100000000)
-    }
-
-    function flashHide() {
-        emit('hide')
-    }
-
-    function flashTimed(message, body, duration) {
-        emit('timed', message, body, duration)
-    }
-
-    function flashShowView(message, body, header, url, button, duration, linkState) {
-        emit('view', message, body, header, url, button, duration, linkState);
+        reloadNav();
     }
 </script>

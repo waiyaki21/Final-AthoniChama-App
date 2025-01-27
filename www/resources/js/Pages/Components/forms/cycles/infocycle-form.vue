@@ -206,7 +206,7 @@
     }
 
     function submit() {
-        flashLoading('Loading, Please Wait..')
+        flashShow('Loading, Please Wait..', 'loading')
         let url = '/cycle/';
         let name = form.name;
 

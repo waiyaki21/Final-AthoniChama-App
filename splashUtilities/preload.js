@@ -8,4 +8,11 @@ contextBridge.exposeInMainWorld('splashApi', {
             callback(data);  // Pass the data (message and type) to the callback
         });
     },
+
+    // Expose a method to receive app version
+    onAppVersion: (callback) => {
+        ipcRenderer.on('set-app-version', (event, version) => {
+            callback(version);
+        });
+    },
 });

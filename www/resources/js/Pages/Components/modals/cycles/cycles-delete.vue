@@ -37,23 +37,13 @@
             </section>
         </section>
     </Modal>
-
-    <!-- flash alert  -->
-    <alert
-        :alertshow  = alerts.alertShow
-        :message    = alerts.flashMessage
-        :class      = alerts.alertBody
-        :type       = alerts.alertType
-        :title      = alerts.alertType
-        :time       = alerts.alertDuration
-    ></alert>
 </template>
 
 <script setup>
     import { defineProps, reactive, computed, watch, defineEmits, onMounted, onUnmounted } from 'vue'
     import { router } from '@inertiajs/vue3';
 
-    const emit = defineEmits(['reload', 'close'])
+    const emit = defineEmits(['reload', 'close', 'flash'])
 
     const props = defineProps({
         info: {
@@ -82,19 +72,6 @@
     onMounted(() => document.addEventListener('keydown', closeOnEscape));
     onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
 
-    // alerts classes 
-    const alerts = reactive({
-        alertShow: false,
-        alertType: '',
-        alertDuration: 15000,
-        flashMessage: '',
-        alertBody: 'border-b-[4px] border-gray-500 shadow-gray-900 dark:shadow-gray-900 bg-gray-100 dark:bg-gray-500',
-        alertSuccess: 'border-b-[4px] border-emerald-800 dark:border-emerald-800 shadow-green-900 dark:shadow-green-900 bg-green-100 dark:bg-green-500',
-        alertInfo: 'border-b-[4px] border-blue-800 dark:border-blue-800 shadow-blue-900 dark:shadow-blue-900 bg-blue-100 dark:bg-blue-500',
-        alertWarning: 'border-b-[4px] border-orange-800 dark:border-orange-800 shadow-orange-900 dark:shadow-orange-900 bg-orange-100 dark:bg-orange-500',
-        alertDanger: 'border-b-[4px] border-red-800 dark:border-red-800 shadow-red-900 dark:shadow-red-900 bg-red-100 dark:bg-red-500',
-    })
-
     // classes 
     const classInfo = reactive({
         // delete info 
@@ -104,7 +81,10 @@
 
         deleteURL: '/delete/cycle/',
 
-        modalCloseBtn: 'cursor-pointer dark:text-red-800 text-red-500 transition-transform hover:rotate-180 w-6 h-6 hover:w-8 hover:h-8'
+        modalCloseBtn: 'cursor-pointer dark:text-red-800 text-red-500 transition-transform hover:rotate-180 w-6 h-6 hover:w-8 hover:h-8',
+
+        alertType: '',
+        flashMessage: '',
     })
 
     function showDelete(info) {
@@ -129,9 +109,9 @@
 
             onSuccess: () => [
                 // flashMessage 
-                alerts.flashMessage   = name + ': Payment Cycle Deleted!',
-                alerts.alertBody      = 'danger',
-                flashShow(alerts.flashMessage, alerts.alertBody),
+                classInfo.flashMessage   = name + ': Payment Cycle Deleted!',
+                classInfo.alertType      = 'danger',
+                flashShow(classInfo.flashMessage, classInfo.alertType),
                 emit('reload'),
                 closeDelete(),
             ]

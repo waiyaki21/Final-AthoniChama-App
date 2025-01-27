@@ -57,6 +57,9 @@ Route::middleware('api')->controller(CycleExpenseController::class)->group(funct
 });
 
 Route::middleware('api')->controller(CycleController::class)->group(function () {
+    // get cycle info for index
+    Route::get('/getCyclesIndexInfo', 'indexCycleInfo');
+
     // get cycles
     Route::get('/getCycles/{to}/{id}', 'getCyclesOrder');
 
@@ -78,6 +81,9 @@ Route::middleware('api')->controller(CycleController::class)->group(function () 
 });
 
 Route::middleware('api')->controller(MemberController::class)->group(function () {
+    // get member info fro index
+    Route::get('/getMembersInfo', 'getMembersInfo');
+
     // get member
     Route::get('/getMember/info/{member}', 'getMember');
 

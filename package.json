@@ -1,12 +1,14 @@
 {
   "name": "athonichama-app",
-  "version": "1.0.8",
+  "devname": "Social Welfare & Development Management System.",
+  "devshortname": "Welfare & Dev. Management System.",
+  "version": "1.0.8460",
   "description": "This application streamlines the management of member contributions and welfare tracking, organizing all data into monthly cycles for easy access and reporting. Admin can record contributions, track both received and owed welfare amounts, and generate detailed reports. The app includes a built-in option to export monthly summaries to Excel spreadsheets, making it simple to review and share financial records. Ideal for organizations or groups that need to efficiently monitor member contributions and welfare transactions in an organized, user-friendly platform.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/waiyaki21/Final-AthoniChama-App.git"
   },
-  "main": "main-forge.js",
+  "main": "main.js",
   "scripts": {
     "app": "electron .",
     "start": "electron-forge start",
@@ -15,7 +17,7 @@
     "lint": "echo \"No linting configured\"",
     "publish": "electron-forge publish",
     "publish-only": "electron-forge publish --ci",
-    "pack": "electron-packager . AthoniChamaApp --platform=win32 --arch=x64 --out=dist --icon=icons/chama_icon.ico --overwrite --prune",
+    "pack": "electron-packager . AthoniChamaApp --platform=win32 --arch=x64 --out=dist --icon=icons/chama_icon.ico --overwrite --prune --ignore=www/node_modules --ignore=www/storage/logs",
     "cmd-pack": "node ./utilities/pack.js",
     "zip": "node ./utilities/zip.js ./dist/AthoniChamaApp-win32-x64 ./dist/AthoniChamaApp-win32-x64.zip",
     "release": "node ./utilities/release.js",
@@ -49,6 +51,7 @@
   },
   "dependencies": {
     "archiver": "^7.0.1",
+    "cli-progress": "^3.12.0",
     "electron-log": "^5.2.2",
     "electron-updater": "^6.3.9",
     "node-php-server": "^0.1.2",

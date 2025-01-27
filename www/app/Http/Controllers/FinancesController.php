@@ -161,17 +161,24 @@ class FinancesController extends Controller
     public function updateSettings() 
     {
         // settings info 
-        $name  = 'Athoni Development and Welfare';
-        $short = 'Athoni D & W';
+        // $name  = 'Athoni Development and Welfare';
+        // $short = 'Athoni D & W';
 
-        // create the settings 
-        Setting::create([
-            'user_id'       => auth()->id(),
-            'name'          => $name,
-            'shortname'     => $short,
-            'payment_def'   => 2500,
-            'welfare_def'   => 500,
-        ]);
+        $settings = Setting::first();
+
+        if (!$settings) {
+            $name  = 'Welfare & Dev. Management System.';
+            $short = 'W. & D.M.S.';
+
+            // create the settings 
+            Setting::create([
+                'user_id'       => auth()->id(),
+                'name'          => $name,
+                'shortname'     => $short,
+                'payment_def'   => 0,
+                'welfare_def'   => 0,
+            ]);
+        }
     }
 
     public function updateExpenseNames()

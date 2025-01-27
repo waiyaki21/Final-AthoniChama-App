@@ -27,50 +27,50 @@ class MemberController extends Controller
 {
     public function index()
     {   
-        // get all members 
-        $members    = Member::orderBy('created_at', 'asc')
-                        ->withCount('payments', 'welfares')
-                        ->get();
+        // // get all members 
+        // $members    = Member::orderBy('created_at', 'asc')
+        //                 ->withCount('payments', 'welfares')
+        //                 ->get();
 
         
-        $active    = DB::table('members')->where('active', 1)->count();
-        $inactive  = DB::table('members')->where('active', 0)->count();
+        // $active    = DB::table('members')->where('active', 1)->count();
+        // $inactive  = DB::table('members')->where('active', 0)->count();
         
-        // payment total
-        $paySum     = Payment::sum('payment');
+        // // payment total
+        // $paySum     = Payment::sum('payment');
 
-        $amntbefore = DB::table('members')->sum('amount_before');
+        // $amntbefore = DB::table('members')->sum('amount_before');
 
-        $grandtotal = $paySum + intval($amntbefore);
+        // $grandtotal = $paySum + intval($amntbefore);
 
-        // welfare totals
-        $addwelfs   = Welfare::where('type', 1)->sum('payment');
-        $before     = $members->sum('welfare_before');
-        $welfareIn  = $before + $addwelfs;
+        // // welfare totals
+        // $addwelfs   = Welfare::where('type', 1)->sum('payment');
+        // $before     = $members->sum('welfare_before');
+        // $welfareIn  = $before + $addwelfs;
 
-        $beforeOwed = $members->sum('welfareowed_before');
-        $afterOwed  = $members->sum('welfare_owing_may');
-        $minuswelfs = Welfare::where('type', 0)->sum('payment');
-        $welfareOwed= $minuswelfs + intval($beforeOwed) + intval($afterOwed);
+        // $beforeOwed = $members->sum('welfareowed_before');
+        // $afterOwed  = $members->sum('welfare_owing_may');
+        // $minuswelfs = Welfare::where('type', 0)->sum('payment');
+        // $welfareOwed= $minuswelfs + intval($beforeOwed) + intval($afterOwed);
 
-        $welfSum    = $welfareIn - $welfareOwed;
+        // $welfSum    = $welfareIn - $welfareOwed;
 
-        $user       = Auth::user();
+        // $user       = Auth::user();
 
         // return $members;
         return Inertia::render('Members', [
             'name'      => env('APP_NAME'),
             'route'     => Route::current()->getName(),
-            'members'   => $members,
-            'paySum'    => $paySum,
-            'welfSum'   => $welfSum,
-            'active'    => $active,
-            'inactive'  => $inactive,
-            'user'      => $user,
-            'grandtotal'=> $grandtotal,
-            'amntbefore'=> $amntbefore,
-            'welfareOwed'=> $welfareOwed,
-            'welfareIn'  => $welfareIn
+            // 'members'   => $members,
+            // 'paySum'    => $paySum,
+            // 'welfSum'   => $welfSum,
+            // 'active'    => $active,
+            // 'inactive'  => $inactive,
+            // 'user'      => $user,
+            // 'grandtotal'=> $grandtotal,
+            // 'amntbefore'=> $amntbefore,
+            // 'welfareOwed'=> $welfareOwed,
+            // 'welfareIn'  => $welfareIn
         ]);
     }
 
@@ -751,6 +751,53 @@ class MemberController extends Controller
     }
 
     // API CALLS 
+    public function getMembersInfo()
+    {
+        // get all members 
+        $members    = Member::orderBy('created_at', 'asc')
+        ->withCount('payments', 'welfares')
+        ->get();
+
+        $active    = DB::table('members')->where('active', 1)->count();
+        $inactive  = DB::table('members')->where('active', 0)->count();
+
+        // payment total
+        $paySum     = Payment::sum('payment');
+
+        $amntbefore = DB::table('members')->sum('amount_before');
+
+        $grandtotal = $paySum + intval($amntbefore);
+
+        // welfare totals
+        $addwelfs   = Welfare::where('type', 1)->sum('payment');
+        $before     = $members->sum('welfare_before');
+        $welfareIn  = $before + $addwelfs;
+
+        $beforeOwed = $members->sum('welfareowed_before');
+        $afterOwed  = $members->sum('welfare_owing_may');
+        $minuswelfs = Welfare::where('type', 0)->sum('payment');
+        $welfareOwed = $minuswelfs + intval($beforeOwed) + intval($afterOwed);
+
+        $welfSum    = $welfareIn - $welfareOwed;
+
+        $user       = Auth::user();
+
+        // Return data as an array
+        return [
+            'name'       => env('APP_NAME'),
+            'members'    => $members,
+            'paySum'     => $paySum,
+            'welfSum'    => $welfSum,
+            'active'     => $active,
+            'inactive'   => $inactive,
+            'user'       => $user,
+            'grandtotal' => $grandtotal,
+            'amntbefore' => $amntbefore,
+            'welfareOwed' => $welfareOwed,
+            'welfareIn'  => $welfareIn
+        ];
+    }
+
     public function getMember(Member $member) 
     {
         $member = Member::where('id', $member->id)

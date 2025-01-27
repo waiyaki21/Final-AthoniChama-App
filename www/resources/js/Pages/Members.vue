@@ -10,91 +10,35 @@
     <div class="py-2 font-boldened">
         <!-- info panel  -->
         <membersinfo
-            :members = members.length
-            :active  = active
-            :inactive = inactive
-            :paySum  = paySum
-            :welfSum = welfSum
-            :amntbefore = amntbefore
-            :grandtotal  = grandtotal
-            :welfareIn   = welfareIn
-            :welfareOwed = welfareOwed
+            :members = classInfo.members.length
+            :active  = classInfo.active
+            :inactive = classInfo.inactive
+            :paySum  = classInfo.paySum
+            :welfSum = classInfo.welfSum
+            :amntbefore = classInfo.amntbefore
+            :grandtotal  = classInfo.grandtotal
+            :welfareIn   = classInfo.welfareIn
+            :welfareOwed = classInfo.welfareOwed
         ></membersinfo>
 
         <hr-line :color="'border-emerald-500/50'"></hr-line>
 
-        <membersPageTabs
-            :route          = props.route
-            :members        = members
-            @loading        = flashLoading
-            @flash          = flashShow
-            @hide           = flashHide
-            @timed          = flashTimed
-            @view           = flashShowView
-        ></membersPageTabs>
+        <mainMemberTabs
+            :route=props.route @loading=flashLoading @flash=flashShow
+            @hide=flashHide @timed=flashTimed @view=flashShowView
+        ></mainMemberTabs>
     </div>
-
-    <!-- toast notification  -->
-    <toast ref="toastNotificationRef"></toast>
 </template>
 
 <script setup>
-    import { defineProps, reactive, computed, ref, nextTick } from 'vue'
+    import { defineProps, reactive, computed, ref, nextTick, onBeforeUnmount, onMounted } from 'vue'
+
+    // Globals 
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide } from '../Pages/Globals/flashMessages';
+    import eventBus     from "./Globals/eventBus";
 
     const props = defineProps({
-        name: {
-            type: String,
-            required: true,
-        },
         route: {
-            type: String,
-            required: true,
-        },
-        members: {
-            type: Array,
-            required: true,
-        },
-        active: {
-            type: String,
-            required: true,
-        },
-        inactive: {
-            type: String,
-            required: true,
-        },
-        paySum: {
-            type: String,
-            required: true,
-        },
-        welfSum: {
-            type: String,
-            required: true,
-        },
-        user: {
-            type: Object,
-            required: true,
-        },
-        paySum: {
-            type: String,
-            required: true,
-        },
-        welfSum: {
-            type: String,
-            required: true,
-        },
-        grandtotal: {
-            type: String,
-            required: true,
-        },
-        amntbefore: {
-            type: String,
-            required: true,
-        },
-        welfareIn: {
-            type: String,
-            required: true,
-        },
-        welfareOwed: {
             type: String,
             required: true,
         },
@@ -108,42 +52,60 @@
         },
     ]);
 
-    // Reference for toast notification
-    const toastNotificationRef = ref(null);
+    // Define the reactive object
+    const classInfo = reactive({
+        members: [],
+        paySum: 0,
+        welfSum: 0,
+        active: 0,
+        inactive: 0,
+        grandtotal: 0,
+        amntbefore: 0,
+        welfareOwed: 0,
+        welfareIn: 0,
+    });
 
-    // Flash message function
-    const flashShow = (info, type) => {
-        flashHide();
-        nextTick(() => {
-            if (toastNotificationRef.value) {
-                toastNotificationRef.value.toastOn([info, type]);
-            }
-        })
-    }
+    // Fetch members info
+    const getMembersInfo = async () => {
+        try {
+            const response = await axios.get('/api/getMembersInfo');
+            const data = response.data;
 
-    const flashLoading = () => {
-        let info        = 'Loading! Please Wait';
-        let type        = 'warning';
-        let duration    = 60000;
-        flashTimed(info, type , duration)
-    }
-
-    // Method to trigger a timed flash message
-    const flashTimed = (message, type, duration) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastOnTime([message, type, duration]);
+            // Update classInfo with the response data
+            classInfo.members = data.members;
+            classInfo.paySum = data.paySum;
+            classInfo.welfSum = data.welfSum;
+            classInfo.active = data.active;
+            classInfo.inactive = data.inactive;
+            classInfo.user = data.user;
+            classInfo.grandtotal = data.grandtotal;
+            classInfo.amntbefore = data.amntbefore;
+            classInfo.welfareOwed = data.welfareOwed;
+            classInfo.welfareIn = data.welfareIn;
+        } catch (error) {
+            console.error('Error fetching members info:', error);
         }
-    }
+    };
 
-    const flashShowView = (message, body, header, url, button, duration, linkState) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastClick([message, body, header, url, button, duration, linkState]);
-        }
-    }
+    // Fetch data on component mount
+    onMounted(() => {
+        getMembersInfo();
 
-    const flashHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.loadHide();
-        }
-    }
+        // Define a map of event handlers for various events
+        const eventHandlers = {
+            reloadMembers:                     getMembersInfo,
+        };
+
+        // Register all event handlers
+        Object.entries(eventHandlers).forEach(([event, handler]) => {
+            eventBus.on(event, handler);
+        });
+
+        // Cleanup event listeners on component unmount
+        onBeforeUnmount(() => {
+            Object.keys(eventHandlers).forEach((event) => {
+                eventBus.off(event);
+            });
+        });
+    });
 </script>

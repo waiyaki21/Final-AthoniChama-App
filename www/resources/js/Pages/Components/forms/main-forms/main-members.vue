@@ -23,15 +23,25 @@
         <!-- tabs body  -->
         <div :id="[classInfo.view_name]">
             <div :class="[classInfo.tabBody]" v-if="classInfo.tab1body">
-                <div class="w-full m-1 text-left mx-auto overflow-hidden  h-fit">
-                    <ActionButton :class="[classInfo.templateActive, 'w-full uppercase']" buttonClass='info' @handleClick="$downloadFile('/download/template/members')"
-                        :tooltipText="`Download Members Template Usable for data entry`"
-                        :buttonText="`Download Template.`">
-                        <download-info class="w-6 h-6 ml-2"></download-info>
+                <section class="grid grid-cols-2 gap-2">
+                    <h3 class="font-boldened flex-col w-full col-span-2 flex p-0.5">
+                        <span :class="['font-boldened text-gray-800 dark:text-gray-300 leading-tight uppercase underline py-0.5 text-md']">Download Template</span>
+                    </h3>
+                    <ActionButton :class="[classInfo.templateActive, 'w-full col-span-1 text-sm']" buttonClass='success' @handleClick="$downloadFile('/template/with/members')"
+                        :tooltipText="`Download Template With Existing Members in the Spreeadsheet Usable for data entry`"
+                        :buttonText="`With Members.`">
+                        <download-info class="w-4 h-4"></download-info>
                     </ActionButton>
 
-                    <hr-line :color="'border-cyan-500/50 dark:border-cyan-500/50'"></hr-line>
+                    <ActionButton :class="[classInfo.templateActive, 'w-full col-span-1 text-sm']" buttonClass='dark' @handleClick="$downloadFile('/template/empty/members')"
+                        :tooltipText="`Download Members Template Usable for data entry`"
+                        :buttonText="` Without Members.`">
+                        <download-info class="w-4 h-4"></download-info>
+                    </ActionButton>
+                </section>
 
+                <hr-line :color="'border-cyan-500/50 dark:border-cyan-500/50'"></hr-line>
+                <div class="w-full m-1 text-left mx-auto overflow-hidden  h-fit">
                     <form @submit.prevent="classInfo.hasFile ? submitSheetAsync : flashShow('Upload a file', 'info')" @drop.prevent="getDrop" class="p-0" v-if = "!classInfo.isLoading">                
                         <div class="flex items-center justify-center w-full flex-col">
                             <label for="dropzone-file" :class="[classInfo.label, classInfo.labelClass]">
@@ -109,7 +119,7 @@
             <div :class="[classInfo.tabBody]" v-if="classInfo.tab2body">
                 <div class="w-full m-1 text-left mx-auto overflow-hidden">
                     <!-- members form  -->
-                    <form @submit.prevent="submit" class="grid grid-cols-2 md:grid-cols-2 gap-1">
+                    <form @submit.prevent="submit" class="grid grid-cols-2 md:grid-cols-2 gap-1 p-1">
                         <div class="col-span-2">
                             <InputLabel for="name" value="Member Name" />
 
@@ -168,10 +178,10 @@
                             <select id="active" v-model="form.active" name="active"
                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 w-full">
                                 <option :value="1">
-                                    <span>Active</span>
+                                    Active
                                 </option>
                                 <option :value="0">
-                                    <span>Inactive</span>
+                                    Inactive
                                 </option>
                             </select>
                         </div>
@@ -242,28 +252,33 @@
     import { onBeforeMount, reactive, computed, defineEmits, onMounted, onUnmounted, ref, getCurrentInstance, watch } from 'vue'
 
     import { useFileUploadMembers, onSubmitSheetAsync } from '../../../Methods/postMethods.js'
+    // import eventBus     from "../../../Globals/eventBus.js";
+    import {flashShow, flashTimed, flashShowView, flashHide, reloadNav, reloadMembers } from '../../../Globals/flashMessages'
 
-    const emit = defineEmits(['reload', 'close', 'view', 'flash', 'timed', 'hide'])
+    const emit = defineEmits(['reload', 'close'])
 
     onBeforeMount(() => {
         clearAll();
         showTab(2);
     })
 
+    // Declare parentName in the outer scope
+    let parentName = '';
+
     onMounted(() => {
         clearAll();
         showTab(2);
 
-        const instance = getCurrentInstance()
-        const parentName = instance?.parent?.type?.name
+        const instance = getCurrentInstance();
+        const parent = instance?.parent?.type?.name;
 
-        if (parentName == 'BaseTransition' || parentName == 'Transition') {
-            const parentName = 'Modal'
-            // console.log('Parent component name:', parentName)
+        if (parent === 'BaseTransition' || parent === 'Transition') {
+            parentName = 'Modal';
         } else {
-            const parentName = 'Regular' 
-            // console.log('Parent component name:', parentName)
+            parentName = 'Regular';
         }
+
+        console.log('Parent component name:', parentName); // For debugging
     })
 
     onUnmounted(() => {
@@ -291,7 +306,7 @@
         
         // template btns 
         templateInactive: 'text-white bg-gradient-to-r from-rose-500 to-red-500 hover:bg-gradient-to-bl focus:ring-1 focus:outline-none focus:ring-rose-300 dark:focus:ring-rose-800 font-medium rounded-lg text-xs px-4 py-2.5 text-center me-2 mb-1 inline-flex justify-between cursor-not-allowed',
-        templateActive: 'text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-1 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm md:text-md p-2 text-center me-2 mb-1 inline-flex justify-between',
+        templateActive: 'text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-1 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm p-2 text-center me-2 mb-1 inline-flex justify-between',
         label: 'flex flex-col items-center justify-center w-full h-fit border-2 border-dashed rounded-lg cursor-pointer',
         labelClass: '',
         labelDef: 'border-gray-300 bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500',
@@ -433,11 +448,11 @@
 
     // submit form 
     function submit() {
-        classInfo.isLoading = true;
-        let url = '/member/';
-        let name = form.name;
+        loadingOn();
+        let url     = '/member/';
+        let name    = form.name;
         let message = '';
-        let type = '';
+        let type    = '';
 
         axios.post(url, form)
             .then(
@@ -447,12 +462,13 @@
                     flashShow(message, type)
                     getNewMember()
                     clearAll();
-                    classInfo.isLoading = false;
+                    refresh();
+                    loadingOff();
                 })
             .catch(error => {
                 let time = 5000;
 
-                console.log(error.response.data.errors);
+                // console.log(error.response.data.errors);
                 let message = error.response.data.message;
                 let type = 'danger';
 
@@ -464,7 +480,7 @@
                         errors[key].forEach(errMsg => {
                             time += 1000; // Increase delay
                             // flashMessage 
-                            emit('timed', errMsg, 'danger', time);
+                            flashTimed(errMsg, 'danger', time);
                         });
                     });
                 }
@@ -506,8 +522,16 @@
         flashMessages,
     });
 
-    function submitSheetStyle(id) {
+    function loadingOn() {
         classInfo.isLoading = true;
+    }
+
+    function loadingOff() {
+        classInfo.isLoading = false;
+    }
+
+    function submitSheetStyle(id) {
+        loadingOn();
         allSheet(id)
 
         if (id == 0 || id == null) {
@@ -531,12 +555,15 @@
 
     // Main function: submit/update members
     const { submitSheetAsync } = onSubmitSheetAsync(classInfo, form, true, sheetMembers, {
-        flashShow, flashTimed, flashHide, refresh, getAllMembers, clearAll
+        flashShow, flashTimed, flashHide, refresh, flashShowMembers, clearAll
     });
 
     function refresh() {
-        classInfo.isLoading = false;
+        clearAll();
+        loadingOff();
         emit('reload');
+        reloadMembers();
+        // eventBus('reloadMembers');
     }
 
     // get members info 
@@ -553,14 +580,14 @@
                         {
                             'info': `Spreadsheets can be used to add new members!`,
                             'delay': 100,
-                            'type': 'warn',
-                            'duration': 100000
+                            'type': 'file',
+                            'duration': 5000
                         },
                         {
                             'info': `Spreadsheets can be used to update existing members!`,
                             'delay': 1100,
-                            'type': 'info',
-                            'duration': 100000
+                            'type': 'file',
+                            'duration': 5000
                         }
                     ];
                     if (classInfo.countNo > 0 && !classInfo.fileSelected) {
@@ -571,7 +598,6 @@
 
     // toast notifications if upload sheet is clicked 
     function flashMessages(messages) {
-        classInfo.isLoading = false;
         messages.forEach(message => {
             setTimeout(() => {
                 flashTimed(message.info, message.type, message.duration);
@@ -601,7 +627,7 @@
     }
 
     // toast view to go to all members page 
-    function getAllMembers() {
+    function flashShowMembers() {
         if (parentName == 'Modal') {
             emit('close');
         }
@@ -646,28 +672,6 @@
     function clearAll() {
         clearFields();
         clearFile();
-        classInfo.isLoading = false;
-    }
-
-    // flash messages 
-    function flashShow(message, body) {
-        emit('flash', message, body)
-    }
-
-    function flashLoading(message) {
-        classInfo.isLoading      = true;
-        emit('timed', message, 'warning', 25000)
-    }
-
-    function flashHide() {
-        emit('hide')
-    }
-
-    function flashTimed(message, body, duration) {
-        emit('timed', message, body, duration)
-    }
-
-    function flashShowView(message, body, header, url, button, duration, linkState) {
-        emit('view', message, body, header, url, button, duration, linkState);
+        loadingOff();
     }
 </script>

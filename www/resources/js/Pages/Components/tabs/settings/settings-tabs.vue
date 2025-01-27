@@ -86,7 +86,7 @@
                             <div class="w-full">
                                 <InputLabel for="payment_def" value="Cycle Payment Default Amount" />
 
-                                <TextInput id="payment_def" type="name" v-model="form.payment_def"
+                                <TextInput id="payment_def" type="number" v-model="form.payment_def"
                                     :placeholder="form.payment_def" autofocus />
 
                                 <InputError class="mt-2" :message="form.errors.payment_def" />
@@ -95,7 +95,7 @@
                             <div class="w-full">
                                 <InputLabel for="welfare_def" value="Cycle Welfare Default Amount" />
 
-                                <TextInput id="welfare_def" type="name" v-model="form.welfare_def"
+                                <TextInput id="welfare_def" type="number" v-model="form.welfare_def"
                                     :placeholder="form.welfare_def" autofocus />
 
                                 <InputError class="mt-2" :message="form.errors.welfare_def" />
@@ -125,6 +125,7 @@
 
 <script setup>
     import { router, useForm } from '@inertiajs/vue3';
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass } from '../../../Globals/flashMessages';
 
     //moment 
     import moment from 'moment';
@@ -173,7 +174,7 @@
         labelClass: 'flex flex-col items-center justify-center w-full h-[30rem] border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600'
     })
 
-    const emit = defineEmits(['changed', 'reload', 'switch', 'flash']);
+    const emit = defineEmits(['changed', 'reload', 'switch']);
 
     onMounted(() => {
         settingsCheck()
@@ -186,11 +187,6 @@
         } else {
             form.hasErrors = false;
         }
-    }
-
-    function flashShow(message, body) {
-        emit('flash');
-        emit('reload');
     }
 
     function setFields() {
@@ -218,7 +214,7 @@
                 classInfo.alertType = 'success',
                 flashShow(classInfo.flashMessage, classInfo.alertType),
                 setFields(),
-                // emit('switch'),
+                emit('reload'),
                 router.get('/settings')
             ],
 
@@ -226,6 +222,7 @@
                 classInfo.flashMessage = 'Failed! Try Again',
                 classInfo.alertType = 'danger',
                 flashShow(classInfo.flashMessage, classInfo.alertType),
+                emit('reload')
             ]
         });
     }

@@ -2,17 +2,8 @@
         <!-- update member modal  -->
     <Modal :show = classInfo.isOpen :maxWidth="classInfo.width">
         <section class="p-2" ref="modalContentRef">
-            <div class="w-full inline-flex justify-between mb-1 p-2">
-                <h2 class="font-boldened sm:text-sm md:text-xl text-gray-800 dark:text-gray-300 leading-tight uppercase underline py-1 w-full">
-                    Add New Members.
-                </h2>
-
-                <button @click="closeModal" :class="[classInfo.modalCloseBtn]">
-                    <svg paymentfill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+            <!-- Use the ModalHeader component and pass the header text -->
+            <ModalHeader :headerText="'Add New Members.'" @close="closeModal"></ModalHeader>
 
             <!-- add members tabs  -->
             <mainmembers-form
@@ -61,23 +52,6 @@
         }
     };
 
-    // const modalContentRef = ref(null); // Reference to modal content
-
-    // Handle click event on the modal wrapper
-    // const handleClickOutside = (event) => {
-    //     if (modalContentRef.value && !modalContentRef.value.contains(event.target)) {
-    //         closeModal();
-    //     }
-    // };
-
-    // onMounted(() => {
-    //     document.addEventListener('click', handleClickOutside);
-    // })
-
-    // onUnmounted(() => {
-    //     document.removeEventListener('click', handleClickOutside);
-    // })
-
     onUnmounted(() => document.removeEventListener('keydown', closeOnEscape));
 
     // classes 
@@ -91,7 +65,7 @@
 
         isLoading: false,
 
-        modalCloseBtn: 'cursor-pointer dark:text-cyan-800 text-cyan-500 transition-transform hover:rotate-180 w-6 h-6 hover:w-8 hover:h-8',
+        modalCloseBtn: 'cursor-pointer dark:text-cyan-400 text-cyan-500 transition-transform hover:rotate-180 w-6 h-6 hover:w-6 hover:h-6',
 
         clicked: false,
 

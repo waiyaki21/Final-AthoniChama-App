@@ -187,7 +187,9 @@
 
 <script setup>
     import { reactive, defineEmits ,defineProps, watch, computed, onMounted } from 'vue';
-    import { router } from '@inertiajs/vue3';
+    import { router }   from '@inertiajs/vue3';
+    import {flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass, reloadMembers } from '../../Globals/flashMessages'
+    import eventBus     from '../../Globals/eventBus';
 
     const props = defineProps({
         members : {
@@ -256,7 +258,7 @@
 
     const allMembers = computed(() => {
         
-        let tempMembers = classInfo.info
+        let tempMembers = [...props.members]
 
         // search rows 
         if (classInfo.search != '' && classInfo.search) {
@@ -308,7 +310,7 @@
     onMounted(() => {
         if (router.page.component != 'Settings') {
             classInfo.isLoading = true;
-            resetMembers()
+            setInfo()
         }
     })
 
@@ -316,7 +318,7 @@
 
     function setInfo() {
         classInfo.isLoading = true;
-        classInfo.info      = props.members;
+        classInfo.info      = [...props.members];
         classInfo.sortBy    = 'id';
 
         // sort message
@@ -355,6 +357,8 @@
     }
 
     function downloadSheet(member) {
+        // flashShow('pkaaah', 'info');
+        
         let name    = member.name;
         let url     = '/download/current/member/' + member.id;
         let header  = `Download Member Spreadsheet!`;
@@ -402,7 +406,6 @@
         orderBy('total_investment', 'TOTAL INVESTED');
     }
 
-
     function LoadingOn() {
         classInfo.ascending = !classInfo.ascending;
         classInfo.isLoading = true 
@@ -411,28 +414,6 @@
     function LoadingOff() {
         flashShow(classInfo.flashMessage, classInfo.alertType);
         classInfo.isLoading = false;
-    }
-
-    // flash messages 
-    function flashShow(message, body) {
-        emit('flash', message, body)
-    }
-
-    function flashLoading(message) {
-        classInfo.isLoading      = true;
-        emit('timed', message, 'warning', 100000000)
-    }
-
-    function flashHide() {
-        emit('hide')
-    }
-
-    function flashTimed(message, body, duration) {
-        emit('timed', message, body, duration)
-    }
-
-    function flashShowView(message, body, header, url, button, duration, linkState) {
-        emit('view', message, body, header, url, button, duration, linkState);
     }
 
     // modal functions 
@@ -471,17 +452,18 @@
     }
 
     function resetMembers() {
-        // emit('reload');
-        let link = 'asc';
-        let linkTo = 'id/';
+        emit('reload');
+        // let link = 'asc';
+        // let linkTo = 'id/';
 
-        axios.get('/api/getMembers/' + linkTo + link)
-            .then(
-                ({ data }) => {
-                    classInfo.info = data[0];
-                    classInfo.isLoading = false;
-                    // orderByID();
-                });
+        // axios.get('/api/getMembers/' + linkTo + link)
+        //     .then(
+        //         ({ data }) => {
+        //             classInfo.info = data[0];
+        //             classInfo.isLoading = false;
+        //             reloadNav();
+        //             reloadMembers();
+        //         });
     }
     // end modal functions 
 </script>

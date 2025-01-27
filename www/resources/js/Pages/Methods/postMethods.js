@@ -1,5 +1,6 @@
 // memberMethods.js
 import axios from 'axios';
+import { membersTemp, presetMembers } from '../Globals/flashMessages';
 
 // check file upload cycle forms used in main-cycle 
 export function useFileUpload(classInfo, pluralCheck, { flashTimed, flashHide, flashShow, flashMessages, loadingOn, loadingOk, loadingError, clearFile }) {
@@ -72,7 +73,7 @@ export function useFileUpload(classInfo, pluralCheck, { flashTimed, flashHide, f
                                 : `Welfare Owed - No (0) owed welfare payments in the spreadsheet!`,
                             type: 'info', delay: 500, duration: 19000
                         },
-                        { info: `Spreadsheet Analysis Complete`, type: 'success', delay: 5500, duration: 20000 }
+                        { info: `Spreadsheet Analysis Complete`, type: 'sheets', delay: 5500, duration: 20000 }
                     ];
 
                     loadingOk();
@@ -96,6 +97,7 @@ export function useFileUpload(classInfo, pluralCheck, { flashTimed, flashHide, f
 // check file upload members forms used in main-members
 export function useFileUploadMembers(classInfo, pluralCheck, { flashShow, flashMessages, clearAll }) {
     const onChangeFileMembers = (event) => {
+        // loadingOn();
         if (classInfo.hasFile) {
             clearAll();
         }
@@ -122,13 +124,13 @@ export function useFileUploadMembers(classInfo, pluralCheck, { flashShow, flashM
         // Check if members exist
         axios.post('/members/excel/exist/', data, config)
             .then(({ data }) => {
-                classInfo.members_existing = data.existing_count;
-                classInfo.members_left  = data.new_count;
-                classInfo.members_count = data.existing_count + data.new_count;
-                classInfo.oldMembers    = data.existing_members;
-                classInfo.newMembers    = data.new_members;
-                classInfo.allMembers    = data.all_members;
-                classInfo.exist         = data.exist;
+                classInfo.members_existing  = data.existing_count;
+                classInfo.members_left      = data.new_count;
+                classInfo.members_count     = data.existing_count + data.new_count;
+                classInfo.oldMembers        = data.existing_members;
+                classInfo.newMembers        = data.new_members;
+                classInfo.allMembers        = data.all_members;
+                classInfo.exist             = data.exist;
 
                 // Array to hold messages
                 let messages = [];
@@ -155,7 +157,7 @@ export function useFileUploadMembers(classInfo, pluralCheck, { flashShow, flashM
                             : `No (0) new members in the spreadsheet!`,
                         'newMembers', 200, data.new_count > 0 ? 20000 : 16000
                     ),
-                    createMessage(`Spreadsheet Analysis Complete`, 'success', 300, 20000)
+                    createMessage(`Spreadsheet Analysis Complete`, 'sheets', 300, 20000)
                 );
 
                 classInfo.labelClass = classInfo.labelInfo;
@@ -163,9 +165,16 @@ export function useFileUploadMembers(classInfo, pluralCheck, { flashShow, flashM
                 // Loop through messages and display them
                 flashMessages(messages);
             })
-            .catch(error => {
+            .catch(async error => {
+                // loadingOff();
+
                 if (error.response && error.response.data.errors) {
                     error.response.data.errors.excel.forEach((err) => flashShow(err, 'danger'));
+                    // validate the spreadsheet Errors
+                    // await sheetValidation(error, { flashTimed, clearAll });
+                } else {
+                    // Handle any other errors
+                    flashShow('An unexpected error occurred. Please try again.', 'danger');
                 }
             });
     };
@@ -322,8 +331,12 @@ export function useFileUploadLedgers(classInfo, pluralCheck, { flashShow, flashM
 }
 
 // Submit / Update Members used in main-members
-export function onSubmitSheetAsync(classInfo, form, state, sheetMembers, { flashShow, flashTimed, flashHide, refresh, getAllMembers, clearAll }) {
+export function onSubmitSheetAsync(classInfo, form, state, sheetMembers, { flashShow, flashTimed, flashHide, refresh, flashShowMembers, clearAll }) {
     const submitSheetAsync = async () => {
+        // loading on 
+        classInfo.isLoading = true;
+        
+        // prompt user confirmation 
         if (confirm(classInfo.confirmText)) {
             // Timed flash message
             flashTimed('Spreadsheet Members Processing, please wait...', 'loading', 300000);
@@ -375,24 +388,33 @@ export function onSubmitSheetAsync(classInfo, form, state, sheetMembers, { flash
                 } catch (error) {
                     // Show an error flash message if the update fails
                     flashShow(`${memberData} Update failed. (${remainingMembers} members left)`, 'danger');
+                    // loading off
+                    classInfo.isLoading = false;
                 }
 
                 // After all members are updated, show a final flash message
                 if (remainingMembers === 0) {
+                    // loading on 
+                    classInfo.isLoading = true;
                     flashHide();
                     const time = 9 * 90 * 90;
                     setTimeout(() => {
                         flashShow(`Upload Success.`, 'success', time);
+                        // loading off 
+                        classInfo.isLoading = false;
                     }, 1000);
 
                     if (state) {
                         await refresh(); // Wait for the refresh method to complete
-                        await getAllMembers(); // get all members   
+                        await flashShowMembers(); // flash show all members   
                         await clearAll(); // clear all file info   
                     }
                 }
             }
         } else {
+            // if confirm cancelled 
+            // loading on 
+            classInfo.isLoading = false;
             flashHide();
             flashShow('Upload Cancelled', 'danger');
         }
@@ -483,82 +505,99 @@ function handleErrors(error, { flashTimed, loadingError }) {
     }
 }
 
-// Reset DB used in resetDB in Settings
-// export function onResetDBAsync(classInfo, form, state, sheetMembers, { flashShow, flashTimed, flashHide, refresh, getAllMembers, clearAll }) {
-//     const submitSheetAsync = async () => {
-//         if (confirm(classInfo.confirmText)) {
-//             // Timed flash message
-//             flashTimed('Spreadsheet Members Processing, please wait...', 'loading', 300000);
+// Helper function to handle errors
+async function sheetValidation(error, { flashTimed, clearAll }) {
+    await handleColumnErrors(error, { flashTimed, clearAll });
+}
 
-//             // Filter out the needed members
-//             const toBeUpdated = sheetMembers.value;
+async function handleColumnErrors(error, { flashTimed, clearAll }) {
+    const spreadsheetErrors = {};
 
-//             // Loop through each member and await the Axios request
-//             for (let [index, member] of toBeUpdated.entries()) {
-//                 const remainingMembers = toBeUpdated.length - index - 1;
-//                 let memberData = `${member.name}`;
+    // Classify errors into spreadsheet-level and member-level
+    error.response.data.errors.forEach(err => {
+        const columnError = err.errors.find(e => e.includes('column is required'));
 
-//                 try {
-//                     if (member.exists) {
-//                         form.name = member.name;
-//                         form.telephone = member.telephone;
-//                         form.amount_before = member.amount_before;
-//                         form.welfare_before = member.welfare_before;
-//                         form.welfareowed_before = member.welfareowed_before;
-//                         form.active = member.active;
+        if (columnError) {
+            const columnName = columnError.match(/The "(.*?)" column is required/)[1];
+            if (!spreadsheetErrors[columnName]) {
+                spreadsheetErrors[columnName] = [];
+            }
+            spreadsheetErrors[columnName].push(err.values.members_name);
+        }
+    });
 
-//                         if (member.welfare_owing_may) {
-//                             form.welfare_owing_may = member.welfare_owing_may;
-//                         }
+    // Initialize the error counter
+    let errorCount = Object.keys(spreadsheetErrors).length;
 
-//                         // Await the Axios PUT request
-//                         await axios.put('/update/member/modal/' + member.id, form);
+    // Display spreadsheet errors first
+    let delayColumn = 0; // Start delay at 0ms
+    Object.keys(spreadsheetErrors).forEach(columnName => {
+        const message = `The "${columnName}" column is needed in this spreadsheet.`;
 
-//                         // Show a success flash message after the update
-//                         flashShow(`${memberData} Updated. (${remainingMembers} members left)`, 'info');
-//                     } else {
-//                         form.name = member.name;
-//                         form.telephone = member.telephone;
-//                         form.amount_before = member.amount_before;
-//                         form.welfare_before = member.welfare_before;
-//                         form.welfareowed_before = member.welfareowed_before;
-//                         form.active = member.active;
+        // Display spreadsheet-level error message
+        setTimeout(() => {
+            // Decrement the counter and check if it reaches zero
+            errorCount--;
+            if (errorCount === 0) {
+                handleMembersErrors(error, { flashTimed, clearAll }); // Resolve the Promise when all errors are handled
+            }
+            // timer 
+            flashTimed(message, 'danger', 5000);
+        }, delayColumn);
 
-//                         if (member.welfare_owing_may) {
-//                             form.welfare_owing_may = member.welfare_owing_may;
-//                         }
+        delayColumn += 1000; // Increment delay by 1 second
+    });
+}
 
-//                         // Await the Axios GET request
-//                         await axios.post('/member', form);
+async function handleMembersErrors(error, { flashTimed, clearAll }) {
+    // Group errors by row and member
+    const errorCounts = {};
 
-//                         // Show a success flash message after the update
-//                         flashShow(`${memberData} Added. (${remainingMembers} members left)`, 'success');
-//                     }
-//                 } catch (error) {
-//                     // Show an error flash message if the update fails
-//                     flashShow(`${memberData} Update failed. (${remainingMembers} members left)`, 'danger');
-//                 }
+    error.response.data.errors.forEach(err => {
+        const row = err.row;
+        const name = err.values.members_name;
 
-//                 // After all members are updated, show a final flash message
-//                 if (remainingMembers === 0) {
-//                     flashHide();
-//                     const time = 9 * 90 * 90;
-//                     setTimeout(() => {
-//                         flashShow(`Upload Success.`, 'success', time);
-//                     }, 1000);
+        // If the member already has an entry, increment the count
+        if (errorCounts[row]) {
+            errorCounts[row].count += err.errors.length;
+        } else {
+            // Initialize a new entry for the member
+            errorCounts[row] = {
+                name,
+                count: err.errors.length
+            };
+        }
+    });
 
-//                     if (state) {
-//                         await refresh(); // Wait for the refresh method to complete
-//                         await getAllMembers(); // get all members   
-//                         await clearAll(); // clear all file info   
-//                     }
-//                 }
-//             }
-//         } else {
-//             flashHide();
-//             flashShow('Upload Cancelled', 'danger');
-//         }
-//     };
+    // Loop through the grouped errors and display messages with delay
+    let delay = 0; // Initialize delay (in milliseconds)
 
-//     return { submitSheetAsync };
-// }
+    // Initialize the error counter
+    let memberErrorCount = Object.keys(errorCounts).length;
+
+    Object.entries(errorCounts).forEach(([row, { name, count }]) => {
+        const message = `Member : ${name} on Row: ${row} has ${count} error(s)!`;
+
+        // Use setTimeout to incrementally delay each message
+        setTimeout(() => {
+            // Decrement the counter and check if it reaches zero
+            memberErrorCount--;
+            if (memberErrorCount === 0) {
+                downloadTemplate(clearAll); // Resolve the Promise when all errors are handled
+            }
+            // timer 
+            flashTimed(message, 'warning', 5000);
+        }, delay);
+
+        delay += 1500; // Increase delay by 1 second for the next message
+    });
+}
+
+async function downloadTemplate(clearAll) {
+    membersTemp();
+    presetMembers();
+
+    setTimeout(() => {
+        clearAll()
+    }, 2000);
+}

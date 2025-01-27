@@ -16,6 +16,7 @@ use App\Exports\MembersTemplate;
 use App\Exports\CyclesExportActive;
 use App\Exports\CyclesTemplateFull;
 use App\Exports\CyclesTemplateModal;
+use App\Exports\MembersEmpty;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportSheetsController extends Controller
@@ -69,9 +70,16 @@ class ExportSheetsController extends Controller
 
     // ................ MEMBER EXPORTS .......................
     // excel sheets 
-    public function exportMemberTemplate()
+    public function exportEmptyMemberTemplates()
     {
         $name = 'Enter New Members';
+
+        return Excel::download(new MembersEmpty(), "$name Template.xlsx");
+    }
+
+    public function exportMembersTemplates()
+    {
+        $name = 'Enter & Update New Members';
 
         return Excel::download(new MembersTemplate(), "$name Template.xlsx");
     }

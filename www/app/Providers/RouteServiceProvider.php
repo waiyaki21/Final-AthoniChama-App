@@ -15,6 +15,8 @@ class RouteServiceProvider extends ServiceProvider
 
     public const DASHBOARD = '/dashboard';
 
+    public const SETTINGS = '/settings';
+
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {

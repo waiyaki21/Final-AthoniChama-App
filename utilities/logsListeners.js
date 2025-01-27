@@ -14,10 +14,10 @@ function initializeLogs(log, isDev, path, app) {
 }
 
 // Function to log messages and update the splash window
-const splashLog = (splashWindow, message, type, log) => {
-    // Send the message to the splash window with the type for color-based display
-    if (splashWindow) {
-        splashWindow.webContents.send('status-change', { message, type });
+const splashLog = (splashWindow, message, type, log, progress = null) => {
+    // Ensure the splash window exists and is not destroyed and Send the message to the splash window with the type and progress for color-based display
+    if (splashWindow && !splashWindow.isDestroyed()) {
+        splashWindow.webContents.send('status-change', { message, type, progress });
     }
 
     // Log the message based on the type
@@ -34,11 +34,19 @@ const splashLog = (splashWindow, message, type, log) => {
         case 'error':
             log.error(message); // Red for errors
             break;
+        case 'download':
+            if (progress !== null) {
+                log.log(message); // Include progress in log
+            } else {
+                log.log(message); // Log message without progress if not provided
+            }
+            break;
         default:
             log.log(message); // Default to standard log if type is unknown
             break;
     }
 };
+
 
 // Export both functions
 module.exports = {

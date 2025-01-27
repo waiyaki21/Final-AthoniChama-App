@@ -438,7 +438,7 @@
     })
     
     const { submitSheetAsync } = onSubmitSheetAsync(classInfo, form, false, sheetMembers, {
-        flashShow, flashTimed, flashHide, refresh, getAllMembers, clearAll
+        flashShow, flashTimed, flashHide, refresh, flashShowMembers, clearAll
     })
 
     function clearFields() {
@@ -487,7 +487,7 @@
     }
 
     // toast view to go to all members page 
-    function getAllMembers() {
+    function flashShowMembers() {
         let url     = '/members';
         let header  = `View All Members!`;
         let button  = `All Members`;

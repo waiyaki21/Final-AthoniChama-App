@@ -4,99 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>AthoniChama - Loading Page</title>
-        <style>
-            @font-face {
-                font-family: "Fjalla One";
-                src: url('../www/resources/fonts/Fjalla_One/FjallaOne-Regular.ttf');
-            }
-
-            body {
-                font-family: 'Fjalla One';
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                background-color: #040404;
-                color: rgb(252, 252, 252);
-                margin: 0;
-            }
-
-            .splash-content {
-                text-align: center;
-            }
-
-            .splash-content h1 {
-                font-family: 'Fjalla One';
-                font-size: 3.2rem;
-                font-weight: 400;
-                margin-bottom: 2px;
-                text-transform: uppercase;
-                text-decoration: underline;
-                text-align: center;
-                color: rgb(246, 71, 71);
-            }
-
-            .splash-content h3 {
-                font-family: 'Fjalla One';
-                font-size: 0.9rem;
-                font-weight: 100;
-                margin-bottom: 4px;
-                text-transform: uppercase;
-                text-decoration: underline;
-                text-align: center;
-                color: rgb(255, 86, 86);
-            }
-
-            .loader {
-                border: 5px solid #f3f3f327;
-                border-top: 5px solid #2d5bf4;
-                border-radius: 50%;
-                width: 50px;
-                height: 50px;
-                animation: spin 2s linear infinite;
-                text-align: center;
-            }
-
-            .image {
-                border-radius: 50%;
-                width: 8rem;
-                height: 8rem;
-                text-align: center;
-            }
-
-            @keyframes spin {
-                0% {
-                    transform: rotate(0deg);
-                }
-
-                100% {
-                    transform: rotate(360deg);
-                }
-            }
-
-            .status-list {
-                margin-top: 10px;
-                margin-bottom: 10px;
-                padding: 10px;
-                max-height: 150px;
-                overflow-y: auto;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-            }
-
-            .status-row {
-                margin-bottom: 5px;
-                font-size: 10px;
-                text-align: left;
-            }
-
-            .splash-row {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
-            }
-        </style>
+        <link rel="stylesheet" href="splash.min.css">
     </head>
 
     <body>
@@ -105,7 +13,7 @@
                 <img src="../www/public/img/chama_icon.png" alt="AthoniChama - App Icon" class="image">
             </div>
             <h1 id="header">AthoniChama - App!</h1>
-            <h3 id="status">Loading...</h3>
+            <h3 id="version"></h3>
             <div id="status-list-container" class="status-list">
                 <!-- Messages will be dynamically added here -->
             </div>
@@ -113,46 +21,6 @@
                 <div class="loader" id="loader"></div>
             </div>
         </div>
-        <script>
-            // Listen for the 'status-change' event from the main process
-            window.splashApi.onStatusChange(({ message, type }) => {
-                const statusListContainer   = document.getElementById('status-list-container');
-                const statusHeader          = document.getElementById('header');
-                const statusState           = document.getElementById('status');
-                const loader                = document.querySelector('.loader');
-
-                // Create a new row for the message
-                const messageRow            = document.createElement('div');
-                messageRow.classList.add('status-row');
-                // messageRow.innerText        = message;
-                messageRow.innerHTML        = `<span class="status-dot">•</span> ${message.toUpperCase()}`; // Convert message to uppercase and prepend the dot
-
-                // Apply color based on message type
-                let color;
-                switch (type) {
-                    case 'log': color       = '#10B981'; break; // Green
-                    case 'info': color      = '#06B6D4'; break; // Cyan
-                    case 'warn': color      = '#F59E0B'; break; // Orange
-                    case 'error': color     = '#EF4444'; break; // Red
-                    default: color          = '#FFFFFF'; break; // White
-                }
-                messageRow.style.color = color;
-
-                // Append the new row to the list
-                if (statusListContainer) {
-                    statusListContainer.appendChild(messageRow);
-                    // color 
-                    statusListContainer.style.borderColor   = color;
-                }
-
-                // change colors 
-                if (statusHeader) statusHeader.style.color  = color;
-                if (statusState) statusState.style.color    = color;
-                // Update the loader's border-top color
-                if (loader) {
-                    loader.style.borderTopColor = color;
-                }
-            });
-        </script>
+        <script src="splash.min.js"></script>
     </body>
 </html>

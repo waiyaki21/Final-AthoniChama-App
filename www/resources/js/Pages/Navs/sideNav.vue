@@ -3,88 +3,86 @@
     <aside id="sidebar-button"
         :class="['fixed top-[60px] mt-2 left-1 z-40 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-transparent dark:bg-transparent', info.sideWidth]"
         aria-label="Sidebar" v-show="info.closeNavBar">
-        <div class="h-[90vh] py-2 pl-2 w-full overflow-y-scroll relative font-boldened space-y-2 flex-col hidescroll">
-            <ul :class="props.done ? info.classList : info.settingsList">
+        <div class="h-[90vh] pt-2 pb-6 pl-2 w-full overflow-y-scroll relative font-boldened space-y-2 flex-col hidescroll">
+            <ul :class="info.setupDone ? info.classList : info.settingsList">
                 <li class="relative"
                     v-tooltip="$tooltip('Return Back','right')"
-                    v-if="info.reloadBtn && props.done">
-                    <Link :class="props.done ? info.linkClass : info.settingsClass" @click="getRoute(info.reloadLink)"
+                    v-if="info.reloadBtn && info.setupDone">
+                    <Link :class="info.setupDone ? info.linkClass : info.settingsClass" @click="getRoute(info.reloadLink)"
                         as="button">
-                    <span :class="props.done ? info.spanClass1 : info.settingsClass1">
+                    <span :class="info.setupDone ? info.svgSpanClass : info.svgSettingsClass">
                         <right-arrow class="w-5 h-5"></right-arrow>
                     </span>
-                    <span :class="props.done ? info.spanClass2 : info.settingsClass2" v-if="info.spanShow">Return
+                    <span :class="info.setupDone ? info.headerSpanClass : info.headerSettingsClass" v-if="info.spanShow">Return
                         Back</span>
                     </Link>
                 </li>
                 <li class="relative"
                     v-tooltip="$tooltip('Reload View', 'right')"
-                    v-if="!info.reloadBtn && props.done">
-                    <Link :class="props.done ? info.linkClass : info.settingsClass" @click="getRoute(info.reloadLink)"
+                    v-if="!info.reloadBtn && info.setupDone">
+                    <Link :class="info.setupDone ? info.linkClass : info.settingsClass" @click="getRoute(info.reloadLink)"
                         as="button">
-                        <span :class="props.done ? info.spanClass1 : info.settingsClass1">
+                        <span :class="info.setupDone ? info.svgSpanClass : info.svgSettingsClass">
                             <loading-icon class="w-5 h-5"></loading-icon>
                         </span>
-                        <span :class="props.done ? info.spanClass2 : info.settingsClass2" v-if="info.spanShow">Reload</span>
+                        <span :class="info.setupDone ? info.headerSpanClass : info.headerSettingsClass" v-if="info.spanShow">Reload</span>
                     </Link>
                 </li>
                 <li class="relative" v-for="link in links"
                     v-tooltip="$tooltip(title(link.header), 'right')">
-                    <a :class="props.done ? info.linkClass : info.settingsClass" @click="getRoute(link.link)">
-                        <span :class="props.done ? info.spanClass1 : info.settingsClass1">
-                            <!-- <div :class="[info.svgSize]" v-html="link.icon" @click="getRoute(link.link)"></div> -->
+                    <a :class="info.setupDone ? info.linkClass : info.settingsClass" @click="getRoute(link.link)">
+                        <span :class="info.setupDone ? info.svgSpanClass : info.svgSettingsClass">
                             <!-- icons  -->
                             <component
                                 :is     = "link.icon"
                                 :class  = "info.svgSize"
                                 v-if    = "link.icon"
-                                @click="getRoute(link.link)"
+                                @click  = "getRoute(link.link)"
                             ></component>
                         </span>
-                        <span :class="props.done ? info.spanClass2 : info.settingsClass2" v-if="info.spanShow"
+                        <span :class="info.setupDone ? info.headerSpanClass : info.headerSettingsClass" v-if="info.spanShow"
                             @click="getRoute(link.link)">
                             {{link.header}}
                         </span>
-                        <div :class="info.badgeClass"
-                            v-if="link.badge && link.header == 'Members' && info.membersNo > 0">
+                        <div :class="info.membersNo > 0 ? info.badgeClass : info.badgeSettingsClass" v-if="link.badge && link.header == 'Members' && !info.spanShow">
                             <span>{{ info.membersNo }}</span>
                         </div>
-                        <div :class="info.badgeClass" v-if="link.badge && link.header == 'Cycles' && info.cyclesNo > 0">
+                        <div :class="info.cyclesNo > 0 ? info.badgeClass : info.badgeSettingsClass" v-if="link.badge && link.header == 'Cycles' && !info.spanShow">
                             <span>{{ info.cyclesNo }}</span>
                         </div>
-                        <div :class="info.badgeClass" v-if="link.badge && link.header == 'Projects' && info.projectsNo > 0">
+                        <div :class="info.projectsNo > 0 ? info.badgeClass : info.badgeSettingsClass" v-if="link.badge && link.header == 'Projects' && !info.spanShow">
                             <span>{{ info.projectsNo }}</span>
                         </div>
                     </a>
                 </li>
             </ul>
-            <ul :class="props.done ? info.classList : info.settingsList">
+            <ul :class="info.classList">
                 <li class="relative"
                     v-tooltip="$tooltip('Log Out', 'right')">
                     <Link :class="[info.linkClass]" :href="route('logout')" method="post" as="button">
-                        <span :class="props.done ? info.spanClass1 : info.settingsClass1">
+                        <span :class="[info.svgSpanClass]">
                             <logout-icon :class="[info.svgSize]"></logout-icon>
                         </span>
-                        <span :class="props.done ? info.spanClass2 : info.settingsClass2" v-if="info.spanShow">Logout</span>
+                        <span :class="[info.headerSpanClass]" v-if="info.spanShow">Logout</span>
                     </Link>
                 </li>
                 <li class="relative" v-tooltip="$tooltip('Database Backup', 'right')">
-                    <a :class="props.done ? info.linkClass : info.settingsClass" @click="toggle(), flashShow('Database Backing Up', 'file')" href="/DBbackup">
-                        <span :class="props.done ? info.spanClass1 : info.settingsClass1">
+                    <a :class="[info.linkClass]" @click="toggle(), flashShow('Database Backing Up', 'file')" href="/DBbackup">
+                        <span :class="[info.svgSpanClass]">
                             <download-info :class="[info.svgSize]"></download-info>
                         </span>
-                        <span :class="props.done ? info.spanClass2 : info.settingsClass2" v-if="info.spanShow">
+                        <span :class="[info.headerSpanClass]" v-if="info.spanShow">
                             DB Backup
                         </span>
                     </a>
                 </li>
                 <li class="relative" v-tooltip="$tooltip(!info.spanShow ? 'Expand Sidebar' : 'Close Sidebar', 'right')">
-                    <a :class="props.done ? info.linkClass : info.settingsClass" @click="toggle()">
-                        <span :class="props.done ? info.spanClass1 : info.settingsClass1">
+                    <a :class="[info.linkClass]" @click="toggle()">
+                        <span :class="[info.svgSpanClass]">
                             <expand-icon :class="[info.svgSize]" v-if="!info.spanShow"></expand-icon>
                             <inward-icon :class="[info.svgSize]" v-else></inward-icon>
                         </span>
-                        <span :class="props.done ? info.spanClass2 : info.settingsClass2" v-if="info.spanShow" v-html="!info.spanShow ? 'Expand' : 'Close'"></span>
+                        <span :class="[info.headerSpanClass]" v-if="info.spanShow" v-html="!info.spanShow ? 'Expand' : 'Close'"></span>
                     </a>
                 </li>
             </ul>
@@ -95,7 +93,9 @@
 
 <script setup>
     import { router } from '@inertiajs/vue3';
-    import { onMounted, onUnmounted, reactive, defineProps, ref, defineEmits } from 'vue';
+    import { onMounted, onBeforeUnmount, reactive, defineProps, ref, defineEmits, defineExpose } from 'vue';
+    import eventBus     from "../Globals/eventBus";
+    import { flashShow } from '../Globals/flashMessages';
 
     const props = defineProps({
         show: {
@@ -112,7 +112,7 @@
         },
     })
 
-    const emit = defineEmits(['size','full','flash'])
+    const emit = defineEmits(['size','full'])
 
     const info = reactive ({
         // windowWidthTest: ''
@@ -127,28 +127,19 @@
         classList: 'space-y-2 font-normal relative bg-gray-50 dark:bg-gray-800 border-2 border-cyan-800 w-full dark:border-cyan-600 rounded-md shadow-md py-1',
         settingsList: 'space-y-2 font-normal relative bg-rose-100 dark:bg-rose-900/50 border-2 border-rose-800 w-full dark:border-rose-600 rounded-md shadow shadow-rose-500/40 py-1',
 
-        tooltipClass: 'inline-block absolute invisible z-10 py-2 px-3 w-auto text-sm uppercase font-semibold text-cyan-300 hover:text-cyan-500 bg-cyan-800 dark:bg-cyan-800 rounded-lg shadow-md opacity-0 transition-opacity duration-300 tooltip border-2 border-cyan-300 dark:border-cyan-300 whitespace-nowrap',
+        linkClass: 'mt-1 flex h-10 cursor-pointer items-center truncate w-full p-2 text-gray-900 outline-none transition duration-300 ease-linear hover:text-cyan-600 hover:outline-none focus:bg-transparent focus:outline-none active:bg-transparent active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-gray-300 dark:focus:text-emerald-800 dark:hover:text-cyan-600 md:text-xl text-md hover:underline uppercase group',
+        settingsClass: 'mt-1 flex h-10 cursor-not-allowed items-center truncate w-full p-2 text-red-600 outline-none transition duration-300 ease-linear hover:text-red-600 hover:outline-none focus:bg-transparent focus:outline-none active:bg-transparent active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-red-300 dark:focus:text-red-800 dark:hover:text-red-600 md:text-xl text-md hover:underline uppercase group',
 
-        linkClass: 'mt-1 flex h-10 cursor-pointer items-center truncate w-full p-2 text-gray-900 outline-none transition duration-300 ease-linear hover:text-cyan-600 hover:outline-none focus:bg-transparent focus:outline-none active:bg-transparent active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-gray-300 dark:focus:text-emerald-800 dark:hover:text-cyan-600 md:text-xl text-md hover:underline uppercase',
-        settingsClass: 'mt-1 flex h-10 cursor-not-allowed items-center truncate w-full p-2 text-red-600 outline-none transition duration-300 ease-linear hover:text-red-600 hover:outline-none focus:bg-transparent focus:outline-none active:bg-transparent active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-red-300 dark:focus:text-red-800 dark:hover:text-red-600 md:text-xl text-md hover:underline uppercase',
+        svgSpanClass      : 'mr-1 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-gray-900 dark:[&>svg]:text-gray-300 dark:group-hover:[&>svg]:text-cyan-600',
+        headerSpanClass      : 'group-[&[data-te-sidenav-slim-collapsed=' + 'true' + ']]:data-[te-sidenav-slim=' + 'false' + ']:hidden w-full inline-flex justify-start ms-3',
 
-        spanClass1      : 'mr-1 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-gray-900 dark:[&>svg]:text-gray-300 dark:hover:[&>svg]:text-cyan-600',
+        svgSize: 'h-5 w-5 md:h-6 md:w-6',
 
-        spanClass2      : 'group-[&[data-te-sidenav-slim-collapsed=' + 'true' + ']]:data-[te-sidenav-slim=' + 'false' + ']:hidden',
+        svgSettingsClass      : 'mr-1 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-red-800 dark:[&>svg]:text-red-300 dark:group-hover:[&>svg]:text-red-600',
+        headerSettingsClass      : 'group-[&[data-te-sidenav-slim-collapsed=' + 'true' + ']]:data-[te-sidenav-slim=' + 'false' + ']:hidden w-full inline-flex justify-start ms-3',
 
-        svgSize: 'h-5 w-5',
-
-        settingsClass1      : 'mr-1 [&>svg]:h-5 [&>svg]:w-5 [&>svg]:text-red-800 dark:[&>svg]:text-red-300 dark:hover:[&>svg]:text-red-600',
-
-        settingsClass2      : 'group-[&[data-te-sidenav-slim-collapsed=' + 'true' + ']]:data-[te-sidenav-slim=' + 'false' + ']:hidden',
-
-        spanClassDrop: 'absolute right-0 ml-auto mr-[0.5rem] transition-transform duration-300 ease-linear motion-reduce:transition-none [&>svg]:text-gray-600 dark:[&>svg]:text-gray-300',
-
-        linkDrop: 'h-5 items-center cursor-pointer truncate w-full py-4 pl-[3.4rem] pr-6 text-[0.85rem] text-gray-600 outline-none transition duration-300 ease-linear hover:bg-transparent my-1 hover:text-inherit hover:outline-none focus:bg-transparent focus:text-inherit focus:outline-none active:bg-transparent active:text-inherit active:outline-none data-[te-sidenav-state-active]:text-inherit data-[te-sidenav-state-focus]:outline-none motion-reduce:transition-none dark:text-gray-300 dark:hover:text-emerald-600 dark:hover:bg-white/10 dark:focus:bg-white/10 dark:active:bg-white/10 inline-flex justify-between w-full',
-
-        spanClass3: 'ml-2 inline-block whitespace-nowrap rounded-[0.27rem] bg-emerald-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.85em] font-normal leading-none text-emerald-700',
-
-        badgeClass: 'absolute inline-flex items-center justify-center w-6 h-6 text-xs font-normal text-black bg-cyan-100 border-2 border-cyan-500 rounded-full -top-2 -end-2 dark:border-cyan-900 right-1 px-1',
+        badgeClass: 'absolute inline-flex items-center justify-center w-5 h-5 text-sm font-normal text-black bg-cyan-100 border shadow-sm border-cyan-500 rounded-full -top-0.5 -end-2 dark:border-cyan-900 right-1 px-1',
+        badgeSettingsClass: 'absolute inline-flex items-center justify-center w-5 h-5 text-sm font-normal text-black bg-rose-100 border shadow-sm border-rose-500 rounded-full -top-0.5 -end-2 dark:border-rose-900 right-1 px-1',
 
         ordersList       : [],
 
@@ -182,7 +173,8 @@
         cyclesNo: 0,
         projectsNo: 0,
 
-        clicked: false
+        clicked: false,
+        setupDone: false
     })
 
     const links =  [
@@ -248,22 +240,28 @@
     ]
 
     onMounted(() => {
-        window.addEventListener('resize', () => { getWindowWidth() })
+        window.addEventListener('resize', getWindowWidth);
+        getWindowWidth();
+        // getBackLink();
+        getUrl();
 
-        getWindowWidth()
+        // Define a map of event handlers for various events
+        const eventHandlers = {
+            reloadNav:                  getUrl
+        };
 
-        getBackLink()
+        // Register all event handlers
+        Object.entries(eventHandlers).forEach(([event, handler]) => {
+            eventBus.on(event, handler);
+        });
 
-        axios.get('/api/urlPrev')
-            .then(({ data }) => {
-                    info.membersNo   = data[2];
-                    info.cyclesNo    = data[3];
-                    info.projectsNo  = data[4];
-                });
-    })
-
-    onUnmounted(() => {
-        window.removeEventListener('resize', () => { getWindowWidth() })
+        // Cleanup event listeners on component unmount
+        onBeforeUnmount(() => {
+            window.removeEventListener('resize', getWindowWidth)
+            Object.keys(eventHandlers).forEach((event) => {
+                eventBus.off(event);
+            });
+        });
     })
 
     function toggle() {
@@ -272,7 +270,7 @@
     }
 
     function title(a) {
-        if (props.done) {
+        if (info.setupDone) {
             return a.toUpperCase();
         } else {
             let x = 'View Disabled ,Complete All Settings';
@@ -309,7 +307,7 @@
 
         info.clicked = !info.clicked;
 
-        doneFlash(info.clicked);
+        // doneFlash(info.clicked);
     }
 
     function getUrl() {
@@ -320,7 +318,16 @@
                     info.membersNo   = data[2];
                     info.cyclesNo    = data[3];
                     info.projectsNo  = data[4];
-                    getBackLink();    
+                    info.setupDone   = data[5];
+                    getBackLink();   
+                    
+                    if (!data[5]) {
+                        let flashMessage = 'Complete All Settings!';
+                        let alertBody    = 'danger';
+                        flashShow(flashMessage, alertBody);
+
+                        otherFlash();
+                    }
                 });
     }
 
@@ -368,14 +375,14 @@
             toggle();
         }
 
-        if (props.done) {
+        if (info.setupDone) {
             router.visit(url, { 
                 preserveScroll: true 
             });
         } else {
-            let flashMessage = 'Other Views Disabled ,Complete All Settings!';
+            let flashMessage = 'Other views disabled ,Complete All Settings!';
             let alertBody    = 'danger';
-            emit('flash', flashMessage, alertBody);
+            flashShow(flashMessage, alertBody);
 
             otherFlash();
         }
@@ -384,7 +391,7 @@
     }
 
     function doneFlash(clicked) {
-        if (!props.done && clicked) {
+        if (!info.setupDone && clicked) {
             let flashMessage = 'Complete All Settings!';
             let alertBody    = 'danger';
             flashShow(flashMessage, alertBody);
@@ -411,7 +418,8 @@
         }, 1500);
     }
 
-    function flashShow(message, type) {
-        emit('flash', message, type)
-    }
+    // Expose the function
+    defineExpose({
+        getUrl,
+    });
 </script>

@@ -4,7 +4,7 @@
             <span class="underline md:text-2xl text-xl col-span-3">{{ cycle.name }} Payments.</span>
         </span>
 
-        <h3 :class="['font-boldened text-xl text-gray-800 dark:text-gray-300 leading-tight uppercase py-1 inline-flex justify-end w-full gap-2']">
+        <section :class="['font-boldened text-xl text-gray-800 dark:text-gray-300 leading-tight uppercase py-1 inline-flex justify-end w-full gap-2']">
             <ActionButton :class="'p-0.5 h-fit my-auto rounded-lg hover:shadow-md'"
                 :buttonClass="'danger'"
                 @handleClick="clearAllBalances()"
@@ -21,7 +21,7 @@
                 :buttonText="`Add Payments.`">
                 <add-icon :class="['w-4 h-4 flex-shrink-0']"></add-icon>
             </ActionButton>
-        </h3>
+        </section>
     </h3>
 
     <!-- search  -->

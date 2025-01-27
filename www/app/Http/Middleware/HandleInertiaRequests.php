@@ -55,7 +55,7 @@ class HandleInertiaRequests extends Middleware
 
             // env data
             'version' => env('APP_VERSION'),
-            'setting' => Setting::orderBy('id', 'desc')->first(),
+            'setting' => Setting::first(),
 
             // settings done 
             'done' => $done,

@@ -12,7 +12,7 @@ class Cycle extends Model
 {
     use HasFactory;
 
-    // use SoftDeletes;
+    use SoftDeletes;
 
     protected $dates = ['deleted_at'];
 

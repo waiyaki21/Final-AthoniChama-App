@@ -143,62 +143,69 @@ class ArtisanController extends Controller
             // return $message;
         }
     }
-    
+
     // Manual Refresh Options
     // 1.  
     public function resetCycles()
     {
-        // get all cycles 
-        $cycles = Cycle::get();
+        // Get all cycles, including soft-deleted ones
+        $cycles = Cycle::withTrashed()->get();
 
-        // delete all info 
+        // Delete all associated records, including soft-deleted ones
         foreach ($cycles as $cycle) {
-            // get & delete payments 
+            // Delete payments
             $payments = Payment::where('cycle_id', $cycle->id)
+                ->withTrashed() // Include soft-deleted payments
                 ->get();
             foreach ($payments as $payment) {
-                $payment->delete();
+                $payment->forceDelete(); // Permanently delete
             }
 
-            // get & delete welfares 
+            // Delete welfares
             $welfares = Welfare::where('cycle_id', $cycle->id)
+                ->withTrashed() // Include soft-deleted welfares
                 ->get();
             foreach ($welfares as $welfare) {
-                $welfare->delete();
+                $welfare->forceDelete(); // Permanently delete
             }
 
-            // get & delete expenses 
-            $expneses = Expense::where('cycle_id', $cycle->id)
+            // Delete expenses
+            $expenses = Expense::where('cycle_id', $cycle->id)
+                ->withTrashed() // Include soft-deleted expenses
                 ->get();
-            foreach ($expneses as $expense) {
-                $expense->delete();
+            foreach ($expenses as $expense) {
+                $expense->forceDelete(); // Permanently delete
             }
 
-            // get & delete cycleexpenses 
-            $cycleexpneses = CycleExpense::where('cycle_id', $cycle->id)
+            // Delete cycle expenses
+            $cycleExpenses = CycleExpense::where('cycle_id', $cycle->id)
+                ->withTrashed() // Include soft-deleted cycle expenses
                 ->get();
-            foreach ($cycleexpneses as $cycleexpense) {
-                $cycleexpense->delete();
+            foreach ($cycleExpenses as $cycleExpense) {
+                $cycleExpense->forceDelete(); // Permanently delete
             }
 
-            // get & delete projects 
+            // Delete projects
             $projects = Project::where('cycle_id', $cycle->id)
+                ->withTrashed() // Include soft-deleted projects
                 ->get();
             foreach ($projects as $project) {
-                $project->delete();
+                $project->forceDelete(); // Permanently delete
             }
 
-            // delete cycle 
-            $cycle->delete();
+            // Delete the cycle itself
+            $cycle->forceDelete(); // Permanently delete
 
-            // update finances
+            // Update finances
             $updateFinance = new FinancesController();
             $updateFinance->update();
         }
 
+        // Get and return settings info
         $info = $this->getSettings();
         return $info;
     }
+
     // 2. 
     public function resetMembers()
     {
@@ -243,6 +250,13 @@ class ArtisanController extends Controller
             // delete user 
             $user->delete();
         }
+
+        // Delete all settings
+        Setting::query()->delete();
+
+        // get ,create & update finances
+        $finances = new FinancesController();
+        $finances->updateSettings();
 
         $info = $this->getSettings();
         return $info;

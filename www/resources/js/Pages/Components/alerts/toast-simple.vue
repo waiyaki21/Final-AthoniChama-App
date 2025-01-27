@@ -14,15 +14,15 @@
 
                         <!-- header  -->
                         <span class="sr-only">Info</span>
-                        <h3 class="text-sm md:text-md font-medium uppercase underline">{{ flash.header }}</h3>
+                        <h3 class="text-md md:text-xl uppercase underline text-center w-full">{{ flash.header }}</h3>
                     </div>
                     <!-- body  -->
-                    <div class="font-boldened font-medium my-2 text-xs w-full text-left">
+                    <div class="my-2 text-xs w-full text-left">
                         {{ flash.body }}
                     </div>
-                    <!-- close  -->
+                    <!-- buttons  -->
                     <div class="inline-flex w-full justify-between gap-1">
-                        <ActionButton :buttonClass="'dark'" :tooltipText="flash.urlLink ? `Go to link`: `Download File`" :buttonText="`${flash.button}`" class="rounded-md shadow-md w-full" @handleClick="flash.urlLink ? $goTo(flash.link) : $downloadFile(flash.link)">
+                        <ActionButton :buttonClass="'dark'" :tooltipText="flash.urlLink ? `Go to link`: `Download File`" :buttonText="`${flash.button}`" class="rounded-md shadow-md w-full font-boldened" @handleClick="flash.urlLink ? $goTo(flash.link) : $downloadFile(flash.link)">
                             <right-icon class="mx-2 w-4 h-4 md:w-5 md:h-5 hover:rotate-180"></right-icon>
                         </ActionButton>
                         <StyleButton :buttonClass="'danger'" :tooltipText="`Close Notification`" :buttonText="`Close`"
@@ -66,8 +66,8 @@
                 textClass   : '',
                 type        : '',
 
-                flashButton: 'flex-col gap-1 items-center p-2 py-3 border rounded-md shadow-md cursor-pointer w-[17rem] md:w-[22.5rem]',
-                flashNorm:   'flex items-center p-2 py-3 border rounded-md shadow-md cursor-pointer w-[17rem] md:w-[22.5rem]',
+                flashButton: 'flex-col gap-1 items-center p-2 py-3 border rounded-md shadow-md cursor-pointer w-[17rem] md:w-[22.5rem] font-boldened font-medium ',
+                flashNorm:   'flex items-center p-2 py-3 border rounded-md shadow-md cursor-pointer w-[17rem] md:w-[22.5rem] font-boldened font-medium ',
 
                 success     : false,
                 info        : false,
@@ -150,6 +150,12 @@
                         textClass: 'bg-transparent text-yellow-900 focus:ring-yellow-200 dark:bg-transparent dark:text-gray-900',
                         classType: 'text-yellow-800 border-yellow-300 bg-yellow-50 dark:text-gray-900 dark:bg-yellow-400 dark:border-yellow-200',
                         warning: true
+                    },
+                    sheets: {
+                        icon: 'sheets-icon',
+                        textClass: 'bg-transparent text-white dark:bg-transparent dark:text-white',
+                        classType: 'bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 text-white border border-black',
+                        info: true
                     },
                     file: {
                         icon: 'document-check',
@@ -434,7 +440,7 @@
             },
 
             iconClass(type, text) {
-                const baseClass = 'w-4 h-4 md:w-5 md:h-5 mx-0.5 shrink-0';
+                const baseClass = 'w-5 h-5 md:w-6 md:h-6 m-0.5 shrink-0';
 
                 if (type === 'loading') {
                     return [baseClass, 'animate-spin', text];

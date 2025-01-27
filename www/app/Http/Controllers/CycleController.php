@@ -925,6 +925,49 @@ class CycleController extends Controller
     }
 
     // API CALLS 
+    public function indexCycleInfo()
+    {
+        // get & update all cycles 
+        $cycles         = Cycle::orderBy('id', 'desc')->get();
+
+        // payment total
+        $paySum         = Payment::sum('payment');
+
+        // members total
+        $members        = Member::count();
+
+        // payment average
+        $totalAvg       = Payment::avg('payment');
+
+        //latest cycle
+        $cycle          = Cycle::orderBy('created_at', 'desc')
+            ->first();
+
+        // form data 
+        // get cycle form data
+        if ($cycles->count() == 0) {
+            // get suitable name 
+            $date       = Carbon::now()->format('d/m/Y');
+            $thisMonth  = Carbon::now()->format('F y');
+            $next_name  = $thisMonth;
+        } else {
+            // get suitable name 
+            $date       = Carbon::now()->format('d/m/Y');
+            $nextMonth  = Carbon::now()->addMonth()->format('F y');
+            $next_name  = $nextMonth;
+        }
+
+        // get settings 
+        $settings = Setting::first();
+
+        $info = new DashboardController;
+        $info = $info->CyclesInfo();
+
+        // update all cycles 
+        $this->updateCycles();
+
+        return [ env('APP_NAME'), Route::current()->getName(), $cycles, $date, $next_name, $paySum, $members, $totalAvg, $cycle, $settings, $info];
+    }
     public function getCycleInfo(Cycle $cycle)
     {
         // get cycle

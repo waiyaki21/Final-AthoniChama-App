@@ -1,82 +1,97 @@
 <template>
-    <div class="bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md col-span-3 border-2 border-cyan-300 dark:border-cyan-700 h-fit">
+    <div
+        class="bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md md:col-span-3 col-span-1 border-2 border-cyan-300 dark:border-cyan-700 h-fit">
         <div class="p-2 w-full flex-col">
-            <h3 class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase  py-1 px-2 whitespace-nowrap">
-                <span class="underline text-gray-800 dark:text-gray-300 leading-tight uppercase">Payment Cycles Info.</span> 
-                <span class="mx-2 text-sm text-gray-500 dark:text-gray-500 leading-tight">( {{ allCycles.length }} cycles )</span>
+            <h3
+                class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase  py-1 px-2 whitespace-nowrap">
+                <span class="underline text-gray-800 dark:text-gray-300 leading-tight uppercase">Payment Cycles
+                    Info.</span>
+                <span class="mx-2 text-sm text-gray-500 dark:text-gray-500 leading-tight">( {{ allCycles.length }}
+                    cycles )</span>
             </h3>
-            <h3 class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase py-1 px-1 grid grid-cols-1 md:grid-cols-5 gap-1">   
+            <h3
+                class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase py-1 px-1 grid grid-cols-1 md:grid-cols-5 gap-1">
                 <!-- search  -->
-                <searchHelper class="col-span-3" :total=classInfo.info.length :new=allCycles.length name="cycles" @search=setSearch></searchHelper>
+                <searchHelper class="col-span-3" :total=classInfo.info.length :new=allCycles.length name="cycles"
+                    @search=setSearch></searchHelper>
 
                 <section class="col-span-2 w-full grid grid-flow-col grid-cols-2 gap-1 pt-1 my-auto">
-                    <Dropdown
-                        @click      = 'classInfo.selected = true'
-                        :name       = "'Cycle Year'"
-                        :listsyear  = classInfo.cycleYears
-                        @selected   = selectYears
-                    ></Dropdown>
+                    <Dropdown @click='classInfo.selected = true' :name="'Cycle Year'" :listsyear=classInfo.cycleYears
+                        @selected=selectYears></Dropdown>
 
-                    <Dropdown 
-                        @click      = 'classInfo.selected = true'
-                        :name       = "'Cycle Month'"
-                        :listsmonth = classInfo.cycleMonths
-                        @selected   = selectMonths
-                    ></Dropdown>
+                    <Dropdown @click='classInfo.selected = true' :name="'Cycle Month'" :listsmonth=classInfo.cycleMonths
+                        @selected=selectMonths></Dropdown>
                 </section>
             </h3>
 
-            <hr-line class="border-cyan-800 dark:border-cyan-300"></hr-line>
+            <hr-line :class="allCycles.length == 0 ? 'border-rose-800 dark:border-rose-300' : 'border-cyan-800 dark:border-cyan-300'"></hr-line>
 
             <!-- cycles table  -->
-            <div class="py-2 relative overflow-x-auto overflow-y-scroll h-auto md:max-h-[35rem]" v-if = "!classInfo.isLoading">
-                <h2 class="font-normal font-boldened text-2xl text-center text-cyan-800 dark:text-cyan-300 leading-tight uppercase py-1" v-if="allCycles.length == 0">
+            <div class="py-2 relative overflow-x-auto overflow-y-scroll h-auto md:max-h-[35rem]"
+                v-if="!classInfo.isLoading">
+                <h2 class="font-normal font-boldened text-2xl text-center text-cyan-800 dark:text-cyan-300 leading-tight uppercase py-1"
+                    v-if="allCycles.length == 0">
                     <span v-if="classInfo.search != ''">
-                        NO SUCH PAYMENT CYCLE: 
+                        NO SUCH PAYMENT CYCLE:
                         <br>
                         <span class="text-orange-500 dark:text-orange-500 underline text-xl">
                             {{ classInfo.search }}!!
                         </span>
                     </span>
-                    <span v-else>ADD PAYMENT CYCLEs TO GET STARTED!!</span>
+                    <span v-else class="text-red-500 dark:text-red-500 underline">ADD PAYMENT CYCLEs TO
+                        GET STARTED!!</span>
                 </h2>
                 <table class="mx-auto w-full text-xs text-left text-gray-500 dark:text-gray-400" v-else>
                     <thead class="text-gray-700 uppercase bg-transparent dark:text-gray-400 font-boldened text-xs">
                         <tr>
-                            <td scope="col" class="px-1 uppercase hover:underline hover:text-white cursor-pointer" @click="orderByID()">
+                            <td scope="col" class="px-1 uppercase hover:underline hover:text-white cursor-pointer"
+                                @click="orderByID()">
                                 <div class="flex items-center">
                                     No.
-                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"  @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
+                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"
+                                        @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
                                 </div>
                             </td>
-                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer" @click="orderByName()">
+                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer"
+                                @click="orderByName()">
                                 <div class="flex items-center">
                                     Name
-                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"  @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
+                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"
+                                        @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
                                 </div>
                             </td>
-                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer hidden md:table-cell" @click="orderByDate()">
+                            <td scope="col"
+                                class="px-2 uppercase hover:underline hover:text-white cursor-pointer hidden md:table-cell"
+                                @click="orderByDate()">
                                 <div class="flex items-center">
                                     Date
-                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"  @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
+                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"
+                                        @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
                                 </div>
                             </td>
-                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer" @click="orderByPaid">
+                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer"
+                                @click="orderByPaid">
                                 <div class="flex items-center">
                                     Paid.
-                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"  @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
+                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"
+                                        @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
                                 </div>
                             </td>
-                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer" @click="orderByWelfare">
+                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer"
+                                @click="orderByWelfare">
                                 <div class="flex items-center">
                                     Welfares.
-                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"  @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
+                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"
+                                        @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
                                 </div>
                             </td>
-                            <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer hidden md:table-cell" @click="orderByMembers()">
+                            <td scope="col"
+                                class="px-2 uppercase hover:underline hover:text-white cursor-pointer hidden md:table-cell"
+                                @click="orderByMembers()">
                                 <div class="flex items-center">
                                     Members.
-                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"  @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
+                                    <updown-icon class="w-3 h-3 md:w-4 md:h-4 ml-0.5"
+                                        @click="classInfo.ascending = !classInfo.ascending"></updown-icon>
                                 </div>
                             </td>
                             <td scope="col" class="px-2 uppercase hover:underline hover:text-white cursor-pointer">
@@ -89,26 +104,22 @@
                     <tbody>
                         <tr class="bg-transparent border-b dark:bg-transparent dark:border-gray-700 font-boldened text-sm uppercase"
                             v-for="(cycle, index) in allCycles">
-                            <td scope="row"
-                                class="px-1 uppercase text-gray-900 whitespace-nowrap dark:text-white">
+                            <td scope="row" class="px-1 uppercase text-gray-900 whitespace-nowrap dark:text-white">
                                 {{ cycle.id }}.
                             </td>
-                            <td scope="row"
-                                class="p-2 uppercase text-gray-900 whitespace-nowrap dark:text-white">
+                            <td scope="row" class="p-2 uppercase text-gray-900 whitespace-nowrap dark:text-white">
                                 <!-- progress bar  -->
                                 <a @click="getRoute(cycle)">
                                     <span class="hover:underline text-sm md:text-md">{{ cycle.name }}</span>
                                     <!-- progress bar  -->
-                                    <progressTable
-                                        :percent = cycle.percent
-                                        :name    = cycle.name 
-                                    ></progressTable>
+                                    <progressTable :percent=cycle.percent :name=cycle.name></progressTable>
                                 </a>
                                 <!-- end progress bar  -->
                             </td>
                             <td class="p-2 hidden md:table-cell">
                                 <div class="">
-                                    <div class="font-normal text-xs dark:text-gray-300 text-gray-800 whitespace-nowrap overflow-x-hidden text-ellipsis">
+                                    <div
+                                        class="font-normal text-xs dark:text-gray-300 text-gray-800 whitespace-nowrap overflow-x-hidden text-ellipsis">
                                         {{ moment(cycle.date).format("ddd, Do-MM-YY") }}
                                     </div>
                                     <div class="font-normal text-2xs dark:text-gray-300 text-gray-800 underline">
@@ -117,23 +128,26 @@
                                 </div>
                             </td>
                             <td class="p-2">
-                                <span class="text-blue-500">ksh {{ numFormat(cycle.payments_total) }}</span> 
+                                <span class="text-blue-500">ksh {{ numFormat(cycle.payments_total) }}</span>
                             </td>
                             <td class="p-2">
-                                <span class="text-purple-600">ksh {{ numFormat(cycle.welfares_total) }}</span> 
+                                <span class="text-purple-600">ksh {{ numFormat(cycle.welfares_total) }}</span>
                             </td>
                             <td class="p-2 hidden md:table-cell">
-                                <span class="text-amber-400">{{cycle.members_no}} Paid.</span> 
+                                <span class="text-amber-400">{{cycle.members_no}} Paid.</span>
                             </td>
                             <td class="p-2">
                                 <div class="inline-flex rounded-md shadow-sm gap-1" role="group">
                                     <!-- download  -->
-                                    <a @click="downloadSheet(cycle)" type="button" class="inline-flex items-center p-0.5 text-xs font-normal text-amber-500 bg-transparent rounded-md hover:text-gray-500 dark:text-amber-500 dark:hover:text-amber-500" v-tooltip="$tooltip('Download '+ cycle.name+' Excelsheet','top')">
+                                    <a @click="downloadSheet(cycle)" type="button"
+                                        class="inline-flex items-center p-0.5 text-xs font-normal text-amber-500 bg-transparent rounded-md hover:text-gray-500 dark:text-amber-500 dark:hover:text-amber-500"
+                                        v-tooltip="$tooltip('Download '+ cycle.name+' Excelsheet','top')">
                                         <download-info class="w-5 h-5"></download-info>
-                                    </a >
+                                    </a>
                                     <!-- edit  -->
                                     <button type="button"
-                                        class="inline-flex items-center p-0.5 text-xs font-normal text-cyan-900 bg-transparent rounded-md hover:text-gray-500 dark:text-cyan-700 dark:hover:text-cyan-400" @click="showCycle(cycle)">
+                                        class="inline-flex items-center p-0.5 text-xs font-normal text-cyan-900 bg-transparent rounded-md hover:text-gray-500 dark:text-cyan-700 dark:hover:text-cyan-400"
+                                        @click="showCycle(cycle)">
                                         <edit-icon class="w-5 h-5"></edit-icon>
                                     </button>
                                     <!-- delete  -->
@@ -150,37 +164,29 @@
                 </table>
             </div>
 
-            <loadingTable
-                v-if     = "classInfo.isLoading"
-            ></loadingTable>
+            <loadingTable v-if="classInfo.isLoading"></loadingTable>
             <!--end cycles table  -->
         </div>
     </div>
 
     <!-- update cycle modal  -->
-    <cyclesupdate
-        :info   = classInfo.modalData
-        :show   = classInfo.isOpen
-        @reload = resetCycles
-        @close  = closeCycle
-        @flash  = flashShow
-    ></cyclesupdate>
+    <cyclesupdate :info=classInfo.modalData :show=classInfo.isOpen @reload=resetCycles @close=closeCycle
+        @flash=flashShow></cyclesupdate>
     <!-- end update cycle modal  -->
 
     <!-- delete cycle modal  -->
-    <cyclesdelete
-        :info   = classInfo.deleteData
-        :show   = classInfo.isDeleteOpen
-        @reload = resetCycles
-        @close  = closeDelete
-        @flash  = flashShow
-    ></cyclesdelete>
+    <cyclesdelete :info=classInfo.deleteData :show=classInfo.isDeleteOpen @reload=resetCycles @close=closeDelete
+        @flash=flashShow></cyclesdelete>
     <!-- end delete cycle modal  -->
 </template>
 
 <script setup>
     import { reactive, onMounted, defineEmits ,defineProps, watch, computed } from 'vue';
     import { router } from '@inertiajs/vue3';
+
+    // Globals 
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass, membersTemp, presetMembers, reloadPage } from '../../../Pages/Globals/flashMessages';
+    // import eventBus from "../../Pages/Globals/eventBus";
 
     //moment 
     import moment           from 'moment';
@@ -236,8 +242,8 @@
 
         // delete info 
         isDeleteOpen: false,
-        deleteData: {},
-        deleteID: '',
+        deleteData: null,
+        deleteID: null,
         deleteURL: '/delete/cycle/',
 
         selected: false
@@ -247,12 +253,12 @@
 
     watch(type, (newValue) => {
         classInfo.isLoading = true;
-        resetCycles();
+        setInfo();
     })
 
     // computed 
     const allCycles = computed(() => {
-        let tempCycles = classInfo.info
+        let tempCycles = [...props.cycles]; // Use props directly as the source
 
             // search rows 
             if (classInfo.search != '' && classInfo.search) {
@@ -310,27 +316,51 @@
     }
 
     function setInfo() {
-        classInfo.info      = props.cycles;
+        // Assigning cycles directly to info
+        classInfo.info = [...props.cycles];
 
-        classInfo.sortBy    = 'id';
+        // Clear sorting-related state to avoid dependency loops
+        classInfo.sortBy = 'id';
 
-        // sort message
-        classInfo.message   = allCycles.length + ' Cycles Sorted by: ';
-
-        // flash message 
+        // Set sorting message (no direct dependency on `allCycles` here)
+        const sortedCycles = props.cycles.length + ' Cycles Sorted by: ';
+        classInfo.message = sortedCycles;
         classInfo.ordername = 'ID';
-        if(classInfo.ascending) {
-            if (allCycles.length != 0) {
-                classInfo.flashMessage = classInfo.message + classInfo.ordername + ' ascending';
-                classInfo.alertBody = 'info';
-            }  
+
+        if (classInfo.ascending && props.cycles.length) {
+            classInfo.flashMessage = sortedCycles + ' ascending';
+            classInfo.alertBody = 'info';
         }
 
-        classInfo.cycleYears    = props.cycleinfo[0]
-        classInfo.cycleMonths   = props.cycleinfo[1]
+        classInfo.cycleYears = props.cycleinfo[0];
+        classInfo.cycleMonths = props.cycleinfo[1];
 
         LoadingOff();
     }
+
+
+    // function setInfo() {
+    //     classInfo.info      = props.cycles;
+
+    //     classInfo.sortBy    = 'id';
+
+    //     // sort message
+    //     classInfo.message   = allCycles.length + ' Cycles Sorted by: ';
+
+    //     // flash message 
+    //     classInfo.ordername = 'ID';
+    //     if(classInfo.ascending) {
+    //         if (allCycles.length != 0) {
+    //             classInfo.flashMessage = classInfo.message + classInfo.ordername + ' ascending';
+    //             classInfo.alertBody = 'info';
+    //         }  
+    //     }
+
+    //     classInfo.cycleYears    = props.cycleinfo[0]
+    //     classInfo.cycleMonths   = props.cycleinfo[1]
+
+    //     LoadingOff();
+    // }
 
     function selectYears(a) {
         LoadingOn();
@@ -432,7 +462,6 @@
     function orderByMembers() {
         orderBy('members_no', 'No of MEMBERS CONTRIBUTED');
     }
-
     // end order rows
 
     // loading
@@ -457,8 +486,9 @@
     }
 
     function showDelete(cycle) {
-        classInfo.deleteData   = cycle;
-        classInfo.deleteID     = cycle.id;
+        console.log('showDelete called', cycle);
+        classInfo.deleteData = { ...cycle };
+        classInfo.deleteID = cycle.id;
         classInfo.isDeleteOpen = true;
     }
 
@@ -472,18 +502,20 @@
         let link = 'desc';
         let linkTo = 'id/';
 
-        axios.get('/api/getCycles/' + linkTo + link)
-            .then(
-                ({ data }) => {
-                    classInfo.info      = data[0];
-                    classInfo.sortBy    = 'id';
+        // axios.get('/api/getCycles/' + linkTo + link)
+        //     .then(
+        //         ({ data }) => {
+        //             classInfo.info      = data[0];
+        //             classInfo.sortBy    = 'id';
 
                     LoadingOff();
-                });
+                    emit('reload');
+                    reloadPage();
+                // });
     }
 
-    function flashShow(message, body) {
-        emit('flash', message, body)
-    }
+    // function flashShow(message, body) {
+    //     emit('flash', message, body)
+    // }
     // end modal functions 
 </script>

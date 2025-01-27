@@ -1,6 +1,6 @@
 <template>
     <!-- Breadcrumb -->
-    <nav class="flex mt-1 pt-1 uppercase boldened" aria-label="Breadcrumb">
+    <nav id="mainCrumbsID" class="flex mt-1 pt-1 uppercase boldened" aria-label="Breadcrumb">
         <ol class="inline-flex items-center gap-1 md:gap-3">
             <li class="inline-flex items-center">
                 <button @click="getRoute('/')" class="inline-flex items-center text-xs md:text-sm font-normal text-gray-700 hover:text-blue-600 dark:text-white dark:hover:text-blue-300 hover:underline">

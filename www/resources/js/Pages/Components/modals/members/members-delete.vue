@@ -119,7 +119,7 @@
             onSuccess: () => [
                 // flashMessage 
                 message   = name + ': Member Deleted!',
-                type      = 'danger',
+                type      = 'delete',
                 flashShow(message, type),
                 emit('reload'),
 

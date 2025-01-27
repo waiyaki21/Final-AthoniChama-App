@@ -85,9 +85,15 @@ class SettingController extends Controller
         ]);
     }
     
-    public function update(Request $request, Setting $setting)
+    public function update(Request $request)
     {
-        //validate the request
+        // Delete all settings
+        // Setting::query()->delete();
+
+        // get ,create & update finances
+        // $finances = new FinancesController();
+        // $finances->updateSettings();
+        // //validate the request
         $this->validate($request, [
             'name'           => 'required',
             'shortname'      => 'required',
@@ -95,8 +101,8 @@ class SettingController extends Controller
             'welfare_def'    => 'required|integer|min:1',
         ]);
 
-        // request to update setting
-        $setting = Setting::where('user_id', Auth::user()->id)->first();
+        // // request to update setting
+        $setting = Setting::first();
         $setting->update($request->all());
 
         Finances::where('user_id', Auth::user()->id)
@@ -106,6 +112,7 @@ class SettingController extends Controller
                 ]);
 
         return back();
+        // return $setting;
     }
 
     public function months() : Array 
@@ -175,14 +182,17 @@ class SettingController extends Controller
 
         // get settings 
         $settings = Setting::first();
+        // return $settings;
+        // Initialize the $updated variable
+        $updated = false;
 
-        //if settings are updated
-        if (!$settings) {
-            $updated = false;
+        // Check if the settings have been updated
+        if ($settings && $settings->created_at != $settings->updated_at) {
+            $updated = true; // Set to true if updated
         } else {
-            $updated = true;
+            $updated = false; // Set to false if never updated
         }
 
-        return [$updated, $members, $cycles, $projects];
+        return [$updated, $members, $cycles, $projects, $settings];
     }
 }

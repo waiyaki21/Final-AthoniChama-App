@@ -124,6 +124,8 @@
 
     import { useFileUpload, onSubmitSheetAsync, onCheckCycleInfo, onPostContributionsAsync, onSubmitLedgerAsync } from '../../../Methods/postMethods.js'
 
+    import eventBus     from "../../../Globals/eventBus.js";
+
     const props = defineProps({
         info: {
             type: Object,
@@ -470,31 +472,10 @@
         return tempMembers;
     })
     const { submitSheetAsync } = onSubmitSheetAsync(classInfo, form, false, sheetMembers, {
-        flashShow, flashTimed, flashHide, refresh, getAllMembers, clearAll
+        flashShow, flashTimed, flashHide, refresh, flashShowMembers, clearAll
     })
 
-    // const checkCycleInfo = async (id) => {
-    //     try {
-    //         // Send the GET request for cycle info
-    //         const response = await axios.get(`/update/cycle/info/${classInfo.cycleID}`);
-
-    //         // Destructure the info object safely
-    //         const info = response.data || {}; // Fallback to an empty object if info is undefined
-
-    //         // Check if info has the expected properties
-    //         if (info[0] && info[1]) {
-    //             flashTimed(`${info[0]}`, info[1], 40000);
-    //         } else {
-    //             console.error('Unexpected response structure:', info);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching cycle info:', error);
-    //         flashTimed('Failed to update cycle info', 'danger', 40000);
-    //     }
-    // }
-
-    // toast view to go to all members page 
-    function getAllMembers() {
+    function flashShowMembers() {
         // if (parentName == 'Modal') {
         //     emit('close');
         // }
@@ -548,7 +529,9 @@
     }
 
     function refresh() {
+        clearAll();
         emit('reload');
+        eventBus('reloadCycles');
     }
 
     function getAllCycles(id, name) {

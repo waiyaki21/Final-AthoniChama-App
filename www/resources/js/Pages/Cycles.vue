@@ -1,36 +1,30 @@
 <template>
+
     <Head>
         <title>{{ props.route }}</title>
     </Head>
 
     <!-- breadcrumb  -->
-    <maincrumbs ref = "mainCrumbsRefs" :items = navItems></maincrumbs>
+    <maincrumbs ref="mainCrumbsRefs" :items=navItems></maincrumbs>
     <!-- end breadcrumb  -->
 
     <!-- body section  -->
     <div class="py-2 font-boldened">
         <!-- info section  -->
-        <cyclesinfo
-            :infosection    = classInfo.infoSection
-            :infoheader     = classInfo.infoHeader
-            :sectionborder  = classInfo.sectionBorder
-            :cycle          = props.cycle
-            :count          = props.cycles.length
-            :paysum         = props.paySum
-            :avg            = props.avg
-            :members        = props.members
-        ></cyclesinfo>
+        <cyclesinfo :infosection=classInfo.infoSection :infoheader=classInfo.infoHeader
+            :sectionborder=classInfo.sectionBorder :cycle=classInfo.cycle :count=classInfo.cycles.length :paysum=classInfo.paySum :avg=classInfo.avg :members=classInfo.members></cyclesinfo>
         <!-- end info section  -->
 
         <!-- cycles tabs  -->
-        <div class="text-xs font-boldened text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 w-full mb-2 mx-2 p-1 justify-between uppercase lg:hidden inline-flex">
+        <div
+            class="text-xs font-boldened text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 w-full mb-2 mx-2 p-1 justify-between uppercase lg:hidden inline-flex">
             <ul class="flex flex-wrap -mb-px">
                 <li class="me-2">
                     <a :class="[classInfo.tab1]" @click="tabSwitch()">
                         {{ classInfo.tab1Name }}
                         <span
                             class="bg-blue-100 text-gray-800 md:text-xs font-normal mx-1 px-1.5 py-0.5 rounded-full dark:bg-cyan-900 dark:text-white border-2 border-cyan-900 dark:border-cyan-500">
-                            {{ props.cycles.length }}
+                            {{ classInfo.cycles.length }}
                         </span>
                     </a>
                 </li>
@@ -47,35 +41,24 @@
         <hr-line :color="'border-teal-500/50'"></hr-line>
 
         <!-- table and forms  -->
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-1">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-1">
             <!-- cycles table  -->
-            <cyclestable
-                :cycles         = classInfo.info
-                :cycleinfo      = info
-                @flash          = flashShow
-                @view           = flashShowView
-                @reload         = setInfo
-                v-if            = classInfo.tab1show
-            ></cyclestable>
+            <cyclestable :cycles=classInfo.cycles :cycleinfo=classInfo.info @flash=flashShow @view=flashShowView @reload=setInfo
+                v-if=classInfo.tab1show></cyclestable>
             <!-- cycles table  -->
 
             <!-- cycles form  -->
-            <section class="col-span-2 bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md font-boldened border-2 border-cyan-300 dark:border-cyan-700 h-fit" v-if = classInfo.tab2show>
+            <section
+                class="md:col-span-2 col-span-1 bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md font-boldened border-2 border-cyan-300 dark:border-cyan-700 h-fit"
+                v-if=classInfo.tab2show>
                 <div class="p-2 w-full">
-                    <h3 class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase underline py-1 px-2">
+                    <h3
+                        class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase underline py-1 px-2">
                         Add New cycles.
                     </h3>
                     <!-- cycles form  -->
-                    <infocycle
-                        :settings   = props.settings
-                        @reload     = setInfo
-                        @loading    = flashLoading 
-                        @flash      = flashShow
-                        @hide       = flashHide 
-                        @timed      = flashTimed 
-                        @view       = flashShowView 
-                        @allhide    = flashAllHide
-                    ></infocycle>
+                    <infocycle :settings=classInfo.settings @reload=resetInfo @loading=flashLoading @flash=flashShow
+                        @hide=flashHide @timed=flashTimed @view=flashShowView @allhide=flashAllHide></infocycle>
                 </div>
             </section>
             <!-- cycles form  -->
@@ -84,13 +67,14 @@
         <hr-line :color="'border-teal-500/50'"></hr-line>
     </div>
     <!-- end body section  -->
-
-    <!-- toast notification  -->
-    <toast ref="toastNotificationRef"></toast>
 </template>
 
 <script setup>
-    import { defineProps, reactive, computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+    import { defineProps, reactive, computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+
+    // Globals 
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass, membersTemp, presetMembers, presetCycles } from '../Pages/Globals/flashMessages';
+    import eventBus     from "./Globals/eventBus";
 
     const props = defineProps({
         name: {
@@ -101,42 +85,6 @@
             type: String,
             required: true,
         },
-        cycles: {
-            type: Array,
-            required: true,
-        },
-        nextname: {
-            type: String,
-            required: true,
-        },
-        date: {
-            type: String,
-            required: true,
-        },
-        paySum: {
-            type: String,
-            required: true,
-        },
-        members: {
-            type: String,
-            required: true,
-        },
-        avg: {
-            type: String,
-            required: true,
-        },
-        cycle: {
-            type: Object,
-            required: true,
-        },
-        settings: {
-            type: Object,
-            required: true,
-        },
-        info: {
-            type: Array,
-            required: true
-        }
     });
 
     const navItems = computed(() => [
@@ -149,6 +97,18 @@
 
     // classes 
     const classInfo = reactive({
+        // name: '',
+        // route: '',
+        cycles: [],
+        nextname: '',
+        date: '',
+        paySum: '',
+        members: '',
+        avg: '',
+        cycle: {},
+        settings: {},
+        info: [],
+
         isOpen: false,
         modalData: {},
 
@@ -157,13 +117,11 @@
         deleteData: {},
         deleteID: '',
 
-        info: [],
+        // info: [],
 
         myDate: new Date().toISOString().slice(0, 10),
 
         // main progress bar 
-        progressMainBorder: 'border border-cyan-500 p-1 overflow-hidden',
-        progressMainClass: 'alerts flex h-6 items-center justify-center rounded-full bg-gradient-to-r from-gray-200 via-cyan-400 to-blue-500 text-base leading-none',
         infoSection: 'w-full m-2 p-2 text-left mx-auto rounded-xl border-2 shadow-md border border-cyan-500 p-1 overflow-hidden bg-cyan-400/10 dark:bg-cyan-400/10',
         infoHeader: 'text-cyan-300 mb-2 sm:text-base text-xl text-left font-normal underline tracking-tight uppercase',
         sectionBorder: 'w-full inline-flex justify-between m-1 p-1 text-left border-b-2 border-cyan-500',
@@ -187,12 +145,28 @@
 
     onMounted(() => {
         window.addEventListener('resize', updateWidth);
-        setInfo();
+        setInfo()
         progressMain();
-    });
 
-    onUnmounted(() => {
-        window.removeEventListener('resize', updateWidth);
+        // Define a map of event handlers for various events
+        const eventHandlers = {
+            // reloadCycles:                   resetInfo,
+            reloadPage:                     resetInfo,
+        };
+
+        // Register all event handlers
+        Object.entries(eventHandlers).forEach(([event, handler]) => {
+            eventBus.on(event, handler);
+        });
+
+        // Cleanup event listeners on component unmount
+        onBeforeUnmount(() => {
+            window.removeEventListener('resize', updateWidth);
+
+            Object.keys(eventHandlers).forEach((event) => {
+                eventBus.off(event);
+            });
+        });
     });
 
     // Watch screenWidth and update the active tab based on its value
@@ -205,15 +179,60 @@
     });
 
     function setInfo() {
-        updateWidth();
-        
-        classInfo.info = props.cycles;
+        axios.get('/api/getCyclesIndexInfo')
+            .then(
+                ({ data }) => {
+                    updateWidth();
 
-        if (screenWidth.value >= 1024) {
-            allSwitch();
-        } else {
-            tabSwitch();
-        }
+                    // classInfo.info = data[0];
+                    // classInfo.name      = data[0];
+                    // classInfo.route     = data[1];
+                    classInfo.cycles    = data[2];
+                    classInfo.nextname  = data[3];
+                    classInfo.date      = data[4];
+                    classInfo.paySum    = data[5];
+                    classInfo.members   = data[6];
+                    classInfo.avg       = data[7];
+                    classInfo.cycle     = data[8];
+                    classInfo.settings  = data[9];
+                    classInfo.info      = data[10];
+
+                    reloadNav();
+
+                    if (screenWidth.value >= 1024) {
+                        allSwitch();
+                    } else {
+                        tabSwitch();
+                    }
+                });
+    }
+
+    function resetInfo() {
+        axios.get('/api/getCyclesIndexInfo')
+            .then(
+                ({ data }) => {
+                    updateWidth();
+
+                    // classInfo.name      = data[0];
+                    // classInfo.route     = data[1];
+                    classInfo.cycles    = data[2];
+                    classInfo.nextname  = data[3];
+                    classInfo.date      = data[4];
+                    classInfo.paySum    = data[5];
+                    classInfo.members   = data[6];
+                    classInfo.avg       = data[7];
+                    classInfo.cycle     = data[8];
+                    classInfo.settings  = data[9];
+                    classInfo.info      = data[10];
+
+                    reloadNav();
+
+                    if (screenWidth.value >= 1024) {
+                        allSwitch();
+                    } else {
+                        tabSwitch();
+                    }
+                });
     }
 
     function resetTabClass() {
@@ -247,54 +266,8 @@
     }
 
     function progressMain() {
-        classInfo.progressMainClass  = classInfo.progressMainClass;
-        classInfo.progressMainBorder = classInfo.progressMainBorder;
         classInfo.infoHeader         = classInfo.infoHeader;
         classInfo.infoSection        = classInfo.infoSection;
         classInfo.sectionBorder      = classInfo.sectionBorder;
-    }
-
-    // Reference for toast notification
-    const toastNotificationRef = ref(null);
-
-    // Flash message function
-    const flashShow = (info, type) => {
-        flashHide();
-        nextTick(() => {
-            if (toastNotificationRef.value) {
-                toastNotificationRef.value.toastOn([info, type]);
-            }
-        })
-    }
-
-    const flashLoading = (info) => {
-        flashTimed(info, 'loading', 9999999)
-    }
-
-    // Method to trigger a timed flash message
-    const flashTimed = (message, type, duration) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastOnTime([message, type, duration]);
-        }
-    }
-
-    const flashShowView = (message, body, header, url, button, duration, linkState) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastClick([message, body, header, url, button, duration, linkState]);
-        }
-    }
-
-    // Method to hide the loading flash message after a delay
-    const flashHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.loadHide();
-        }
-    }
-
-    // Method to hide all messages after a delay
-    const flashAllHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.allHide();
-        }
     }
 </script>

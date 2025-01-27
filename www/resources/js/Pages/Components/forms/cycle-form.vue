@@ -37,11 +37,6 @@
         <div
             class="text-xs font-boldened text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 w-full mb-1 mx-2 p-2">
             <ul class="flex flex-wrap -mb-px">
-                <li class="me-2">
-                    <a :class="[classInfo.tab1]" @click="tabSwitch1()" preserve-scroll>
-                        Enter cycles Form.
-                    </a>
-                </li>
                 <li class="me-2" v-if="isDashboard">
                     <a :class="[classInfo.tab2Bad, 'cursor-not-allowed']" @click="cycleAlert()"
                         v-if="props.current != null && isDashboard" preserve-scroll>
@@ -54,6 +49,11 @@
                 <li class="me-2" v-else>
                     <a :class="[classInfo.tab3]" @click="tabSwitch3()" preserve-scroll>
                         Upload Ledgers.
+                    </a>
+                </li>
+                <li class="me-2">
+                    <a :class="[classInfo.tab1]" @click="tabSwitch1()" preserve-scroll>
+                        Enter cycles Form.
                     </a>
                 </li>
             </ul>
@@ -161,12 +161,13 @@
 </template>
 
 <script setup>
-    import { useForm, router } from '@inertiajs/vue3';
+    import { useForm, router }  from '@inertiajs/vue3';
 
-    import mainLedger from './main-forms/main-ledger.vue'
-
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, presetCycles, reloadPage } from '../../../Pages/Globals/flashMessages';
+    // main ledger 
+    import mainLedger           from './main-forms/main-ledger.vue'
     //moment 
-    import moment from 'moment';
+    import moment               from 'moment';
 
     import { defineProps, reactive, onMounted, computed, ref, nextTick } from 'vue';
     
@@ -332,16 +333,9 @@
         tab3show: false,
         tabheader: '',
 
-        // alerts
-        alertShow: false,
+        // toast
         alertType: '',
-        alertDuration: 60000,
         flashMessage: '',
-        alertBody: 'border-b-[4px] border-gray-500 shadow-gray-900 dark:shadow-gray-900 bg-gray-100 dark:bg-gray-500',
-        alertSuccess: 'border-b-[4px] border-emerald-800 dark:border-emerald-800 shadow-green-900 dark:shadow-green-900 bg-green-100 dark:bg-green-500',
-        alertInfo: 'border-b-[4px] border-blue-800 dark:border-blue-800 shadow-blue-900 dark:shadow-blue-900 bg-blue-100 dark:bg-blue-500',
-        alertWarning: 'border-b-[4px] border-orange-800 dark:border-orange-800 shadow-orange-900 dark:shadow-orange-900 bg-orange-100 dark:bg-orange-500',
-        alertDanger: 'border-b-[4px] border-red-800 dark:border-red-800 shadow-red-900 dark:shadow-red-900 bg-red-100 dark:bg-red-500',
 
         file_size: '',
         file_name: '',
@@ -360,23 +354,6 @@
         preset_message   : `No ledgers exist in the system yet! Use the preset set by the program manufacturer to upload ledgers. This Template has Ledger records till September 2024!`,
     })
 
-    const alerts = reactive({
-        // alerts
-        alertShow: false,
-        alertShowView: false,
-        alertDuration: 15000,
-        alertType: '',
-        flashMessage: '',
-        alertBody: 'border-b-[4px] border-gray-500 shadow-gray-900 dark:shadow-gray-900 bg-gray-100 dark:bg-gray-500',
-        alertSuccess: 'border-b-[4px] border-emerald-800 dark:border-emerald-800 shadow-green-900 dark:shadow-green-900 bg-green-100 dark:bg-green-500',
-        alertInfo: 'border-b-[4px] border-blue-800 dark:border-blue-800 shadow-blue-900 dark:shadow-blue-900 bg-blue-100 dark:bg-blue-500',
-        alertWarning: 'border-b-[4px] border-orange-800 dark:border-orange-800 shadow-orange-900 dark:shadow-orange-900 bg-orange-100 dark:bg-orange-500',
-        alertDanger: 'border-b-[4px] border-red-800 dark:border-red-800 shadow-red-900 dark:shadow-red-900 bg-red-100 dark:bg-red-500',
-        linkName: '',
-        linkUrl: '',
-        linkState: false,
-    })
-
     onMounted(() => {
         setFields()
         tabSwitch1()
@@ -389,7 +366,7 @@
 
     function checkCount() {
         if (!props.cycles && !isDashboard) {
-            flashShowView(classInfo.preset_message, classInfo.preset_body, classInfo.preset_header, classInfo.preset_url, classInfo.preset_button, 30000, false);
+            presetCycles();
         }
     }
 
@@ -426,15 +403,14 @@
 
     function ledgersTemplate() {
         if (classInfo.tab3show) {
-            flashShowView(classInfo.preset_message, classInfo.preset_body, classInfo.preset_header, classInfo.preset_url, classInfo.preset_button, 30000, false);
+            presetCycles();
         }
     }
 
     function cycleAlert() {
-        // alert('Use the regular form to create new payment cycles one at a time or use the plus button at the right to add either members or payments');
-        alerts.flashMessage = 'Use the regular form to create new payment cycles one at a time or use the plus button at the right to add either members or payments';
-        alerts.alertType    = 'warning';
-        flashShow(alerts.flashMessage, alerts.alertType);
+        classInfo.flashMessage = 'Use the regular form to create new payment cycles one at a time or use the plus button at the right to add either members or payments';
+        classInfo.alertType    = 'warning';
+        flashShow(classInfo.flashMessage, classInfo.alertType);
     }
 
     function tabClass() {
@@ -461,15 +437,15 @@
                         classInfo.month = '';
                         classInfo.monthTrue = false;
                         // flashMessage 
-                        alerts.flashMessage = data[1];
-                        alerts.alertBody = 'danger';
-                        flashShow(alerts.flashMessage, alerts.alertBody);
+                        classInfo.flashMessage = data[1];
+                        classInfo.alertType = 'danger';
+                        flashShow(classInfo.flashMessage, classInfo.alertType);
                     } else {
                         classInfo.cycle_exist = false;
                         // flashMessage 
-                        alerts.flashMessage = data[1];
-                        alerts.alertBody = 'success';
-                        flashShow(alerts.flashMessage, alerts.alertBody);
+                        classInfo.flashMessage = data[1];
+                        classInfo.alertType = 'success';
+                        flashShow(classInfo.flashMessage, classInfo.alertType);
                     }
                 });
     }
@@ -492,9 +468,11 @@
             onFinish: () => setFields(),
 
             onSuccess: () => [
-                alerts.flashMessage = 'New cycle: ' + name + ' Added!',
-                alerts.alertType    = 'success',
-                flashShow(alerts.flashMessage, alerts.alertType),
+                classInfo.flashMessage = 'New cycle: ' + name + ' Added!',
+                classInfo.alertType    = 'success',
+                flashShow(classInfo.flashMessage, classInfo.alertType),
+                refresh(),
+                viewDash()
             ],
 
             onError: () => [
@@ -506,9 +484,9 @@
                 // let allErrors = form.errors,
 
                 // allErrors.forEach(error => {
-                //     alerts.flashMessage = error,
-                //     alerts.alertType    = 'danger',
-                //     flashShow(alerts.flashMessage, alerts.alertType),    
+                //     classInfo.flashMessage = error,
+                //     classInfo.alertType    = 'danger',
+                //     flashShow(classInfo.flashMessage, classInfo.alertType),    
                 // })
                 
             ]
@@ -518,201 +496,31 @@
     function formErrors(form) {
         // if (form.hasErrors) {
             if (form.errors.name) {
-                alerts.flashMessage = form.errors.name,
-                alerts.alertType    = 'danger';
-                flashShow(alerts.flashMessage, alerts.alertType); 
+                classInfo.flashMessage = form.errors.name,
+                classInfo.alertType    = 'danger';
+                flashShow(classInfo.flashMessage, classInfo.alertType); 
             }
             if (form.errors.date) {
-                alerts.flashMessage = form.errors.date,
-                alerts.alertType    = 'danger';
-                flashShow(alerts.flashMessage, alerts.alertType); 
+                classInfo.flashMessage = form.errors.date,
+                classInfo.alertType    = 'danger';
+                flashShow(classInfo.flashMessage, classInfo.alertType); 
             }
             if (form.errors.amount) {
-                alerts.flashMessage = form.errors.amount,
-                alerts.alertType    = 'danger';
-                flashShow(alerts.flashMessage, alerts.alertType); 
+                classInfo.flashMessage = form.errors.amount,
+                classInfo.alertType    = 'danger';
+                flashShow(classInfo.flashMessage, classInfo.alertType); 
             }
             if (form.errors.welfare_amnt) {
-                alerts.flashMessage = form.errors.welfare_amnt,
-                alerts.alertType    = 'danger';
-                flashShow(alerts.flashMessage, alerts.alertType); 
+                classInfo.flashMessage = form.errors.welfare_amnt,
+                classInfo.alertType    = 'danger';
+                flashShow(classInfo.flashMessage, classInfo.alertType); 
             }
         // }
     }
 
-    // upload sheet 
-    function handleclick() {
-        if (!classInfo.clicked) {
-            // console.log("click");
-            classInfo.clicked = true;
-        }
-    }
-
-    // on file change 
-    function onChangeFile(event) {
-        classInfo.labelClass   = classInfo.labelLoading;
-        classInfo.fileSelected = event.target.files.length;
-        classInfo.excel_file   = event.target.files[0];
-        console.log('Uploaded sheet', classInfo.excel_file, classInfo.fileSelected);
-
-        classInfo.file_name      = event.target.files[0].name;
-        classInfo.file_size      = Number(event.target.files[0].size/ (1024 * 1024)).toFixed(2);
-        classInfo.upload_info    = 'File Name ' + classInfo.file_name + ' ' + classInfo.file_size + ' MBs';
-
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data'
-            }
-        }
-
-        let file = event.target.files[0];
-
-        let fileData = file;
-        let data    = new FormData();
-        data.append('excel', fileData);
-
-        axios.post('/members/excel/exist/', data, config)
-            .then(
-                ({ data }) => {
-                    classInfo.members_existing = data[0];
-                    classInfo.members_left     = data[1];
-                    classInfo.members_count    = data[0] + data[1];
-                    if (data[0] > 0) {
-                        if (data[1] > 0) {
-                            classInfo.labelClass = classInfo.labelInfo;
-                            // flashMessage 
-                            alerts.flashMessage   = classInfo.members_existing + ' existing members and ' + classInfo.members_left +' New Member(s)!';
-                            alerts.alertBody      = 'info';
-                            flashShow(alerts.flashMessage, alerts.alertBody);
-                        } else {
-                            // flashMessage 
-                            alerts.flashMessage = 'NOTE! '+ classInfo.members_existing + ' existing members information will be updated with the current sheet information!';
-                            alerts.alertBody = 'danger';  
-                            classInfo.labelClass = classInfo.labelInfo;
-                            flashShow(alerts.flashMessage, alerts.alertBody); 
-                        }  
-                    } else {
-                        classInfo.exist = false;
-                        classInfo.labelClass = classInfo.labelInfo;
-                        // flashMessage 
-                        alerts.flashMessage = classInfo.members_left + ' new members will be added!!';
-                        alerts.alertBody = 'info';
-                        flashShow(alerts.flashMessage, alerts.alertBody);
-                    }
-                })
-            .catch(error => {
-                if (error.response.data.errors) {
-                    let errors = error.response.data.errors.excel;
-                    errors.forEach(error => {
-                        // flashMessage 
-                        alerts.flashMessage = error;
-                        alerts.alertBody = 'danger';
-                        flashShow(alerts.flashMessage, alerts.alertBody);
-                    });
-                }
-            });
-    }
-
-    function clearFile() {
-        classInfo.fileSelected   = '';
-        classInfo.excel_file     = '';
-        classInfo.file_name      = '';
-        classInfo.file_size      = '';
-        classInfo.upload_info    = '';
-        classInfo.labelClass     = classInfo.labelDef;
-    }
-
-    // submit product Sheet
-    function submitSheet() {
-        if (classInfo.fileSelected != 1) {
-            // flashMessage 
-            alerts.flashMessage   = 'Upload 1(One) file at a time!';
-            alerts.alertBody      = 'info';
-            flashShow(alerts.flashMessage, alerts.alertBody);
-            classInfo.labelClass     = classInfo.labelDanger;
-        } else {
-            classInfo.isLoading = true;
-            alerts.flashMessage   = 'Loading! Please Wait';
-            alerts.alertBody      = 'info';
-            flashLoading(alerts.flashMessage, alerts.alertBody);
-            
-            const config = {
-                headers: {
-                    'content-type': 'multipart/form-data'
-                }
-            }
-
-            let file     = classInfo.excel_file;
-            let fileData = file;
-            let data     = new FormData();
-            data.append('excel', fileData);
-            axios.post('/import/cycles/excel/'+ classInfo.year, data, config)
-                .then(
-                    ({ data }) => {
-                        classInfo.isLoading = false;
-                        // flashShowView();
-                        flashUpload();
-                        classInfo.labelClass    = classInfo.labelSuccess
-                        clearFile();
-                    })
-                .catch (error => {
-                    classInfo.labelClass = classInfo.labelDanger;
-                    if (error.response.data.errors) {
-                        let errors = error.response.data.errors.excel;
-                        errors.forEach(error => {
-                            // flashMessage 
-                            alerts.flashMessage = error;
-                            alerts.alertBody = 'danger';
-                            flashShow(alerts.flashMessage, alerts.alertBody);
-                        });
-                    }
-                });
-        }
-    }
-
-    // Reference for toast notification
-    const toastNotificationRef = ref(null);
-
-    // Flash message function
-    const flashShow = (info, type) => {
-        flashHide();
-        nextTick(() => {
-            if (toastNotificationRef.value) {
-                toastNotificationRef.value.toastOn([info, type]);
-            }
-        })
-    }
-
-    const flashLoading = (info) => {
-        flashTimed(info, 'loading', 9999999)
-    }
-
-    // Method to trigger a timed flash message
-    const flashTimed = (message, type, duration) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastOnTime([message, type, duration]);
-        }
-    }
-
-    const flashShowView = (message, body, header, url, button, duration, linkState) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastClick([message, body, header, url, button, duration, linkState]);
-        }
-    }
-
-    // Method to hide the loading flash message after a delay
-    const flashHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.loadHide();
-        }
-    }
-
-    // Method to hide all messages after a delay
-    const flashAllHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.allHide();
-        }
-    }
+    // const flashLoading = (info) => {
+    //     flashTimed(info, 'loading', 9999999)
+    // }
 
     function viewDash() {
         let url = '/dashboard';
@@ -728,9 +536,9 @@
         router.get(url, {
             onSuccess: () => {
                 return Promise.all([
-                    alerts.flashMessage   = 'File Upload Successful!',
-                    alerts.alertType      = 'success',
-                    flashShow(alerts.flashMessage, alerts.alertType),
+                    classInfo.flashMessage   = 'File Upload Successful!',
+                    classInfo.alertType      = 'success',
+                    flashShow(classInfo.flashMessage, classInfo.alertType),
                     classInfo.labelClass = classInfo.labelInfo
                 ])
             },
@@ -738,5 +546,9 @@
                 viewDash();
             },
         })
+    }
+
+    function refresh() {
+        reloadPage();
     }
 </script>
