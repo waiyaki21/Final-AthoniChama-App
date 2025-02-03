@@ -4,7 +4,7 @@
         <h3 class="font-boldened  flex-col  w-full flex py-2 px-1">
             <span :class="[classInfo.mainHeader, 'text-xl']">Recent Cycle</span>
         </h3>
-        <section class="relative grid grid-cols-2 md:grid-cols-1 gap-1 m-1 overflow-y-scroll sm:h-[350px] md:h-[330px]"
+        <section :class="['relative grid grid-cols-2 md:grid-cols-1 gap-1 m-1 overflow-y-scroll', classInfo.tab1show ? 'sm:h-[350px] md:h-[330px]' : 'sm:h-[350px] md:h-[425px]']"
             v-if="props.current != null">
             <div v-for="(item, index) in summaryItems" :key="index"
                 class="mb-2 md:mb-4 border-s-base border-gray-200 dark:border-gray-700 pl-2">
@@ -155,9 +155,6 @@
         <!-- end upload sheet & form -->
     </section>
     <!-- end enter cycles form  -->
-
-    <!-- toast notification  -->
-    <toast ref="toastNotificationRef"></toast>
 </template>
 
 <script setup>

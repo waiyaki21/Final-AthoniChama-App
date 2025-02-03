@@ -1,17 +1,17 @@
 <template>
     <!-- Sidenav -->
     <aside id="sidebar-button"
-        :class="['fixed top-[60px] mt-2 left-1 z-40 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-transparent dark:bg-transparent', info.sideWidth]"
+        :class="['fixed top-[49px] left-1 z-40 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-transparent dark:bg-transparent', info.sideWidth]"
         aria-label="Sidebar" v-show="info.closeNavBar">
         <div class="h-[90vh] pt-2 pb-6 pl-2 w-full overflow-y-scroll relative font-boldened space-y-2 flex-col hidescroll">
             <ul :class="info.setupDone ? info.classList : info.settingsList">
-                <li class="relative"
+                <!-- <li class="relative"
                     v-tooltip="$tooltip('Return Back','right')"
                     v-if="info.reloadBtn && info.setupDone">
                     <Link :class="info.setupDone ? info.linkClass : info.settingsClass" @click="getRoute(info.reloadLink)"
                         as="button">
                     <span :class="info.setupDone ? info.svgSpanClass : info.svgSettingsClass">
-                        <right-arrow class="w-5 h-5"></right-arrow>
+                        <left-arrow class="w-5 h-5"></left-arrow>
                     </span>
                     <span :class="info.setupDone ? info.headerSpanClass : info.headerSettingsClass" v-if="info.spanShow">Return
                         Back</span>
@@ -27,9 +27,9 @@
                         </span>
                         <span :class="info.setupDone ? info.headerSpanClass : info.headerSettingsClass" v-if="info.spanShow">Reload</span>
                     </Link>
-                </li>
+                </li> -->
                 <li class="relative" v-for="link in links"
-                    v-tooltip="$tooltip(title(link.header), 'right')">
+                    v-tooltip="$tooltip(title(link), 'right')">
                     <a :class="info.setupDone ? info.linkClass : info.settingsClass" @click="getRoute(link.link)">
                         <span :class="info.setupDone ? info.svgSpanClass : info.svgSettingsClass">
                             <!-- icons  -->
@@ -58,7 +58,7 @@
             </ul>
             <ul :class="info.classList">
                 <li class="relative"
-                    v-tooltip="$tooltip('Log Out', 'right')">
+                    v-tooltip="$tooltip('SIGN OUT', 'right')">
                     <Link :class="[info.linkClass]" :href="route('logout')" method="post" as="button">
                         <span :class="[info.svgSpanClass]">
                             <logout-icon :class="[info.svgSize]"></logout-icon>
@@ -66,7 +66,7 @@
                         <span :class="[info.headerSpanClass]" v-if="info.spanShow">Logout</span>
                     </Link>
                 </li>
-                <li class="relative" v-tooltip="$tooltip('Database Backup', 'right')">
+                <li class="relative" v-tooltip="$tooltip('DATABASE BACKUP', 'right')">
                     <a :class="[info.linkClass]" @click="toggle(), flashShow('Database Backing Up', 'file')" href="/DBbackup">
                         <span :class="[info.svgSpanClass]">
                             <download-info :class="[info.svgSize]"></download-info>
@@ -76,7 +76,7 @@
                         </span>
                     </a>
                 </li>
-                <li class="relative" v-tooltip="$tooltip(!info.spanShow ? 'Expand Sidebar' : 'Close Sidebar', 'right')">
+                <li class="relative" v-tooltip="$tooltip(!info.spanShow ? 'EXPAND SIDEBAR' : 'CLOSE SIDEBAR', 'right')">
                     <a :class="[info.linkClass]" @click="toggle()">
                         <span :class="[info.svgSpanClass]">
                             <expand-icon :class="[info.svgSize]" v-if="!info.spanShow"></expand-icon>
@@ -112,7 +112,7 @@
         },
     })
 
-    const emit = defineEmits(['size','full'])
+    const emit = defineEmits(['size','full', 'done'])
 
     const info = reactive ({
         // windowWidthTest: ''
@@ -174,7 +174,7 @@
         projectsNo: 0,
 
         clicked: false,
-        setupDone: false
+        setupDone: true
     })
 
     const links =  [
@@ -269,13 +269,15 @@
         spanVisible();
     }
 
-    function title(a) {
+    function title(link) {
+        let text = '';
         if (info.setupDone) {
-            return a.toUpperCase();
+            text = link.header.toUpperCase();
         } else {
-            let x = 'View Disabled ,Complete All Settings';
-            return x;
+            text = 'View Disabled ,Complete All Settings';
         }
+
+        return text;
     }
 
     function closeNav() {
@@ -293,22 +295,22 @@
         }
     }
 
-    function getBackLink() {
-        let link = info.reloadLink
-        // console.log(route().current());
+    // function getBackLink() {
+    //     let link = info.reloadLink
+    //     // console.log(route().current());
 			
-        if (link == 'empty' || route().current() == 'Dashboard') {
-            info.reloadBtn     = false;
-            info.reloadLink    = '/dashboard';
-        } else {
-            info.reloadBtn     = true;
-            info.reloadLink    = link;
-        }
+    //     if (link == 'empty' || route().current() == 'Dashboard') {
+    //         info.reloadBtn     = false;
+    //         info.reloadLink    = '/dashboard';
+    //     } else {
+    //         info.reloadBtn     = true;
+    //         info.reloadLink    = link;
+    //     }
 
-        info.clicked = !info.clicked;
+    //     info.clicked = !info.clicked;
 
-        // doneFlash(info.clicked);
-    }
+    //     // doneFlash(info.clicked);
+    // }
 
     function getUrl() {
         axios.get('/api/urlPrev')
@@ -319,7 +321,7 @@
                     info.cyclesNo    = data[3];
                     info.projectsNo  = data[4];
                     info.setupDone   = data[5];
-                    getBackLink();   
+                    // getBackLink();   
                     
                     if (!data[5]) {
                         let flashMessage = 'Complete All Settings!';
@@ -328,6 +330,8 @@
 
                         otherFlash();
                     }
+
+                    emit('done', data[5])
                 });
     }
 
@@ -367,10 +371,12 @@
                 break;
         }
 
-        getBackLink()
+        // getBackLink()
     }
 
     function getRoute(url) {
+        // console.log(url);
+        
         if (info.spanShow == true) {
             toggle();
         }

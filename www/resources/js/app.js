@@ -36,20 +36,8 @@ import GuestLayout      from './Pages/Layouts/GuestLayout.vue';
 
 // alerts
 import toast            from './Pages/Components/alerts/toast-simple.vue';
-// import alertview        from './Pages/Components/alerts/toast-view.vue';
-// import alertnew         from './Pages/Components/alerts/toast-new.vue';
 
 // crumbs
-import dashboardcrumbs  from './Pages/Components/breadcrumbs/dashboard-crumbs.vue';
-import cyclescrumbs     from './Pages/Components/breadcrumbs/cycles-crumbs.vue';
-import profilecrumbs    from './Pages/Components/breadcrumbs/profile-crumbs.vue';
-import ledgerCrumbs     from './Pages/Components/breadcrumbs/ledger-crumbs.vue';
-import memberscrumbs    from './Pages/Components/breadcrumbs/members-crumbs.vue';
-import membercrumbs     from './Pages/Components/breadcrumbs/member-crumbs.vue';
-import paymentcrumbs    from './Pages/Components/breadcrumbs/payment-crumbs.vue';
-import expensescrumbs   from './Pages/Components/breadcrumbs/expenses-crumbs.vue';
-import settingscrumbs   from './Pages/Components/breadcrumbs/settings-crumbs.vue';
-import projectcrumbs    from './Pages/Components/breadcrumbs/project-crumbs.vue';
 import maincrumbs       from './Pages/Components/breadcrumbs/main-crumbs.vue';
 
 // forms
@@ -90,6 +78,7 @@ import memberinfo       from './Pages/Components/infopanel/member-info.vue';
 import paymentinfo      from './Pages/Components/infopanel/payment-info.vue';
 import expensesinfo     from './Pages/Components/infopanel/expenses-info.vue';
 import projectinfo      from './Pages/Components/infopanel/project-info.vue';
+import MemberTableInfo  from './Pages/Components/infopanel/memberTable-info.vue';
 
 // sidepanels
 import memberside       from './Pages/Components/sidepanel/member-side.vue';
@@ -119,20 +108,11 @@ import CycleExpensesDelete from './Pages/Components/modals/cycleExpenses/cycleEx
 import CycleExpensesNamesUpdate from './Pages/Components/modals/cycleExpensesNames/cycleExpensesNames-update.vue';
 import CycleExpensesNamesDelete from './Pages/Components/modals/cycleExpensesNames/cycleExpensesNames-delete.vue';
 
-// tabs
-import ledgerTabs       from './Pages/Components/tabs/dashboard/ledger-tabs.vue';
-import membersTabs      from './Pages/Components/tabs/dashboard/members-tabs.vue';
-import cycleTabs        from './Pages/Components/tabs/dashboard/cycle-tabs.vue';
-import ledgerTab        from './Pages/Components/tabs/ledger/ledgerTabs.vue';
-import settingTabs      from './Pages/Components/tabs/settings/settings-tabs.vue';
-
-import setmembersTabs   from './Pages/Components/tabs/settings/members-tabs.vue';
-import setcycleTabs     from './Pages/Components/tabs/settings/cycle-tabs.vue';
-
-// import membersPageTabs  from './Pages/Components/tabs/members/members-tabs.vue';
-
 // main tabs 
 import MainMembersTabs  from './Pages/Components/tabs/MainTabs/members-tabs.vue';
+import MainCycleTabs    from './Pages/Components/tabs/MainTabs/cycle-tabs.vue';
+import MainSettingTabs  from './Pages/Components/tabs/MainTabs/settings-tabs.vue';
+import MainLedgerTabs   from './Pages/Components/tabs/MainTabs/ledger-tabs.vue';
 
 // others
 import progressTable    from './Pages/Components/progress/progressTable.vue';
@@ -153,11 +133,15 @@ import LoaderIcon       from './Pages/Utilities/icons/loaderIcon.vue';
 import CloudIcon        from './Pages/Utilities/icons/cloudIcon.vue';
 import hrLine           from './Pages/Utilities/hrLine/hrLine.vue';
 
+// utilities table
+import NotFound         from './Pages/Utilities/Tables/Table-NotFound.vue';
+
 // buttons 
 import actionButton     from './Pages/Utilities/Button/actionButton.vue';
 import styleButton      from './Pages/Utilities/Button/styleButton.vue';
 import tabButton        from './Pages/Utilities/Button/tabButton.vue';
 import ModalHeader      from './Pages/Utilities/Modals/ModalHeader.vue';
+import viewToggle       from './Pages/Utilities/Dashboard/viewToggle.vue';
 
 import { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CheckIcon, XMarkIcon, HomeIcon, DocumentCheckIcon, PencilIcon, TrashIcon, FolderArrowDownIcon, PhoneIcon, ChevronUpDownIcon, CalendarDaysIcon, PlusIcon, TableCellsIcon, DocumentPlusIcon, MagnifyingGlassIcon, BellAlertIcon, ArrowPathIcon, CurrencyDollarIcon, ClockIcon, MoonIcon, LightBulbIcon, UserGroupIcon, ArrowUpTrayIcon, ArrowDownTrayIcon, HandRaisedIcon, PaperAirplaneIcon, SparklesIcon, UserPlusIcon, DocumentArrowDownIcon, CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, HomeModernIcon, XCircleIcon, PresentationChartLineIcon, Cog8ToothIcon, UserIcon, ArrowUpCircleIcon, ArrowDownCircleIcon, ArrowLeftCircleIcon, ArrowRightCircleIcon, UserMinusIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, Bars3Icon } from '@heroicons/vue/24/solid';
 
@@ -261,22 +245,9 @@ createInertiaApp({
 
             // alerts
             .component('toast', toast)
-            // .component('alertview', alertview)
-            // .component('alertview', alertfile)
-            // .component('alert', alertnew)
 
             // crumbs
             .component('maincrumbs', maincrumbs)
-            .component('dashboardcrumbs', dashboardcrumbs)
-            .component('cyclescrumbs', cyclescrumbs)
-            .component('profilecrumbs', profilecrumbs)
-            .component('ledgerCrumbs', ledgerCrumbs)
-            .component('memberscrumbs', memberscrumbs)
-            .component('membercrumbs', membercrumbs)
-            .component('paymentcrumbs', paymentcrumbs)
-            .component('expensescrumbs', expensescrumbs)
-            .component('settingscrumbs', settingscrumbs)
-            .component('projectcrumbs', projectcrumbs)
 
             // info 
             .component('infoBlock', infoBlock)
@@ -288,6 +259,7 @@ createInertiaApp({
             .component('paymentinfo', paymentinfo)
             .component('expensesinfo', expensesinfo)
             .component('projectinfo', projectinfo)
+            .component('memberTableInfo', MemberTableInfo)
 
             // sides
             .component('memberside', memberside)
@@ -345,22 +317,13 @@ createInertiaApp({
             .component('projecttable', projecttable)
             .component('cycleExpensestable', CycleExpensesTable)
 
-            // tabs
-            .component('ledgerTabs', ledgerTabs)
-            .component('membersTabs', membersTabs)
-            .component('cycleTabs', cycleTabs)
-            .component('ledgerTab', ledgerTab)
-            .component('settingTabs', settingTabs)
+            .component('notFound',      NotFound)
 
             // main tabs
-            .component('mainMemberTabs', MainMembersTabs)
-
-            // settings tabs 
-            .component('setmembersTabs', setmembersTabs)
-            .component('setcycleTabs', setcycleTabs)
-
-            // members tabs 
-            // .component('membersPageTabs', membersPageTabs)
+            .component('mainMemberTabs',  MainMembersTabs)
+            .component('mainCycleTabs',   MainCycleTabs)
+            .component('mainSettingTabs', MainSettingTabs)
+            .component('mainLedgerTabs',  MainLedgerTabs)
 
             // progress bar
             .component('progressTable', progressTable)
@@ -376,6 +339,7 @@ createInertiaApp({
             .component('ActionButton', actionButton)
             .component('StyleButton', styleButton)
             .component('tabButton', tabButton)
+            .component('viewToggle', viewToggle)
 
             // plugins 
             .use(GlobalMethods)

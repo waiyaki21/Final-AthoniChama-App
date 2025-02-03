@@ -8,26 +8,28 @@ const {
     dialog
 }                                           = require('electron');
 const path                                  = require('path');
-let phpServer                               = require('node-php-server');
 const log                                   = require('electron-log');
+const fs                                    = require('fs');
 
 // Determine if the app is in production or development
 const isDev                                 = !app.isPackaged;
 
 // load in the autoUpdater listener file from utilities 
-const initializeAutoUpdater                 = require('./utilities/autoUpdaterListeners');
+const { setupAutoUpdater }                 = require('./utilities/autoUpdater');
 
 // load in the log listener file from utilities 
 const { 
     initializeLogs, 
-    splashLog
-}                                           = require('./utilities/logsListeners');
+    splashLog,
+    mainLog
+}                                           = require('./utilities/appLogs');
 initializeLogs(log, isDev, path, app);
 
 const { 
     createWindow, 
     getAppDetails, 
-    capitalize
+    capitalize,
+    openUrlDialog
 }                                           = require('./utilities/windowUtils');
 
 // create the windows 
@@ -39,13 +41,7 @@ const singleInstanceLock                   = app.requestSingleInstanceLock();
 
 let isPhpServerRunning                     = false; // State variable to track server status
 
-const phpFolderPath = isDev
-    ? path.join(__dirname, 'php', 'php.exe') // Development
-    : path.join(process.resourcesPath, 'app' ,'php', 'php.exe'); // Production
-
-const wwwFolderPath = isDev
-    ? path.join(__dirname, 'www', 'public') // Development
-    : path.join(process.resourcesPath, 'app' ,'www', 'public'); // Production
+const { phpFolderPath, wwwFolderPath, cacheFolderPath, dbFolderPath } = require("./utilities/paths");
 
 const { phpCheck } = require(isDev
     ? './utilities/phpInfo' // Development
@@ -65,6 +61,10 @@ const showNotification = (title, body) => {
 
 const showLogInfo = (message, type, progress = null) => {
     splashLog(splashWindow, message, type, log, progress);
+};
+
+const showMainLogInfo = (message, type, progress = null) => {
+    mainLog(mainWindow, message, type, log, progress);
 };
 
 // Declare mainCount outside the function to persist its value across calls
@@ -95,14 +95,15 @@ const loadScreen = () => {
 
 // Load the application splash screen
 function createSplashWindow() {
+    // clearLogFile();
     showLogInfo('Create Splash Page...', 'log');
-    // updates check info 
-    showLogInfo('Searching for updates...', 'info');
-    initializeAutoUpdater(showNotification, log, isDev, showLogInfo);
 
     // Start PHP-server check
     showLogInfo('Starting PHP server...', 'log');
     phpCheck(wwwFolderPath, phpFolderPath, updateStatus, showLogInfo); 
+
+    // Updates check info 
+    setupAutoUpdater(showNotification, log, isDev, showLogInfo)
 
     // get App info & notify 
     const { title } = getAppDetails();
@@ -142,110 +143,22 @@ function createSplashWindow() {
 
 // Function to create the main window
 function createMainWindow() {
+    if (!isDev) {
+        // Ensure cacheFolderPath file exists
+        if (!fs.existsSync(cacheFolderPath)) {
+            fs.mkdirSync(path.dirname(cacheFolderPath), { recursive: true });
+            showLogInfo(`CACHE file created at ${cacheFolderPath}🔔`, 'info');
+        } else {
+            showLogInfo(`CACHE file exists at ${cacheFolderPath}✔️`, 'info');
+        }
+    }
+
     // get App info & notify 
     const { title } = getAppDetails();
-    showLogInfo(`${title} Launching!`, 'log');
+    showLogInfo(`${title} Launching!✔️`, 'log');
 
-    let url    = 'http://localhost:8000';
-    let openedUrls = new Set(); // Keep track of opened URLs
-
-    let option1 = capitalize('Open in Browser');
-    let option2 = capitalize('Open in New Window');
-    let option3 = capitalize('Close App');
-    let header  = capitalize(`${title} Options`);
-
-    const options = {
-        type: 'question',
-        buttons: [option1, option2, option3],
-        defaultId: 0,
-        title: `${header}`,
-        message: `Open ${title} in Browser or a Separate window?`,
-    };
-
-    dialog.showMessageBox(mainWindow, options).then(result => {
-        let timeout;
-
-        // Set a timeout to select the default option if no response within 3 seconds
-        timeout = setTimeout(() => {
-            // Check if no option has been selected, simulate default (0) selection
-            if (result.response === -1) { // -1 means no selection
-                result.response = 0; // Set default to 0
-            }
-        }, 3000); // 3 seconds timeout
-
-        if (result.response === 0) {
-            // Create a new browser window for the main application
-            //send logs
-            showLogInfo('Done Opening in browser...', 'log');
-
-            // Open the URL in the user's default browser
-            if (openedUrls.has(url)) {
-                console.log(`The URL ${url} is already open.`);
-                return;
-            }
-
-            shell.openExternal(url)
-                .then(() => {
-                    let time = isDev ? 5000 : 2500;
-                    setTimeout(() => {
-                        // Check if the splashWindow exists and is not destroyed
-                        if (splashWindow && !splashWindow.isDestroyed()) {
-                            splashWindow.close();
-                        }
-                    }, time);
-                    console.log(`Opened ${url} in the default browser.`);
-                    openedUrls.add(url); // Mark this URL as opened
-                })
-                .catch((err) => {
-                    //send logs
-                    showLogInfo(`Failed to open the link: ${err}`, 'error');
-                });
-        } else if (result.response === 1) {
-            // Create a new window for the main application
-            mainWindow = createWindow({
-                width: 1280,
-                height: 800,
-                show: false, // Do not show immediately, only after content is loaded
-                isDev,
-                webPreferences: {
-                    nodeIntegration: true, // Enable node integration for this window
-                    contextIsolation: false // Allow node.js integration in the renderer process
-                }
-            });
-            // Load the main content using URL
-            mainWindow.loadURL(url);
-
-            mainWindow.once('ready-to-show', () => {
-                setTimeout(() => {
-                    // Check if the splashWindow exists and is not destroyed
-                    if (splashWindow && !splashWindow.isDestroyed()) {
-                        splashWindow.close();
-                    }
-
-                    // Check if the mainWindow exists and is not destroyed
-                    if (mainWindow && !mainWindow.isDestroyed()) {
-                        mainWindow.show();
-                    }
-                }, 1500);
-            });
-
-            // Handle window close event
-            mainWindow.on('closed', () => {
-                mainWindow = null; // Dereference the window object when closed
-                app.quit();
-            });
-
-            //send logs
-            showLogInfo('Done Main Window...', 'log');
-        } else if (result.response === 2) {
-            // User clicked "Cancel"
-            console.log('User canceled the action');
-            // You can close the dialog or take any other action here
-            showNotification(`Closing App`, `Closing ${title}!`);
-            //close app
-            app.quit();
-        }
-    });
+    // options dialog to open the mainWindow
+    openUrlDialog('http://localhost:8000', '10000', title, mainWindow, splashWindow, isDev, dialog, showLogInfo, shell, app, fs)
 }
 
 // App initialization and configuration
@@ -287,7 +200,6 @@ if (!singleInstanceLock) {
     app.on('window-all-closed', () => app.quit());
 }
 
-// Handle when all windows are closed
 app.on("quit", () => {
     app.quit();
 });

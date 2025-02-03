@@ -211,6 +211,18 @@
                         classType: 'dark:text-slate-100 dark:bg-slate-900 dark:border-slate-100',
                         info: true
                     },
+                    check: {
+                        icon: 'checksolid-icon',
+                        textClass: 'bg-emerald-50 text-emerald-500 focus:ring-emerald-200 dark:bg-emerald-800 dark:text-emerald-200',
+                        classType: 'text-emerald-800 border-emerald-300 bg-emerald-50 dark:text-emerald-200 dark:bg-emerald-800 dark:border-emerald-800',
+                        success: true
+                    },
+                    times: {
+                        icon: 'timessolid-icon',
+                        textClass: 'bg-rose-50 text-rose-500 focus:ring-rose-200 dark:bg-red-800 dark:text-rose-200',
+                        classType: 'text-red-800 border-red-300 bg-red-50 dark:text-red-200 dark:bg-red-800 dark:border-red-800',
+                        danger: true
+                    },
                 },
             }
         },

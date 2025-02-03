@@ -1,5 +1,3 @@
-// const path = require('path');
-
 module.exports = {
     packagerConfig: {
         icon: 'icons/chama_icon.ico',
@@ -7,24 +5,13 @@ module.exports = {
         ignore: [
             'www/node_modules',
             'www/storage/logs/*',
-            'www/bootsrap/cache/*',
-            // './logs',
+            'www/bootstrap/cache/*',
+            'www/public/backup/*',
+            'www/backups/*',
+            // 'logs',
         ],
-        // Specify the directory where your Electron app source code resides
-        // dir: 'dist/AthoniChamaApp-win32-x64', // Adjust this path to the folder you want to package
-        // extraResource: [
-        //     path.join(__dirname, 'php'), // Include the PHP binary and related files
-        //     path.join(__dirname, 'www'),
-        //     path.join(__dirname, 'utilities'),
-        //     path.join(__dirname, 'node_modules', 'node-php-server'),
-        //     path.join(__dirname, 'node_modules', 'electron-log'),
-        // ],
     },
     makers: [
-        // {
-        //     name: '@electron-forge/maker-zip', // Generic ZIP installer
-        //     platforms: ['win32'],
-        // },
         {
             name: '@electron-forge/maker-squirrel',
             config: {

@@ -6,6 +6,7 @@ window.splashApi.onAppVersion((version) => {
         versionElement.textContent = `v.${version}`; // Set the version dynamically
     }
 });
+
 // Listen for the 'status-change' event from the main process
 window.splashApi.onStatusChange(({ message, type, progress }) => {
     const statusListContainer   = document.getElementById('status-list-container');

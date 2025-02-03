@@ -94,8 +94,37 @@ export const scrollToClass = () => {
     }
 }
 
+// Scroll to the top of a specific class or element
+export const scrollToToggle = (selector = '.topToggle') => {
+    const element = document.querySelector(selector);
+    if (element) {
+        // Get the element's position relative to the viewport
+        const rect = element.getBoundingClientRect();
+        const offset = window.pageYOffset || document.documentElement.scrollTop;
+
+        // Scroll to the calculated position (200px above the element)
+        window.scrollTo({
+            top: rect.top + offset - 50, // Subtract 200px
+            behavior: 'smooth',
+        });
+    } else {
+        console.warn(`Element with class ".${selector}" not found.`);
+    }
+};
+
 // goto Route 
 export const gotoRoute = (url) => {
     // router 
     router.get(url);
+}
+
+// plural check
+export const pluralCheck = (count, name) => {
+    if (count == 1) {
+        let text = `${name}`;
+        return text;
+    } else {
+        let text = `${name}s`;
+        return text;
+    }
 }

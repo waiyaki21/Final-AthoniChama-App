@@ -1,23 +1,29 @@
 <template>
-    <div class="flex-col space-y-2" id="member" role="tabpanel" aria-labelledby="member-tab">
+    <div class="topToggle flex-col space-y-2" id="member" role="tabpanel" aria-labelledby="member-tab">
 
-        <section class="grid grid-cols-1 md:grid-cols-5 gap-1">
+        <viewToggle v-if="isDashboard" :title="'Member'" :show="classInfo.viewShow" :length="classInfo.length"
+            @toggle="toggleInfo"></viewToggle>
+
+        <section class="grid grid-cols-1 md:grid-cols-5 gap-1" v-if="classInfo.viewShow">
             <!-- table  -->
-            <memberstable :members=classInfo.info :loading=classInfo.isLoading @flash=flashShow @hide=flashHide @loading=flashLoading @timed=flashTimed @view=flashShowView @reload=getInfo>
+            <memberstable :members=classInfo.info :loading=classInfo.isLoading @flash=flashShow @hide=flashHide
+                @loading=flashLoading @timed=flashTimed @view=flashShowView @reload=getInfo>
             </memberstable>
 
             <!-- forms  -->
-            <membersform :count=classInfo.info.length @reload=getInfo @flash=flashShow @hide=flashHide @loading=flashLoading @timed=flashTimed @view=flashShowView></membersform>
+            <membersform :count=classInfo.info.length @reload=getInfo @flash=flashShow @hide=flashHide
+                @loading=flashLoading @timed=flashTimed @view=flashShowView></membersform>
         </section>
 
-        <hr-line :color="'border-emerald-500/50'"></hr-line>
+        <hr-line :color="classInfo.viewShow ? 'border-rose-500/50' : 'border-emerald-500/50'"></hr-line>
     </div>
 </template>
 
 <script setup>
-    import { reactive, onBeforeMount, defineEmits, ref, nextTick } from 'vue'
+    import { reactive, onBeforeMount, defineEmits, ref, nextTick, computed } from 'vue'
+    import { router }  from '@inertiajs/vue3';
 
-    import {flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, reloadMembers } from '../../../Globals/flashMessages'
+    import {flashShow, flashLoading, flashTimed, flashShowView, flashHide, reloadMembers, scrollToToggle } from '../../../Globals/flashMessages'
 
     const props = defineProps({
         route: {
@@ -25,21 +31,23 @@
             required: true,
         }
     })
+
+    const isDashboard = computed(() => {
+        return router.page.props.route === 'Dashboard';
+    })
     
     const classInfo = reactive ({
         routeCheck: false,
         isLoading: false,
 
         info: [],
-
-        infoSection: 'w-full m-2 p-2 text-left mx-auto rounded-xl border-2 shadow-md border border-cyan-500 p-1 overflow-hidden bg-cyan-400/10 dark:bg-cyan-400/10',
-        infoHeader: 'text-cyan-300 mb-2 text-2xl text-left font-normal underline tracking-tight uppercase',
-        borderClass: 'border-[3px] border-cyan-600 dark:border-cyan-700',
-        mainHeader: 'font-boldened text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase underline py-1',
+        length: '',
 
         // tabs settings 
-        viewShow: false,
-        headerMain: 'font-normal text-[1.95rem] text-cyan-800 dark:text-gray-300 leading-tight uppercase py-1 w-full inline-flex justify-between my-1 hover:text-cyan-500 dark:hover:text-cyan-500 cursor-pointer',
+        viewShow: true,
+        headerMain: 'font-normal md:text-2xl text-xl leading-tight uppercase py-1 w-full inline-flex justify-between my-1 cursor-pointer text-cyan-800 dark:text-gray-300 ',
+        headerOn: 'hover:text-emerald-500 dark:hover:text-emerald-500',
+        headerOff: 'hover:text-rose-500 dark:hover:text-rose-500',
 
         link: ''
     })
@@ -59,9 +67,20 @@
             .then(
                 ({ data }) => {
                     classInfo.info      = data[0];
+                    classInfo.length    = data[0].length;
                     classInfo.isLoading = false;
                     emit('changed')
                     reloadMembers();
                 });
     }
+
+function toggleInfo(message, type) {
+    classInfo.viewShow = !classInfo.viewShow;
+
+    flashShow(message, type)
+
+    nextTick(() => {
+        scrollToToggle('.topToggle')
+    });
+}
 </script>

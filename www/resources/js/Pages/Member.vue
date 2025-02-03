@@ -71,24 +71,11 @@
             <!-- payments table  -->
             <div :class="['overflow-hidden rounded-lg md:rounded-md w-full p-1']" v-if="classInfo.tab1show">
                 <!-- payments info section  -->
-                <section :class="[classInfo.infoSection]">
-                    <section
-                        :class="['w-full justify-between m-1 p-1 text-left space-x font-boldened grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-1']">
-                        <a v-for="(item, index) in paymentInfoBlocks" :key="index" class="block max-w-sm p-2 bg-transparent">
-                            <h5 :class="[classInfo.infoHeader, 'text-sm md:text-md']" :title="item.title">
-                                <span>{{ item.label }}</span>
-                                <info-icon class="flex-shrink-0 inline md:w-4 md:h-4 md:ml-1 w-3 h-3 ml-0.5"></info-icon>
-                            </h5>
-                            <p :class="classInfo.subHeader" :title="item.value">
-                                <small v-if="item.prefix">
-                                    {{ item.prefix }}
-                                </small>
-                                {{ numFormat(item.value) }}
-                                <span v-if="item.suffix">{{ item.suffix }}</span>
-                            </p>
-                        </a>
-                    </section>
-                </section>
+                <memberTableInfo
+                    :infoBlocks="paymentInfoBlocks" 
+                    :classInfo="classInfo" 
+                    :numFormat="numFormat" 
+                ></memberTableInfo>
 
                 <div
                     :class="['bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-md rounded-lg md:rounded-md w-full p-2', classInfo.borderClass]">
@@ -149,7 +136,7 @@
                                         v-for="(payment, index) in allPayments">
                                         <td scope="row" class="p-2">
                                             <span class="uppercase text-gray-900 whitespace-nowrap dark:text-white">
-                                                {{ payment.id }}.
+                                                {{ index + 1 }}.
                                             </span>
                                         </td>
                                         <td class="p-2">
@@ -306,35 +293,22 @@
             <!-- welfares table  -->
             <div :class="['overflow-hidden rounded-lg md:rounded-md w-full p-1']" v-if="classInfo.tab3show">
                 <!-- welfare info section  -->
-                <section :class="[classInfo.infoSection, 'mb-2']">
-                    <section
-                        :class="['w-full justify-between m-1 p-1 text-left space-x font-boldened grid grid-cols-2 md:grid-cols-4 gap-1']">
-                        <a v-for="(item, index) in welfareInfoBlocks" :key="index" class="block max-w-sm p-2 bg-transparent">
-                            <h5 :class="[classInfo.infoHeader, 'text-sm md:text-md']" :title="item.title">
-                                <span>{{ item.label }}</span>
-                                <info-icon class="flex-shrink-0 inline md:w-4 md:h-4 md:ml-1 w-3 h-3 ml-0.5"></info-icon>
-                            </h5>
-                            <p :class="classInfo.subHeader" :title="item.tooltipInfo">
-                                <small v-if="item.prefix">
-                                    {{ item.prefix }}
-                                </small>
-                                {{ numFormat(item.value) }}
-                                <span v-if="item.suffix">{{ item.suffix }}</span>
-                            </p>
-                        </a>
-                    </section>
-                </section>
+                <memberTableInfo
+                    :infoBlocks="welfareInfoBlocks" 
+                    :classInfo="classInfo" 
+                    :numFormat="numFormat" 
+                ></memberTableInfo>
 
                 <div
                     :class="['bg-gray-100 dark:bg-gray-800 overflow-hidden shadow-md rounded-lg w-full p-2', classInfo.borderClass]">
                     <h3 :class="[classInfo.mainHeader,'justify-between w-full mb-1 grid grid-cols-10 md:grid-cols-3 gap-2']">
                         <span class="underline col-span-9 md:col-span-2">{{ member.name }} Welfares.</span>
                         <!-- forms  -->
-                        <a @click="tabSwitch2()" type="button"
-                            class="col-span-1 md:col-span-1 text-white bg-gradient-to-br from-teal-500 to-blue-700 hover:bg-gradient-to-bl focus:ring-1 focus:outline-none focus:ring-blue-200 dark:focus:ring-blue-800 font-medium rounded-lg text-sm p-2 text-center uppercase shadow-md cursor-pointer inline-flex justify-center md:justify-between gap-2 w-fit">
-                            <add-icon class="w-4 h-4"></add-icon>
-                            <span class="hidden md:block">Add Welfares</span>
-                        </a>
+                        <ActionButton :buttonClass="'info'" :tooltipText="`Add Welfare`"
+                            :buttonText="`Add Welfare`" class="rounded-md shadow-md w-full font-boldened"
+                            @handleClick="tabSwitch2()">
+                            <add-icon class="w-4 h-4 md:w-6 md:h-6"></add-icon>
+                        </ActionButton>
                     </h3>
 
                     <!-- welfares table  -->
@@ -487,15 +461,16 @@
         :payment=numFormat(classInfo.deleteData.payment) @reload=reloadWelfares @close=closeWelfareDelete @loading = flashLoading @flash = flashShow @hide  = flashHide @timed = flashTimed @view = flashShowView>
     </welfaresdelete>
     <!-- end delete payment modal  -->
-
-    <!-- toast notification  -->
-    <toast ref="toastNotificationRef"></toast>
     <!-- end app body  -->
 </template>
 
 <script setup>
     import { useForm, router } from '@inertiajs/vue3';
     import { defineProps, reactive, onMounted, computed, ref, nextTick } from 'vue'
+
+    // Globals 
+    import { flashShow, flashLoading, flashTimed, flashShowView, flashHide, flashAllHide, reloadNav, scrollToClass, membersTemp, presetMembers, presetCycles } from '../Pages/Globals/flashMessages';
+    import eventBus     from "./Globals/eventBus";
 
     //moment 
     import moment from 'moment';
@@ -579,8 +554,8 @@
         subHeader: 'font-normal text-left md:text-2xl text-xl text-gray-900 dark:text-gray-300 uppercase',
 
         // tabs 
-        tabActive: 'inline-block p-1 text-blue-600 border-b-base border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 text-sm cursor-pointer whitespace-nowrap',
-        tabInactive: 'inline-block p-1 border-b-base border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-sm cursor-pointer whitespace-nowrap',
+        tabActive: 'inline-block p-1 text-blue-600 border-b-base border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 text-base cursor-pointer whitespace-nowrap',
+        tabInactive: 'inline-block p-1 border-b-base border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-base cursor-pointer whitespace-nowrap',
         tab1: '',
         tab2: '',
         tab1show: true,
@@ -1039,44 +1014,5 @@
     function reloadWelfares() {
         reloadPayments()
         tabSwitch3()
-    }
-
-    // Reference for toast notification
-    const toastNotificationRef = ref(null);
-
-    // Flash message function
-    const flashShow = (info, type) => {
-        flashHide();
-        nextTick(() => {
-            if (toastNotificationRef.value) {
-                toastNotificationRef.value.toastOn([info, type]);
-            }
-        })
-    }
-
-    const flashLoading = () => {
-        let info        = 'Loading! Please Wait';
-        let type        = 'warning';
-        let duration    = 9999999;
-        flashTimed(info, type , duration)
-    }
-
-    // Method to trigger a timed flash message
-    const flashTimed = (message, type, duration) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastOnTime([message, type, duration]);
-        }
-    }
-
-    const flashShowView = (message, body, header, url, button, duration, linkState) => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.toastClick([message, body, header, url, button, duration, linkState]);
-        }
-    }
-
-    const flashHide = () => {
-        if (toastNotificationRef.value) {
-            toastNotificationRef.value.loadHide();
-        }
     }
 </script>

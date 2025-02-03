@@ -113,6 +113,8 @@ class CyclesExport implements FromView, WithEvents, WithColumnWidths, WithStyles
                                     ->orderBy('member_id', 'asc')
                                     ->get();
 
+        // return $info;
+
         $rows      = $info;
         $numOfRows = $info->count();
 

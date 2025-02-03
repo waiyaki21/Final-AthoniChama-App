@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Cycle;
 use App\Models\Member;
+use App\Models\Payment;
 use App\Exports\LedgerYear;
 use Illuminate\Http\Request;
 use App\Exports\CyclesExport;
+use App\Exports\MembersEmpty;
 use App\Exports\MemberSingle;
 use App\Exports\LedgersSelect;
 use App\Exports\MembersLedger;
@@ -16,7 +18,6 @@ use App\Exports\MembersTemplate;
 use App\Exports\CyclesExportActive;
 use App\Exports\CyclesTemplateFull;
 use App\Exports\CyclesTemplateModal;
-use App\Exports\MembersEmpty;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportSheetsController extends Controller
@@ -109,6 +110,13 @@ class ExportSheetsController extends Controller
 
     public function exportLedgerCycle(Cycle $cycle)
     {
+        // $info      = Payment::where('cycle_id', $cycle->id)
+        //     ->with('member')
+        //     ->orderBy('member_id', 'asc')
+        //     ->get();
+
+        // return $info;
+
         $name = strtoupper('Full ' . $cycle->month . ' ' . $cycle->year . ' Payments & Welfares Ledger');
 
         return Excel::download(new CyclesExport($cycle), "$name Template.xlsx");

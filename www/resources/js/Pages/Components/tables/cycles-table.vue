@@ -1,6 +1,6 @@
 <template>
     <div
-        class="bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md md:col-span-3 col-span-1 border-2 border-cyan-300 dark:border-cyan-700 h-fit">
+        class="bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md md:col-span-5 col-span-1 border-2 border-cyan-300 dark:border-cyan-700 h-fit">
         <div class="p-2 w-full flex-col">
             <h3
                 class="font-boldened text-xl md:text-2xl text-gray-800 dark:text-gray-300 leading-tight uppercase  py-1 px-2 whitespace-nowrap">
@@ -14,13 +14,11 @@
                 <!-- search  -->
                 <searchHelper class="col-span-3" :total=classInfo.info.length :new=allCycles.length name="cycles"
                     @search=setSearch></searchHelper>
-
+ 
                 <section class="col-span-2 w-full grid grid-flow-col grid-cols-2 gap-1 pt-1 my-auto">
-                    <Dropdown @click='classInfo.selected = true' :name="'Cycle Year'" :listsyear=classInfo.cycleYears
-                        @selected=selectYears></Dropdown>
+                    <Dropdown @click='classInfo.selected = true' :name="'Cycle Year'" :listsyear=classInfo.cycleYears @selected=selectYears></Dropdown>
 
-                    <Dropdown @click='classInfo.selected = true' :name="'Cycle Month'" :listsmonth=classInfo.cycleMonths
-                        @selected=selectMonths></Dropdown>
+                    <Dropdown @click='classInfo.selected = true' :name="'Cycle Month'" :listsmonth=classInfo.cycleMonths @selected=selectMonths></Dropdown>
                 </section>
             </h3>
 
@@ -29,22 +27,16 @@
             <!-- cycles table  -->
             <div class="py-2 relative overflow-x-auto overflow-y-scroll h-auto md:max-h-[35rem]"
                 v-if="!classInfo.isLoading">
-                <h2 class="font-normal font-boldened text-2xl text-center text-cyan-800 dark:text-cyan-300 leading-tight uppercase py-1"
-                    v-if="allCycles.length == 0">
-                    <span v-if="classInfo.search != ''">
-                        NO SUCH PAYMENT CYCLE:
-                        <br>
-                        <span class="text-orange-500 dark:text-orange-500 underline text-xl">
-                            {{ classInfo.search }}!!
-                        </span>
-                    </span>
-                    <span v-else class="text-red-500 dark:text-red-500 underline">ADD PAYMENT CYCLEs TO
-                        GET STARTED!!</span>
-                </h2>
+                <notFound
+                    title="Payment Cycles" 
+                    :count="allCycles.length" 
+                    :search="classInfo.search"
+                    v-if="allCycles.length == 0"
+                ></notFound>
                 <table class="mx-auto w-full text-xs text-left text-gray-500 dark:text-gray-400" v-else>
                     <thead class="text-gray-700 uppercase bg-transparent dark:text-gray-400 font-boldened text-xs">
                         <tr>
-                            <td scope="col" class="px-1 uppercase hover:underline hover:text-white cursor-pointer"
+                            <td scope="col" class="px-0.5 uppercase hover:underline hover:text-white cursor-pointer"
                                 @click="orderByID()">
                                 <div class="flex items-center">
                                     No.
@@ -104,8 +96,8 @@
                     <tbody>
                         <tr class="bg-transparent border-b dark:bg-transparent dark:border-gray-700 font-boldened text-sm uppercase"
                             v-for="(cycle, index) in allCycles">
-                            <td scope="row" class="px-1 uppercase text-gray-900 whitespace-nowrap dark:text-white">
-                                {{ cycle.id }}.
+                            <td scope="row" class="px-2 uppercase text-gray-900 whitespace-nowrap dark:text-white">
+                                {{ index + 1 }}.
                             </td>
                             <td scope="row" class="p-2 uppercase text-gray-900 whitespace-nowrap dark:text-white">
                                 <!-- progress bar  -->
@@ -254,11 +246,11 @@
     watch(type, (newValue) => {
         classInfo.isLoading = true;
         setInfo();
-    })
+    }) 
 
     // computed 
     const allCycles = computed(() => {
-        let tempCycles = [...props.cycles]; // Use props directly as the source
+        let tempCycles = [...classInfo.info]; // Use props directly as the source
 
             // search rows 
             if (classInfo.search != '' && classInfo.search) {
@@ -329,7 +321,7 @@
 
         if (classInfo.ascending && props.cycles.length) {
             classInfo.flashMessage = sortedCycles + ' ascending';
-            classInfo.alertBody = 'info';
+            classInfo.alertType = 'info';
         }
 
         classInfo.cycleYears = props.cycleinfo[0];
@@ -338,39 +330,16 @@
         LoadingOff();
     }
 
-
-    // function setInfo() {
-    //     classInfo.info      = props.cycles;
-
-    //     classInfo.sortBy    = 'id';
-
-    //     // sort message
-    //     classInfo.message   = allCycles.length + ' Cycles Sorted by: ';
-
-    //     // flash message 
-    //     classInfo.ordername = 'ID';
-    //     if(classInfo.ascending) {
-    //         if (allCycles.length != 0) {
-    //             classInfo.flashMessage = classInfo.message + classInfo.ordername + ' ascending';
-    //             classInfo.alertBody = 'info';
-    //         }  
-    //     }
-
-    //     classInfo.cycleYears    = props.cycleinfo[0]
-    //     classInfo.cycleMonths   = props.cycleinfo[1]
-
-    //     LoadingOff();
-    // }
-
     function selectYears(a) {
         LoadingOn();
         axios.get('/api/getCyclesBy/year/' + a)
             .then(
                 ({ data }) => {
                     classInfo.info      = data[0];
-                    classInfo.flashMessage   =  a + ' :Payment Cycles!';
-                    classInfo.alertBody      = 'info';
-                    flashShow(classInfo.flashMessage, classInfo.alertBody);
+                    classInfo.flashMessage   =  `Now Showing ${a} : Payment Cycles!`;
+                    classInfo.alertType      = 'info';
+                    classInfo.search         = '';
+                    flashShow(classInfo.flashMessage, classInfo.alertType);
                     LoadingOff();
                 });
     }
@@ -381,9 +350,10 @@
             .then(
                 ({ data }) => {
                     classInfo.info           = data[0];
-                    classInfo.flashMessage   = a + ' :Payment Cycles!';
-                    classInfo.alertBody      = 'info';
-                    flashShow(classInfo.flashMessage, classInfo.alertBody);
+                    classInfo.flashMessage   =  `Now Showing ${a} : Payment Cycles!`;
+                    classInfo.alertType      = 'info';
+                    classInfo.search         = '';
+                    flashShow(classInfo.flashMessage, classInfo.alertType);
                     LoadingOff();
                 });
     }
@@ -429,7 +399,7 @@
         classInfo.flashMessage = `Cycles Sorted By: ${ordername.toLowerCase()} ${classInfo.ascending ? 'ascending' : 'descending'}`;
         classInfo.alertType = classInfo.ascending ? 'asc' : 'desc';
 
-        flashShow(classInfo.flashMessage, classInfo.alertBody);
+        flashShow(classInfo.flashMessage, classInfo.alertType);
 
         LoadingOff();
     }
@@ -471,7 +441,9 @@
     }
 
     function LoadingOff() {
-        classInfo.isLoading = false
+        setTimeout(() => {
+            classInfo.isLoading = false    
+        }, 1000); 
     }
 
     // modal functions 

@@ -1,7 +1,7 @@
 <template>
     <section class="w-full flex flex-col justify-start">
 
-        <span class="text-2xs text-gray-500 w-full uppercase">Search ( {{ props.new }} / {{ props.total }} ) {{ name }}</span>
+        <span class="text-2xs text-gray-500 w-full uppercase inline-flex justify-start">Search ( {{ props.new }} / {{ props.total }} ) {{ name }}</span>        
 
         <h3 class="font-boldened md:text-md sm:text-md text-gray-800 dark:text-gray-300 leading-tight uppercase p-2 w-full inline-flex justify-between gap-1 whitespace-nowrap sticky">
             <div class="relative w-full inline-flex justify-start gap-1">

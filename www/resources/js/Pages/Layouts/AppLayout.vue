@@ -27,7 +27,7 @@
                         <UserDropdown 
                             :userName="$page.props.auth.user.name" 
                             :userEmail="$page.props.auth.user.email"
-                            :done="$page.props.done" 
+                            :done="classInfo.setup" 
                             :classInfo="classInfo" 
                             @dropdown-toggle="switchDrop"
                             @close="closeDrop" />
@@ -39,8 +39,8 @@
         <section
             class="inline-flex justify-normal w-full bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white mainBody">
             <!-- Sidenav -->
-            <sidenav :user=$page.props.auth.user :done=$page.props.done :show=classInfo.showBtn :link=props.urlPrev
-                @size=widthCheck @full=fullCheck @flash=flashShow></sidenav>
+            <sidenav :user=$page.props.auth.user :done=classInfo.setup :show=classInfo.showBtn :link=props.urlPrev
+                @size=widthCheck @full=fullCheck @flash=flashShow @done=doneCheck></sidenav>
             <!--End Sidenav -->
 
             <div :class="['flex min-h-screen bg-transparent dark:bg-transparent w-full', classInfo.bodyWidth]">
@@ -55,7 +55,7 @@
                     <!-- Page Content -->
                     <main>
                         <!-- plugins -->
-                        <mainplugin :user=$page.props.auth.user :done=$page.props.done ref="pluginRef"></mainplugin>
+                        <mainplugin :user=$page.props.auth.user :done=classInfo.setup ref="pluginRef"></mainplugin>
                         <!-- end plugins -->
                         <slot />
                     </main>
@@ -74,6 +74,9 @@
     import UserDropdown from "../Utilities/Dropdown/userDropdown.vue"
     import  packageJson from "../../../../../package.json";
     import { reactive, defineProps, ref, nextTick, onMounted, onBeforeUnmount } from "vue";
+    import { usePage }  from '@inertiajs/vue3';
+
+    const page          = usePage();
 
     import eventBus     from "../Globals/eventBus";
 
@@ -132,6 +135,7 @@
     }
 
     onMounted(() => {
+        doneCheck(page.props.done);
         window.addEventListener('keydown', handleKeydown);
 
         // Define a map of event handlers for various events
@@ -148,12 +152,10 @@
 
                     const { message, body, header, url, button, duration, linkState } = data;
 
-                    if (props.done && !linkState) {
-                       flashShowView(message, body, header, url, button, duration, linkState); 
+                    if (page.props.done) {
+                        flashShowView(message, body, header, url, button, duration, linkState);
                     } else {
-                        if (!props.done && !linkState) {
-                            flashShow('Cannot download until setup is complete', 'download')
-                        }
+                        flashShow(`Cannot ${linkState ? 'view link' : 'download'} until setup is complete`, 'times');
                     }
 
                     setTimeout(() => {
@@ -179,6 +181,11 @@
             });
         });
     });
+
+    function doneCheck(a) {
+        classInfo.setup = a;
+        console.log('done set', classInfo.setup);
+    }
 
     function widthCheck(a) {
         classInfo.bodyWidth = a;

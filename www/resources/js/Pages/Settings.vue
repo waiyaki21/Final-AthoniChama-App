@@ -77,19 +77,23 @@
             <hr-line :color="classInfo.hrClass"></hr-line>
             <!-- tabs body  -->
             <div class="md:my-4 my-2">
-                <settingTabs :settings=settings :updated=classInfo.setup @reload=resetInfo @changed=settingsChanged
+                <mainSettingTabs :settings=settings :updated=classInfo.setup @reload=resetInfo @changed=settingsChanged
                     @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed @view=flashShowView
-                    v-if="classInfo.tab1show"></settingTabs>
+                    v-if="classInfo.tab1show"></mainSettingTabs>
 
-                <setmembersTabs :route=props.route @changed=membersChanged @loading=flashLoading @flash=flashShow
-                    @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab2show"></setmembersTabs>
+                <!-- <setmembersTabs :route=props.route @changed=membersChanged @loading=flashLoading @flash=flashShow
+                    @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab2show"></setmembersTabs> -->
+                <!--main member tabs -->
+                <mainMemberTabs :route=props.route @changed=membersChanged @loading=flashLoading @flash=flashShow
+                    @hide=flashHide @timed=flashTimed @view=flashShowView v-if="classInfo.tab2show"></mainMemberTabs>
+                <!-- end main member tabs  -->
 
-                <setcycleTabs :route=props.route :current=current :cycles=cycles :nextname=nextname :date=date
+                <mainCycleTabs :route=props.route :current=current :cycles=cycles :nextname=nextname :date=date
                     :settings=settings :show="classInfo.tab3show" @changed=cyclesChanged v-if="classInfo.tab3show">
-                </setcycleTabs>
+                </mainCycleTabs>
             </div>
 
-            <hr-line v-if="!classInfo.tab2show" :color="classInfo.hrClass"></hr-line>
+            <!-- <hr-line v-if="!classInfo.tab2show" :color="classInfo.hrClass"></hr-line> -->
         </div>
         <!-- end documents panel -->
     </div>

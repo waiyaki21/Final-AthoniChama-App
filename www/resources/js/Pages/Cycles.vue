@@ -17,7 +17,7 @@
 
         <!-- cycles tabs  -->
         <div
-            class="text-xs font-boldened text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 w-full mb-2 mx-2 p-1 justify-between uppercase lg:hidden inline-flex">
+            class="text-xs font-boldened text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700 w-full mb-2 mx-2 p-1 justify-between uppercase inline-flex">
             <ul class="flex flex-wrap -mb-px">
                 <li class="me-2">
                     <a :class="[classInfo.tab1]" @click="tabSwitch()">
@@ -49,7 +49,7 @@
 
             <!-- cycles form  -->
             <section
-                class="md:col-span-2 col-span-1 bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md font-boldened border-2 border-cyan-300 dark:border-cyan-700 h-fit"
+                class="md:col-span-5 col-span-1 bg-cyan-50 dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg rounded-md font-boldened border-2 border-cyan-300 dark:border-cyan-700 h-fit"
                 v-if=classInfo.tab2show>
                 <div class="p-2 w-full">
                     <h3
@@ -127,14 +127,14 @@
         sectionBorder: 'w-full inline-flex justify-between m-1 p-1 text-left border-b-2 border-cyan-500',
 
         // tabs 
-        tabActive: 'inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-sky-500 dark:border-blue-500 text-xs md:text-sm cursor-pointer',
-        tabInactive: 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-50 text-xs md:text-sm cursor-pointer',
+        tabActive: 'inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-sky-500 dark:border-blue-500 text-sm md:text-base cursor-pointer',
+        tabInactive: 'inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-50 text-sm md:text-base cursor-pointer',
         tab1: '',
         tab2: '',
         tab1show: true,
         tab2show: false,
-        tab1Name: 'Cycles Info',
-        tab2Name: 'Enter Cycles',
+        tab1Name: 'View Cycles',
+        tab2Name: 'Cycles Form',
     })
 
     const screenWidth = ref(window.innerWidth);
@@ -171,11 +171,13 @@
 
     // Watch screenWidth and update the active tab based on its value
     watch(screenWidth, (newWidth) => {
-        if (newWidth > 1024) {
-            allSwitch();
-        } else {
-            tabSwitch();
-        }
+        // if (newWidth > 1024) {
+        //     allSwitch();
+        // } else {
+        //     tabSwitch();
+        // }
+
+        setSwitch();
     });
 
     function setInfo() {
@@ -198,41 +200,21 @@
                     classInfo.info      = data[10];
 
                     reloadNav();
-
-                    if (screenWidth.value >= 1024) {
-                        allSwitch();
-                    } else {
-                        tabSwitch();
-                    }
+                    setSwitch();
                 });
     }
 
     function resetInfo() {
-        axios.get('/api/getCyclesIndexInfo')
-            .then(
-                ({ data }) => {
-                    updateWidth();
+        setInfo();
+    }
 
-                    // classInfo.name      = data[0];
-                    // classInfo.route     = data[1];
-                    classInfo.cycles    = data[2];
-                    classInfo.nextname  = data[3];
-                    classInfo.date      = data[4];
-                    classInfo.paySum    = data[5];
-                    classInfo.members   = data[6];
-                    classInfo.avg       = data[7];
-                    classInfo.cycle     = data[8];
-                    classInfo.settings  = data[9];
-                    classInfo.info      = data[10];
-
-                    reloadNav();
-
-                    if (screenWidth.value >= 1024) {
-                        allSwitch();
-                    } else {
-                        tabSwitch();
-                    }
-                });
+    function setSwitch() {
+        // if (screenWidth.value >= 1024) {
+        //     allSwitch();
+        // } else {
+        //     tabSwitch();
+        // }
+        tabSwitch();
     }
 
     function resetTabClass() {

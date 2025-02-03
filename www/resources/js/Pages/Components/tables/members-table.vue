@@ -3,6 +3,8 @@
         <!-- members table -->
         <div class="text-xs font-boldened text-center text-gray-500 dark:text-gray-400 w-full mb-2 p-1">
             <div class="w-full">
+                <!-- search  -->
+                
                 <h3 class="font-boldened md:text-2xl text-md text-gray-800 dark:text-gray-300 leading-tight uppercase py-1 w-full flex-col justify-between space-y-1 whitespace-nowrap">
                     <span class="w-full inline-flex justify-start">
                         <span class="underline mr-1">Members' Information.</span>
@@ -10,32 +12,20 @@
                             ( {{ allMembers.length }} ) members
                         </span>
                     </span>
-                    <label for="table-search" class="sr-only">Search</label>
-                    <div class="relative w-full">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                        </div>
-                        <input type="text" id="table-search-users" v-model="classInfo.search" class="w-full block p-2 pl-8 text-sm text-gray-900 border border-gray-300 rounded-lg  bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-fit shadow-md placeholder:text-base placeholder:font-normal" placeholder="Search for members">
-                    </div>
+                    <searchHelper :total=classInfo.info.length :new=allMembers.length name="members"
+                    @search=setSearch></searchHelper>
                 </h3>
 
-                <hr-line :color="'border-cyan-500/50 dark:border-cyan-500/50'"></hr-line>
+                <hr-line :color="allMembers.length == 0 ? 'border-rose-500/50 dark:border-rose-500/50' : 'border-teal-500/50 dark:border-teal-500/50'"></hr-line>
 
                 <!-- members table  -->
                 <div class="py-2 relative overflow-x-auto overflow-y-scroll h-auto max-h-[30rem]"  v-if = "!classInfo.isLoading">
-                    <h2 class="font-normal font-boldened text-[3rem] text-center text-cyan-800 dark:text-cyan-300 leading-tight uppercase py-1" v-if="allMembers.length == 0">
-                        <span v-if="classInfo.search != ''">
-                            NO SUCH MEMBER: 
-                            <br>
-                            <span class="text-orange-500 dark:text-orange-500 underline text-[2rem]">
-                                {{ classInfo.search }}!!
-                            </span>
-                        </span>
-                        <span v-else>ADD MEMBERS TO GET STARTED!!</span>
-                    </h2>
-
+                    <notFound
+                        title="Members" 
+                        :count="allMembers.length" 
+                        :search="classInfo.search"
+                        v-if="allMembers.length == 0"
+                    ></notFound>
                     <table class="mx-auto w-full text-xs text-left text-gray-500 dark:text-gray-400" v-else>
                         <thead class="text-gray-700 uppercase bg-transparent dark:text-gray-400 font-boldened text-xs">
                             <tr class="" preserve-scroll>
@@ -146,7 +136,7 @@
                 ></loadingTable>
 
                 <!--end members table  -->
-                <hr-line :color="'border-teal-500/50 dark:border-teal-500/50'"></hr-line>
+                <hr-line :color="allMembers.length == 0 ? 'border-rose-500/50 dark:border-rose-500/50' : 'border-teal-500/50 dark:border-teal-500/50'"></hr-line>
             </div>
         </div>
     </section>
@@ -315,6 +305,10 @@
     })
 
     const emit = defineEmits(['flash', 'loading', 'view', 'hide', 'timed'])
+
+    function setSearch(i) {
+        classInfo.search = i;
+    }
 
     function setInfo() {
         classInfo.isLoading = true;
