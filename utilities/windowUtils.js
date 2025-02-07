@@ -55,7 +55,6 @@ const openUrlDialog = (url, countdown, title, mainWindow, splashWindow, isDev, d
     dotenv.config();
     const appMode = process.env.APP_MODE;
     showLogInfo(`APP MODE ${appMode}`, 'log')
-    console.log(`APP MODE ${appMode}`)
 
     // If APP_MODE is 'browser', open URL in the browser directly
     if (!appMode || appMode.trim() === '') {
@@ -201,4 +200,4 @@ const updateAppMode = (mode, fs, isDev, showLogInfo) => {
     showLogInfo(`APP_MODE set to ${mode}`, 'log');
 };
 
-module.exports = { capitalize, getAppDetails, createWindow, openUrlDialog };
+module.exports = { createWindow, getAppDetails, openUrlDialog };

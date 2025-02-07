@@ -1,6 +1,6 @@
 // memberMethods.js
 import axios from 'axios';
-import { membersTemp, presetMembers } from '../Globals/flashMessages';
+import { membersTemp, presetMembers, reloadPage, gotoRoute } from '../Globals/flashMessages';
 
 // check file upload cycle forms used in main-cycle 
 export function useFileUpload(classInfo, pluralCheck, { flashTimed, flashHide, flashShow, flashMessages, loadingOn, loadingOk, loadingError, clearFile }) {
@@ -443,6 +443,12 @@ export function onSubmitLedgerAsync(classInfo, { flashShow, flashTimed, flashHid
 
                 flashTimed(`${data.message}, Upload Success`, data.type, 40000);
                 await postContributionsAsync(classInfo.cycleID, classInfo.cycleName, contributions);
+
+                await reloadPage();
+
+                setTimeout(() => {
+                    gotoRoute('/dashboard');
+                }, 2000);
             } catch (error) {
                 handleErrors(error, { flashShow, loadingError });
             }
@@ -476,7 +482,7 @@ export function onPostContributionsAsync(classInfo, { flashShow, flashTimed, che
 
     return { postContributionsAsync };
 }
-
+ 
 // Update Cycle Information main-cycle & main-ledger
 export function onCheckCycleInfo({ flashTimed }) {
     const checkCycleInfo = async (cycleID) => {

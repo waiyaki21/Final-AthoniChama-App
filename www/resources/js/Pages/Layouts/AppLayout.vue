@@ -166,6 +166,7 @@
             membersTemplate:                    membersTemplate,
             presetMembersTemplate:              presetMembers,
             presetCyclesTemplate:               presetCycles,
+            showAllMembers:                     flashShowMembers,
         };
 
         // Register all event handlers
@@ -251,6 +252,17 @@
         let message = `No ledgers exist in the system yet! Use the preset set by the program manufacturer to upload ledgers. This Template has Ledger records till September 2024!`;
 
         flashShowView(message, body, header, url, button, 20000, false);
+    }
+
+    // toast view to go to all members page 
+    function flashShowMembers() {
+        let url     = '/members';
+        let header  = `View All Members!`;
+        let button  = `All Members`;
+        let body    = 'success';
+        let message = `Click to view all members`;
+
+        flashShowView(message, body, header, url, button, 15000, true);
     }
 
     // Reference for toast notification

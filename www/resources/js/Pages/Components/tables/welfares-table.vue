@@ -48,7 +48,7 @@
     <hr-line class="border-cyan-800 dark:border-cyan-300"></hr-line>
 
     <!-- welfares table  -->
-    <div class="py-2 relative overflow-x-auto overflow-y-scroll h-auto md:max-h-[35rem]" v-if="!classInfo.isLoading">
+    <div class="py-2 relative overflow-x-auto overflow-y-scroll h-auto md:max-h-[540px]" v-if="!classInfo.isLoading">
         <h2 class="font-normal font-boldened text-[3rem] text-center text-amber-500 dark:text-amber-500 leading-tight uppercase underline py-1"
             v-if="allWelfares.length == 0">
             <span v-if="classInfo.search != ''">

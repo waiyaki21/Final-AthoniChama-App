@@ -30,8 +30,9 @@ async function bundleElectronApp() {
         prune: true, // Remove unnecessary files (e.g., devDependencies)
         ignore: [
             /www\/node_modules/, // Ignore the 'www/node_modules' folder
-            /www\/storage\/logs/, // Ignore the 'www/storage/logs' folder
-            // /www\/bootstrap\/cache/, // Ignore the 'www/bootstrap/cache' folder
+            /www\/storage\/logs/, // Ignore the 'www/storage/logs' folder 
+            /^\/out/, // Ignore the 'out' folder at the root
+            // /^\/php/, // Ignore the 'php' folder at the root
         ],
     };
 

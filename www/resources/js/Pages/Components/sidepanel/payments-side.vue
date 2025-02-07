@@ -1,5 +1,5 @@
 <template>
-    <section :class="[classInfo.infosection, 'col-span-1 font-boldened w-full overflow-y-scroll h-auto max-h-[760px] md:h-fit']"> 
+    <section :class="[classInfo.infosection, 'col-span-1 font-boldened w-full overflow-y-scroll hidescroll h-auto max-h-[775px] md:h-fit']"> 
         <section :class="[classInfo.sectionborder, 'md:flex-col grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 md:grid-rows-1']">
             <a v-for="(block, index) in cycleInfoBlocks" :key="index" :class="[classInfo.tagClass]">
                 <h5 :class="[classInfo.header]" v-tooltip="$tooltip(block.tooltip, 'right')">

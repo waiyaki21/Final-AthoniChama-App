@@ -1,5 +1,6 @@
 const path          = require("path");
 const app           = require('electron');
+const os            = require('os');
 
 // Determine if the app is in production or development
 const isDev                                 = !app.isPackaged;
@@ -28,9 +29,22 @@ const versionFile = isDev
     ? path.join(__dirname, "app-version.json") // Dev mode: Save in the project folder
     : path.join(app.getPath('appData').replace('Roaming', 'Local'), `${app.getName()}`, "app-version.json"); // Prod mode: Save in Local AppData
 
-// const updateFilePath = isDev
-//     ? path.join(__dirname, "../app-update.yml") // Development
-//     : path.join(process.resourcesPath, "app-update.yml"); // Production
+// IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT IMPORTANT
+// NEEDED BY THE PHPINFO.JS FOLDER
+const serverFolderPath = isDev
+    ? path.join(__dirname, '../www', 'server.php') // Development
+    : path.join(process.resourcesPath, 'app', 'www', 'server.php'); // Production
+
+const envFilePath = isDev
+    ? path.join(__dirname, '../.env')
+    : path.join(__dirname, 'app', '.env');
+
+// preffered PHP Directory not the path
+const phpDirPath = isDev
+    ? path.join(__dirname, '../php/') // Development
+    : path.join(process.resourcesPath, 'app', 'php'); // Production
+
+const tempDownPath = path.join(os.tmpdir(), 'php.zip');
 
 // function createUpdateConfig(name, fs) {
 //     // Define the update configuration
@@ -54,6 +68,10 @@ module.exports = {
     cacheFolderPath,
     dbFolderPath,
     backupFolder,
-    versionFile
+    versionFile,
+    serverFolderPath,
+    envFilePath,
+    phpDirPath,
+    tempDownPath
     // createUpdateConfig
 };

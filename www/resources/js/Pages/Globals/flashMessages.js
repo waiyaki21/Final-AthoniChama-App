@@ -84,6 +84,10 @@ export const presetMembers = () => {
 export const presetCycles = () => {
     eventBus.emit('presetCyclesTemplate');
 };
+// show All Members
+export const showAllMembers = () => {
+    eventBus.emit('showAllMembers');
+};
 // .................DOWNLOAD TEMPLATES
 
 // scroll to top 

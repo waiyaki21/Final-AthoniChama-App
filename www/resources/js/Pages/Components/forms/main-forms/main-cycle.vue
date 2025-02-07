@@ -287,6 +287,18 @@
         classInfo.hasFile = newValue !== ''
     })
 
+    watch(() => classInfo.month, (newMonth, oldMonth) => {
+        if (newMonth !== oldMonth) {
+            check(); // Call check when the Month changes
+            if (classInfo.fileSelected) {
+                // clear files 
+                clearFile();
+                flashAllHide();
+            }
+            flashShow(`Upload a ${classInfo.month} spreadsheet`, 'warn')
+        }
+    })
+
     // Computed property to check if month and year are filled
     const isFilled = computed(() => {
         // Check if month and year and file are not empty
@@ -546,13 +558,14 @@
         emit('close');
     }
 
+    let timeouts = []; // Store timeouts for cancellation
     // flash messages 
     function flashMessages(messages) {
-        messages.forEach(message => {
+        timeouts = messages.map(message =>
             setTimeout(() => {
                 flashTimed(message.info, message.type, message.duration);
-            }, message.delay);
-        });
+            }, message.delay)
+        );
     }
 
     function flashShow(message, body) {
@@ -564,6 +577,8 @@
     }
 
     function flashAllHide() {
+        timeouts.forEach(clearTimeout); // Clear all scheduled timeouts
+        timeouts = []; // Reset the array
         emit('allhide')
     }
 

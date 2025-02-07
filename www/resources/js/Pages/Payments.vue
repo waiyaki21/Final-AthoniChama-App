@@ -3,15 +3,16 @@
     <Head>
         <title>{{ props.route }}</title>
     </Head>
- 
+
     <!-- breadcrumb  -->
-    <maincrumbs ref = "mainCrumbsRefs" :items = navItems></maincrumbs>
+    <maincrumbs ref="mainCrumbsRefs" :items=navItems></maincrumbs>
     <!-- end breadcrumb  -->
 
     <!-- body section  -->
     <div class="py-2 font-boldened">
         <!-- info panel  -->
-        <paymentinfo :cycle=classInfo.cycleInfo :state=props.state :percent=classInfo.cycleInfo.percent @editCycle=showCycle @deleteCycle=showCycleDelete @view=flashShowView :border=classInfo.progressMainBorder
+        <paymentinfo :cycle=classInfo.cycleInfo :state=props.state :percent=classInfo.cycleInfo.percent
+            @editCycle=showCycle @deleteCycle=showCycleDelete @view=flashShowView :border=classInfo.progressMainBorder
             :class=classInfo.progressMainClass></paymentinfo>
 
         <!-- panel, table and form  -->
@@ -76,8 +77,7 @@
                         </li>
 
                         <li class="me-2">
-                            <StyleButton :class="'py-1 h-fit my-auto rounded-lg hover:shadow-xl'"
-                                :buttonClass="'info'"
+                            <StyleButton :class="'py-1 h-fit my-auto rounded-lg hover:shadow-xl'" :buttonClass="'info'"
                                 @handleClick="() => { $downloadFile('/download/template/' + cycle.id); tabswitch2(); }"
                                 :tooltipText="`Download ${cycle.name} Monthly Template`"
                                 :buttonText="`Download ${cycle.name} Template.`">
@@ -107,16 +107,17 @@
                             <span class="underline">Add Cycle Payments</span>
                         </span>
                     </h3>
-                    <section class="w-full justify-between grid grid-cols-1 md:grid-cols-2">
+                    <section class="w-full justify-between grid grid-cols-1 md:grid-cols-2 gap-1">
                         <div
-                            :class="['p-2 m-2 rounded-lg bg-cyan-50 dark:bg-gray-900 overflow-hidden shadow-md sm:rounded-lg h-fit', classInfo.borderClass]">
+                            :class="['p-1.5 rounded-lg bg-cyan-50 dark:bg-gray-900 overflow-hidden shadow-md sm:rounded-lg h-fit', classInfo.borderClass]">
                             <!-- upload sheet  -->
-                                <maincycle-form  @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed   @view=flashShowView @reload=reloadInfo></maincycle-form>
+                            <maincycle-form @loading=flashLoading @flash=flashShow @hide=flashHide @timed=flashTimed
+                                @view=flashShowView @reload=reloadInfo></maincycle-form>
                         </div>
                         <!-- end upload sheet  -->
                         <!-- forms  -->
                         <div
-                            :class="['p-2 m-2 rounded-lg bg-cyan-50 dark:bg-gray-900 overflow-hidden shadow-md sm:rounded-lg h-fit', classInfo.borderClass]">
+                            :class="['p-1.5 rounded-lg bg-cyan-50 dark:bg-gray-900 overflow-hidden shadow-md sm:rounded-lg h-fit', classInfo.borderClass]">
                             <h3 :class="[classInfo.mainHeader,'underline']">
                                 Enter Member Payments.
                             </h3>
@@ -126,16 +127,17 @@
                                 <span class="underline text-rose-500">{{ classInfo.unpaidMembers.length }}
                                     Members</span>
                             </span>
-                            <form @submit.prevent="submit" class="p-1">
-                                <div>
+                            <form @submit.prevent="submit" class="p-1 grid grid-cols-2 gap-1.5">
+                                <div class="col-span-2">
                                     <InputLabel for="member_id" value="Member Name" />
 
                                     <select id="member_id" v-model="form.member_id" name="member_id"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                            required @change="getname(form.member_id)">
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                        required @change="getname(form.member_id)">
                                         <option v-if="props.cycle.percent == 100">All members entered</option>
                                         <option v-else disabled>Select a member</option>
-                                        <option v-for="(member, index) in classInfo.unpaidMembers" :key="member.id" :value="member.id">
+                                        <option v-for="(member, index) in classInfo.unpaidMembers" :key="member.id"
+                                            :value="member.id">
                                             {{ member.name }}
                                         </option>
                                     </select>
@@ -143,7 +145,7 @@
                                     <InputError class="mt-2" :message="form.errors.member_id" />
                                 </div>
 
-                                <div>
+                                <div class="col-span-2">
                                     <InputLabel for="payment" value="payment" />
 
                                     <TextInput id="payment" type="number" v-model="form.payment" required autofocus />
@@ -151,7 +153,7 @@
                                     <InputError class="mt-2" :message="form.errors.payment" />
                                 </div>
 
-                                <div>
+                                <div class="col-span-1">
                                     <InputLabel for="welfare" value="welfare in" />
 
                                     <TextInput id="welfare" type="number" v-model="form.welfare" required autofocus />
@@ -159,7 +161,7 @@
                                     <InputError class="mt-2" :message="form.errors.welfare" />
                                 </div>
 
-                                <div>
+                                <div class="col-span-1">
                                     <InputLabel for="welfare_owed" value="welfare owed" />
 
                                     <TextInput id="welfare_owed" type="number" v-model="form.welfare_owed" required
@@ -168,7 +170,7 @@
                                     <InputError class="mt-2" :message="form.errors.welfare_owed" />
                                 </div>
 
-                                <div class="flex items-center justify-start mt-4">
+                                <div class="flex items-center justify-start mt-3 col-span-2">
                                     <button
                                         class="text-white bg-gradient-to-br from-rose-600 to-red-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-rose-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-4 py-2.5 text-center mr-2 mb-2 uppercase inline-flex justify-between cursor-not-allowed"
                                         @click="submitAnyway" v-if="classInfo.unpaidMembers.length == 0">
@@ -190,7 +192,9 @@
                                                 d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                         </svg>
                                     </button>
-                                    <SubmitButton @click="submit" :disabled="form.processing" :loading="form.processing" :success="form.wasSuccessful" :failed="form.hasErrors" :editting="form.isDirty" v-else>
+                                    <SubmitButton @click="submit" :disabled="form.processing" :loading="form.processing"
+                                        :success="form.wasSuccessful" :failed="form.hasErrors" :editting="form.isDirty"
+                                        v-else>
                                         Submit {{ props.cycle.name }} Payment
                                     </SubmitButton>
                                 </div>
@@ -214,22 +218,23 @@
                 <!-- welfares table  -->
 
                 <!-- projects table  -->
-                <div :class="['bg-transparent dark:bg-transparent overflow-hidden w-full']"
-                    v-if="classInfo.tab4show">
+                <div :class="['bg-transparent dark:bg-transparent overflow-hidden w-full']" v-if="classInfo.tab4show">
                     <div class="w-full">
                         <!-- projects table  -->
-                        <projecttable :ref="projectsRefs" :cycle=classInfo.cycleInfo @flash=flashShow @hide=flashHide @reload=reloadInfo></projecttable>
+                        <projecttable :ref="projectsRefs" :cycle=classInfo.cycleInfo @flash=flashShow @hide=flashHide
+                            @reload=reloadInfo></projecttable>
                         <!--end projects table  -->
                     </div>
                 </div>
                 <!-- projects table  -->
 
                 <!-- cycle expenses table  -->
-                <div :class="['bg-transparent dark:bg-transparent overflow-hidden w-full']"
-                    v-if="classInfo.tab5show">
+                <div :class="['bg-transparent dark:bg-transparent overflow-hidden w-full']" v-if="classInfo.tab5show">
                     <div class="w-full">
                         <!-- cycle expenses table  -->
-                        <cycleExpensestable :ref="CycleExpensesRefs" :cycleexpenses=classInfo.cycleExpenses :cycle=classInfo.cycleInfo @flash=flashShow @hide=flashHide @reload=reloadInfo></cycleExpensestable>
+                        <cycleExpensestable :ref="CycleExpensesRefs" :cycleexpenses=classInfo.cycleExpenses
+                            :cycle=classInfo.cycleInfo @flash=flashShow @hide=flashHide @reload=reloadInfo>
+                        </cycleExpensestable>
                         <!--end cycle expenses table  -->
                     </div>
                 </div>
@@ -242,12 +247,14 @@
     <!-- end body section  -->
 
     <!-- update cycle modal  -->
-    <cyclesupdate :info=classInfo.modalData :show=classInfo.isCycleOpen @reload=reloadInfo @close=closeCycle @flash = flashShow>
+    <cyclesupdate :info=classInfo.modalData :show=classInfo.isCycleOpen @reload=reloadInfo @close=closeCycle
+        @flash=flashShow>
     </cyclesupdate>
     <!-- end update cycle modal  -->
 
     <!-- delete cycle modal  -->
-    <cyclesdelete :info=classInfo.deleteData :show=classInfo.isDeleteCycleOpen @reload=reloadInfo @close=closeCycleDelete @flash = flashShow>
+    <cyclesdelete :info=classInfo.deleteData :show=classInfo.isDeleteCycleOpen @reload=reloadInfo
+        @close=closeCycleDelete @flash=flashShow>
     </cyclesdelete>
     <!-- end delete cycle modal  -->
 
@@ -365,7 +372,7 @@
 
         // tabs 
         tabActive: 'inline-block p-1 pb-2 text-emerald-600 border-b-base border-emerald-600 rounded-t-lg active text-emerald-500 dark:text-emerald-500 dark:border-emerald-500 text-sm md:text-[15px] cursor-pointer whitespace-nowrap',
-        tabInactive: 'inline-block p-1 pb-2 border-b-base border-transparent rounded-t-lg text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 text-sm md:text-[15px] cursor-pointer whitespace-nowrap',
+        tabInactive: 'inline-block p-1 pb-2 border-b-base border-transparent rounded-t-lg text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 text-sm md:text-[15px] cursor-pointer whitespace-nowrap',
         tabAmber: 'inline-block p-1 pb-2 border-b-base border-transparent rounded-t-lg text-amber-500 hover:text-amber-600 hover:border-amber-300 dark:hover:text-amber-300 text-sm md:text-[15px] cursor-pointer whitespace-nowrap',
         tab1: '',
         tab2: '',

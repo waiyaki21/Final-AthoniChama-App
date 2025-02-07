@@ -13,9 +13,6 @@ const version = packageJson.version;
 const filePath = path.join(__dirname, '../dist', 'AthoniChamaApp-win32-x64');
 const zipPath = path.join(__dirname, '../dist', 'AthoniChamaApp-win32-x64.zip');
 
-// const exePathForge = path.join(__dirname, '../out','make','squirrel.windows','x64','AthoniChamaAppSetup.exe');
-// const zipPathForge = path.join(__dirname, '../out', 'make', 'zip', 'win32', 'x64', `athonichama-app-win32-x64-${version}.zip`);
-
 // Generate the release command
 const releaseCommand = `gh release create ${version} --generate-notes --title "Release ${version}" --notes "Automated release via CLI." "${zipPath}"`;
 

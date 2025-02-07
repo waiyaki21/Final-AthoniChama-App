@@ -226,6 +226,12 @@
     watch(() => classInfo.year, (newYear, oldYear) => {
         if (newYear !== oldYear) {
             check(); // Call check when the year changes
+            if (classInfo.fileSelected) {
+                // clear files 
+                clearFile();
+                flashAllHide();
+            }
+            flashShow(`Upload a ${classInfo.year} spreadsheet`, 'warn')
         }
     })
 
@@ -449,7 +455,6 @@
 
     // clear file uploads only 
     function clearFile() {
-        classInfo.year           = moment().year()
         classInfo.fileSelected   = '';
         classInfo.excel_file     = '';
         classInfo.file_name      = '';
@@ -471,6 +476,7 @@
         clearFields();
         clearFile();
         classInfo.isLoading = false;
+        classInfo.year = moment().year()
     }
 
     // ledgers view 
@@ -501,13 +507,14 @@
         emit('reload');
     }
 
+    let timeouts = []; // Store timeouts for cancellation
     // flash messages 
     function flashMessages(messages) {
-        messages.forEach(message => {
+        timeouts = messages.map(message =>
             setTimeout(() => {
                 flashTimed(message.info, message.type, message.duration);
-            }, message.delay);
-        });
+            }, message.delay)
+        );
     }
 
     function flashShow(message, body) {
@@ -523,6 +530,8 @@
     }
 
     function flashAllHide() {
+        timeouts.forEach(clearTimeout); // Clear all scheduled timeouts
+        timeouts = []; // Reset the array
         emit('allhide')
     }
 

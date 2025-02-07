@@ -1,9 +1,8 @@
 const { exec }  = require('child_process');
 const http      = require('http');
-const { app, Notification }   = require('electron');
+const { Notification }   = require('electron');
 const path      = require('path');
 const fs        = require('fs');
-const os        = require('os');
 
 let isPhpEnv_Checked    = false;
 let phpEnv_Exists       = false;
@@ -11,14 +10,9 @@ let isPhpServerRunning  = false;
 let isPhpServerStarting = false;
 let envPHP_Path         = '';
 
+const { envFilePath, phpDirPath, tempDownPath } = require("./paths");
+
 const serverUrl = 'http://127.0.0.1:8000';
-
-// Determine if the app is in production or development
-const isDev = !app.isPackaged;
-
-const serverFolderPath = isDev
-    ? path.join(__dirname, '../www', 'server.php') // Development
-    : path.join(process.resourcesPath, 'app', 'www', 'server.php'); // Production
 
 // UNZIP PHP IF IT DOES NOT EXIST 
 const https     = require('https');
@@ -232,10 +226,6 @@ function savePathsToEnv(wwwFolderPath, phpFolderPath, updateStatus, showLogInfo)
         return;
     }
 
-    const envFilePath = isDev
-        ? path.join(__dirname, '../.env')
-        : path.join(__dirname, 'app', '.env');
-
     // Ensure .env file exists
     if (!fs.existsSync(envFilePath)) {
         fs.mkdirSync(path.dirname(envFilePath), { recursive: true });
@@ -264,13 +254,6 @@ function savePathsToEnv(wwwFolderPath, phpFolderPath, updateStatus, showLogInfo)
     //once env has been saved recheck php
     phpRecheck(wwwFolderPath, phpFolderPath, updateStatus, showLogInfo);
 }
-
-// preffered PHP Directory not the path
-const phpDirPath = isDev
-    ? path.join(__dirname, '../php/') // Development
-    : path.join(process.resourcesPath, 'app', 'php'); // Production
-
-const tempDownPath = path.join(os.tmpdir(), 'php.zip');
 
 async function getPHP(wwwFolderPath, phpFolderPath, updateStatus, showLogInfo) {
     try {
